@@ -19,18 +19,49 @@ namespace Instrumental.Interaction
 		private void Awake()
 		{
             container = transform.GetChild(0);
+			containerScale = container.GetComponent<TweenScale>();
+			viewDirection = GetComponent<ViewDirectionTrigger>();
 		}
 
 		// Start is called before the first frame update
 		void Start()
+		{
+			container.gameObject.SetActive(false);
+
+			viewDirection.OnActivated += () =>
+			{
+				Activate();
+			};
+
+			viewDirection.OnDeactivated += () =>
+			{
+				Deactivate();
+			};
+		}
+
+		void Activate()
+		{
+			// set container initial conditions
+			// set initial rotation
+			// set initial scale
+			// activate container
+			// play tweens, set animations into motion
+			container.transform.localScale = Vector3.zero;
+			container.gameObject.SetActive(true);
+			containerScale.Play();
+		}
+
+		void Deactivate()
+		{
+			// deactivate container
+			container.gameObject.SetActive(false);
+		}
+
+		// Update is called once per frame
+		void Update()
         {
 
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
-    }
+	}
 }
