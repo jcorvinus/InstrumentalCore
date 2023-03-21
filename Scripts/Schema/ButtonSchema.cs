@@ -23,7 +23,7 @@ namespace Instrumental.Schema
 		public const float MAX_EXTRUSION_DEPTH = 1;
 
 		public const float MIN_RADIUS = 0;
-		public const float MAX_RADIUS = 1;
+		public const float MAX_RADIUS = 0.2f;
 
 		public const float MIN_BEVEL_RADIUS_PERCENT = 0;
 		public const float MAX_BEVEL_RADIUS_PERCENT = 1;
