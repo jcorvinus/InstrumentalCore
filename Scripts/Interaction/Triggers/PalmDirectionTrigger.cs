@@ -11,7 +11,8 @@ namespace Instrumental.Interaction.Triggers
 		public enum DirectionToCheck
         {
             UserUp,
-            HeadForward
+            HeadForward,
+            DirectionToHead
         }
 
 		// want to support checking against the up direction.
@@ -27,6 +28,9 @@ namespace Instrumental.Interaction.Triggers
 
         [Range(0,90)]
         public float exitAngle = 35;
+
+        [Range(0, 80)]
+        [SerializeField] float feedbackActivationAngleOuter = 80f;
 
         float measuredAngle;
 
@@ -44,7 +48,7 @@ namespace Instrumental.Interaction.Triggers
             if (handedness == Handedness.Left) hand = InstrumentalHand.LeftHand;
             else if (handedness == Handedness.Right) hand = InstrumentalHand.RightHand;
 
-            if (hand) head = hand.transform.parent;
+            if (hand) head = hand.Body.Head;
         }
 
         Vector3 GetDirectionToCheck()
@@ -55,6 +59,10 @@ namespace Instrumental.Interaction.Triggers
                     return Vector3.up; // todo: replace this with a smoothly rotating tracked plane
 				case DirectionToCheck.HeadForward:
                     return head.forward;
+                case DirectionToCheck.DirectionToHead:
+                    Vector3 palmPosition = hand.GetAnchorPose(AnchorPoint.Palm).position;
+                    Vector3 directionToHead = (head.position - palmPosition).normalized;
+                    return directionToHead;
 				default:
                     return Vector3.up;
 			}
@@ -71,22 +79,35 @@ namespace Instrumental.Interaction.Triggers
 			{
                 comparisonDirection = GetDirectionToCheck();
                 palmDirection = hand.GetAnchorPose(AnchorPoint.Palm).rotation * Vector3.forward;
+                bool isCorrectSide = (Vector3.Dot(palmDirection, comparisonDirection) > 0); // vector3.angle doesn't 
+                                                                                          // have a notion of sidedness and I'm not screwing around with vector3.signed angle rn
                 measuredAngle = Vector3.Angle(palmDirection, comparisonDirection);
 
-                if (Vector3.Dot(palmDirection, comparisonDirection) < 0)
-				{
-                    measuredAngle = -1;
-				}
-
-                if(!IsActive)
-				{
-                    if (measuredAngle >= 0 && measuredAngle < entryAngle) Activate();
-				}
+                if (IsActive)
+                {
+                    // should we disengage?
+                    if (!isCorrectSide || measuredAngle > exitAngle)
+                    {
+                        Deactivate();
+                    }
+                    else
+                    {
+                        feedback = Mathf.InverseLerp(0, exitAngle, measuredAngle);
+                    }
+                }
                 else
-				{
-                    if (measuredAngle > exitAngle) Deactivate();
-				}
-			}
+                {
+                    if (isCorrectSide && measuredAngle < entryAngle)
+                    {
+                        Activate();
+                    }
+                    else
+                    {
+                        feedback = 1 - Mathf.InverseLerp(entryAngle, feedbackActivationAngleOuter,
+                            measuredAngle);
+                    }
+                }
+            }
         }
 
         void DrawCone(Vector3 source, float length, float coneAngle, Vector3 normal)

@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 4079726732628830458}
   - component: {fileID: 4079726732628830437}
   - component: {fileID: 1394328721620377636}
-  - component: {fileID: 5626186669354259773}
+  - component: {fileID: 4674509169592695131}
   m_Layer: 0
   m_Name: HandMenu
   m_TagString: Untagged
@@ -176,7 +176,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ebd2ea22b8343e0418f481804616ea6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &5626186669354259773
+--- !u!114 &4674509169592695131
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -185,12 +185,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 4079726732628830459}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3271afd409e79284285a8f51c646d9d6, type: 3}
+  m_Script: {fileID: 11500000, guid: 67ff7b35e3a623d48b1131f075f4cabc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  activationAngle: 25
-  deactivationAngle: 30
+  handedness: 1
+  directionToCheck: 2
+  entryAngle: 21
+  exitAngle: 30
   feedbackActivationAngleOuter: 80
+  DrawLength: 0.2
 --- !u!1 &7407452433184291576
 GameObject:
   m_ObjectHideFlags: 0

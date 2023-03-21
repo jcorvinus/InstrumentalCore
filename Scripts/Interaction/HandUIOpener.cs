@@ -9,7 +9,7 @@ namespace Instrumental.Interaction
 {
     public class HandUIOpener : MonoBehaviour
     {
-        ViewDirectionTrigger viewDirection;
+        PalmDirectionTrigger palmDirection;
         Transform container;
         TweenScale containerScale;
 
@@ -20,7 +20,7 @@ namespace Instrumental.Interaction
 		{
             container = transform.GetChild(0);
 			containerScale = container.GetComponent<TweenScale>();
-			viewDirection = GetComponent<ViewDirectionTrigger>();
+			palmDirection = GetComponent<PalmDirectionTrigger>();
 		}
 
 		// Start is called before the first frame update
@@ -28,12 +28,12 @@ namespace Instrumental.Interaction
 		{
 			container.gameObject.SetActive(false);
 
-			viewDirection.OnActivated += () =>
+			palmDirection.OnActivated += () =>
 			{
 				Activate();
 			};
 
-			viewDirection.OnDeactivated += () =>
+			palmDirection.OnDeactivated += () =>
 			{
 				Deactivate();
 			};

@@ -136,6 +136,7 @@ namespace Instrumental.Interaction
 
 		public static InstrumentalHand LeftHand { get { return leftHand; } }
 		public static InstrumentalHand RightHand { get { return rightHand; } }
+		public InstrumentalBody Body { get { return body; } }
 
 		private void Awake()
 		{
