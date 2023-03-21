@@ -19,6 +19,8 @@ namespace Instrumental.Interaction
             SphereCollider visCollider = visModel.GetComponent<SphereCollider>();
             visRenderer = visModel.GetComponent<MeshRenderer>();
             visRenderer.material = effectMaterial;
+            visRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            visRenderer.receiveShadows = false;
             Destroy(visCollider);
 
             visModel.transform.localScale = Vector3.zero;
@@ -37,7 +39,6 @@ namespace Instrumental.Interaction
         // Update is called once per frame
         void Update()
         {
-            //PinchInfo pinchInfo = hand.GetPinchInfo(pinchFinger);
             PinchInfo pinchInfo = GetPinchInfo();
             visModel.transform.position = pinchInfo.PinchCenter;
             visModel.transform.localScale = Vector3.one * (pinchInfo.PinchDistance * 0.5f);
