@@ -24,7 +24,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2267020461655908881}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.07530001, y: 0, z: 0}
+  m_LocalPosition: {x: 0.07530001, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -58,7 +58,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3349764331477926188}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.0747, y: 0, z: 0}
+  m_LocalPosition: {x: 0.0747, y: 0, z: -0.0074}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -128,7 +128,7 @@ GameObject:
   - component: {fileID: 1394328721620377636}
   - component: {fileID: 4674509169592695131}
   m_Layer: 0
-  m_Name: HandMenu
+  m_Name: RightHandMenu
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -162,7 +162,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1106ad7297e0b94cb05f2be19fe6cd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  handToAttach: 1
+  handToAttach: 2
   pointToAttach: 1
 --- !u!114 &1394328721620377636
 MonoBehaviour:
@@ -188,7 +188,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67ff7b35e3a623d48b1131f075f4cabc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  handedness: 1
+  handedness: 2
   directionToCheck: 2
   entryAngle: 21
   exitAngle: 30
@@ -374,7 +374,7 @@ PrefabInstance:
     - target: {fileID: 2733170341325265289, guid: 8d37fa135d8d78c46ae249b0d36e4561,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.0352
+      value: -0.0352
       objectReference: {fileID: 0}
     - target: {fileID: 2733170341325265289, guid: 8d37fa135d8d78c46ae249b0d36e4561,
         type: 3}
