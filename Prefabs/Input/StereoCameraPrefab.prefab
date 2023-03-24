@@ -217,7 +217,7 @@ MonoBehaviour:
       m_Calls: []
   renderTexture: {fileID: 0}
   screenCamera: {fileID: 0}
-  perCameraFovMultiplier: 1.333
+  perCameraFovMultiplier: 1.298
   debugOverlay: {fileID: 0}
   setFieldOfView: 0
 --- !u!1 &5947800674395091383
