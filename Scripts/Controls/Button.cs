@@ -81,6 +81,8 @@ namespace Instrumental.Controls
 		public float HoverHeight { get { return hoverHeight; } }
 		#endregion
 
+		public ButtonRuntime Runtime { get { return buttonRuntimeBehavior; } }
+
 		private void OnValidate()
 		{
 			buttonModel.SetNewButtonSchema(buttonSchema);

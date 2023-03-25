@@ -48,10 +48,18 @@ namespace Instrumental.Overlay
 			int textureWidth = (int)SteamVR.instance.sceneWidth;
 			int textureHeight = (int)SteamVR.instance.sceneHeight;
 
-			renderTexture = new RenderTexture(textureWidth, textureHeight,
+			float multiplier = 2f; // set this back to 1 once we figure out
+				// why rendering at the recommended resolution is so crunchy
+				// (this probably has something to do with the render target
+				// being stereopanorama. It looked high res on my varjo though
+
+			renderTexture = new RenderTexture((int)(textureWidth * multiplier), 
+				(int)(textureHeight * multiplier),
 				renderTextureFormat,
 				depthStencilFormat, 
 				0);
+
+			Debug.Log("Creating render texture of resolution:" + textureWidth + " x " + textureHeight);
 
 			Vector2 tanHalfFov;
 			CVRSystem hmd = SteamVR.instance.hmd;
