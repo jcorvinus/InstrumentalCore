@@ -39,7 +39,12 @@ namespace Instrumental.Test
                 visualflip = !visualflip;
 
                 foreach (SteamVR_Behaviour_Skeleton visSkeleton in visualSkeletons) visSkeleton.mirroring = visualflip ? SteamVR_Behaviour_Skeleton.MirrorType.RightToLeft : SteamVR_Behaviour_Skeleton.MirrorType.None;
+            }
 
+            if(Input.GetKeyUp(dataFlipKey))
+			{
+                dataFlip = !dataFlip;
+                dataSkeleton.mirroring = dataFlip ? SteamVR_Behaviour_Skeleton.MirrorType.RightToLeft : SteamVR_Behaviour_Skeleton.MirrorType.None;
             }
         }
     }
