@@ -759,6 +759,7 @@ GameObject:
   - component: {fileID: 3257512864065753747}
   - component: {fileID: 7341932497678361447}
   - component: {fileID: 3360380928463394925}
+  - component: {fileID: 7026333588348193561}
   m_Layer: 0
   m_Name: LeftHand
   m_TagString: Untagged
@@ -858,6 +859,24 @@ MonoBehaviour:
   staticIntersectColor: {r: 0, g: 0, b: 0, a: 0}
   grabIntersectColor: {r: 0, g: 0, b: 0, a: 0}
   fingerUIDistanceGlow: 0.12
+--- !u!114 &7026333588348193561
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3215571058188270409}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f89b76250133b324bad19c27023b29cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  visualSkeletons:
+  - {fileID: 1160357974179523563}
+  - {fileID: 5762391000864631694}
+  dataSkeleton: {fileID: 8547949597477311703}
+  visualFlipKey: 284
+  dataFlipKey: 285
 --- !u!1 &3359060933882474111
 GameObject:
   m_ObjectHideFlags: 0

@@ -24,6 +24,7 @@ namespace Instrumental.Interaction
         private Quaternion noRollHeadRotation;
 
         [SerializeField] HandAvatar handAvatar = HandAvatar.Glove;
+        [SerializeField] KeyCode avatarSwitchKey = KeyCode.F1;
 
         public Transform Head { get { return head; } }
 
@@ -60,6 +61,11 @@ namespace Instrumental.Interaction
         void Update()
         {
             // get shoulder positions
+            if(Input.GetKeyUp(avatarSwitchKey))
+			{
+                handAvatar++;
+                handAvatar = (HandAvatar)Mathf.Repeat(0, 2);
+			}
         }
     }
 }
