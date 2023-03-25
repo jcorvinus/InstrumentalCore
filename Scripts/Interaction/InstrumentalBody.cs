@@ -63,9 +63,9 @@ namespace Instrumental.Interaction
             // get shoulder positions
             if(Input.GetKeyUp(avatarSwitchKey))
 			{
-                handAvatar++;
-                handAvatar = (HandAvatar)Mathf.Repeat(0, 2);
-			}
+                if (handAvatar == HandAvatar.Glove) handAvatar = HandAvatar.Capsule;
+                else handAvatar = HandAvatar.Glove;
+            }
         }
     }
 }
