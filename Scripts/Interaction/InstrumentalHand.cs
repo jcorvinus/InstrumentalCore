@@ -131,6 +131,11 @@ namespace Instrumental.Interaction
 		const float curlCutoff = 0.3f;
 		const float thumbCurlCutoff = 0.31f;
 
+		// tracking
+		bool isTracking = true;
+
+		public bool IsTracking { get { return isTracking; } }
+
 		private static InstrumentalHand leftHand;
 		private static InstrumentalHand rightHand;
 

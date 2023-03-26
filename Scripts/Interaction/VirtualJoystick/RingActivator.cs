@@ -6,9 +6,22 @@ namespace Instrumental.Interaction.VirtualJoystick
 {
     public class RingActivator : MonoBehaviour
     {
-        [SerializeField] float verticalOffset=0.1f;
+        [System.Serializable]
+        public struct ClickState
+        {
+            public bool InRegion;
+            public float InPlaneDistance;
+            public float HeightValue; // negative means we are on the valid side for activation
+            public bool OnCorrectSide;
+        }
+
+        public System.Action Activated;
+
+        [Range(0, 1)]
+        [SerializeField] float radius = 0.1f;
+        [SerializeField] float verticalOffset = 0.1f;
         [SerializeField] float outerRingOffset = 0.05f;
-        [SerializeField] float dampAmount=6f;
+        [SerializeField] float dampAmount = 6f;
         Vector3 innerRingVelocity;
         GameObject outerTarget;
 
@@ -21,23 +34,30 @@ namespace Instrumental.Interaction.VirtualJoystick
         [SerializeField]
         float innerRingTimeOffset = 0.05f;
         float enabledTime = 0;
+        ClickState currentState;
 
-        [Range(0,1f)]
+        [Range(0, 1f)]
         [SerializeField] float scale = 1f;
 
         // components
         [SerializeField] MeshRenderer innerRing;
         [SerializeField] MeshRenderer outerRing;
+        Color outerRingDefaultGlowColor;
+        int emissionHash;
 
-        // debug:
-        [Range(0, 1)]
-        [SerializeField] float debugRadius = 0.1f;
+        AudioSource audioSource;
+
+        public float Radius { get { return radius; } }
 
 		private void Awake()
 		{
+            audioSource = GetComponent<AudioSource>();
             outerTarget = new GameObject("InnerTarget");
             outerTarget.transform.parent = transform;
             outerRing.transform.parent = null;
+
+            emissionHash = Shader.PropertyToID("_EmissionColor");
+            outerRingDefaultGlowColor = outerRing.material.GetColor(emissionHash);
 		}
 
 		// Start is called before the first frame update
@@ -54,6 +74,14 @@ namespace Instrumental.Interaction.VirtualJoystick
             innerRing.enabled = true;
             innerRing.transform.localScale = Vector3.zero;
             outerRing.transform.position = transform.position;
+
+			currentState = new ClickState()
+			{ 
+                HeightValue = (outerRingOffset),
+                InPlaneDistance = 0,
+                InRegion = true,
+                OnCorrectSide = true
+            };
 		}
 
 		private void OnDisable()
@@ -92,16 +120,65 @@ namespace Instrumental.Interaction.VirtualJoystick
                 outerRing.transform.position = Vector3.SmoothDamp(outerRing.transform.position, 
                     outerTarget.transform.position, 
                     ref innerRingVelocity, dampAmount);
+
+                // get our is in region
+                Vector3 outerTransformedToInnerSpace = innerRing.transform.InverseTransformPoint(outerRing.transform.position);
+                outerTransformedToInnerSpace = new Vector3(outerTransformedToInnerSpace.x, outerTransformedToInnerSpace.z, outerTransformedToInnerSpace.y);
+                Vector3 transformedInPlane = new Vector3(outerTransformedToInnerSpace.x, 0, outerTransformedToInnerSpace.z);
+                float y = outerTransformedToInnerSpace.y;
+                float distance = transformedInPlane.magnitude;
+
+                bool inRegion = transformedInPlane.sqrMagnitude < radius;
+
+                ClickState newClickState = new ClickState()
+				{
+					HeightValue = y,
+                    InPlaneDistance = distance,
+                    OnCorrectSide = y < 0,
+                    InRegion = inRegion
+                };
+
+                // update our clickstate
+                if(newClickState.OnCorrectSide && !currentState.OnCorrectSide)
+				{
+                    // we've gone from one side to the other
+                    if(newClickState.InPlaneDistance < radius &&
+                        currentState.InPlaneDistance < radius)
+					{
+                        Activate();
+					}
+				}
+
+                Color emissionColor = (newClickState.OnCorrectSide) ? Color.cyan : outerRingDefaultGlowColor;
+                outerRing.material.SetColor(emissionHash, emissionColor);
+
+                currentState = newClickState;
 			}
         }
 
-		private void OnDrawGizmos()
+        void Activate()
+		{
+            if (Activated != null)
+            {
+                Activated();
+            }
+
+            audioSource.Play();
+            enabled = false;
+        }
+
+        public Vector3 GetChildSpawnPosition()
+        {
+            return innerRing.transform.position;
+        }
+
+        private void OnDrawGizmos()
 		{
             Vector3 outerRingPoint = transform.position + (Vector3.up * (verticalOffset + outerRingOffset));
             Vector3 innerRingPoint = transform.position + (Vector3.up * verticalOffset);
 
-            DebugExtension.DrawCircle(outerRingPoint, debugRadius);
-            DebugExtension.DrawCircle(innerRingPoint, debugRadius);
+            DebugExtension.DrawCircle(outerRingPoint, radius);
+            DebugExtension.DrawCircle(innerRingPoint, radius);
         }
 	}
 }

@@ -11,6 +11,7 @@ namespace Instrumental.Interaction.VirtualJoystick
         InstrumentalHand hand;
         LogicTrigger logicTrigger;
         RingActivator ringActivator;
+        [SerializeField] Joystick joystick;
 
 		private void Awake()
 		{
@@ -19,7 +20,7 @@ namespace Instrumental.Interaction.VirtualJoystick
             GetHand();
 		}
 
-        void GetHand()
+		void GetHand()
 		{
             hand = InstrumentalHand.LeftHand;
         }
@@ -29,6 +30,12 @@ namespace Instrumental.Interaction.VirtualJoystick
         {
             ringActivator.enabled = false;
             GetHand();
+
+            ringActivator.Activated += () =>
+            {
+                joystick.transform.position = ringActivator.GetChildSpawnPosition();
+                joystick.gameObject.SetActive(true);
+            };
         }
 
         // Update is called once per frame
@@ -39,7 +46,8 @@ namespace Instrumental.Interaction.VirtualJoystick
                 Pose anchorPose = hand.GetAnchorPose(AnchorPoint.Palm);
                 ringActivator.transform.position = anchorPose.position;
 
-                ringActivator.enabled = logicTrigger.IsActive;
+                ringActivator.enabled = logicTrigger.IsActive && 
+                    !joystick.gameObject.activeInHierarchy;
             }
         }
     }
