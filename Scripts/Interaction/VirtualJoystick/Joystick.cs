@@ -49,8 +49,10 @@ namespace Instrumental.Interaction.VirtualJoystick
             if(bulb.IsGrasped)
 			{
                 // draw the line
-                linePositions[0] = transform.position;
-                linePositions[1] = bulb.transform.position;
+                linePositions[0] = bulb.transform.position;
+                linePositions[1] = transform.position;
+                lineRenderer.SetPositions(linePositions);
+                lineRenderer.enabled = true;
 			}
             else
 			{

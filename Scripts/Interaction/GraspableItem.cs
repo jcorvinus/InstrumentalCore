@@ -184,11 +184,13 @@ namespace Instrumental.Interaction
 		void StartHover(InstrumentalHand hand)
 		{
             isHovering = true;
+            graspingHand = hand.Hand;
         }
 
         void StopHover(InstrumentalHand hand)
 		{
             isHovering = false;
+            graspingHand = Handedness.None;
 		}
 
         float HoverDistSqr(InstrumentalHand hand)
@@ -250,10 +252,10 @@ namespace Instrumental.Interaction
 
                     // if hover distance is lower than radius, then hover clamp hover distance to 0
                     // aside from that, inverse lerp
-                    if (hoverAmount > hoverDistance)
+                    /*if (hoverAmount > hoverDistance)
                     {
                         StopHover(hand);
-                    }
+                    }*/
                 }
             }
             else // we should look at either hand to figure out if hovering should start.
