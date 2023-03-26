@@ -4,6 +4,11 @@ using UnityEngine;
 
 namespace Instrumental.Interaction
 {
+    /// <summary>
+    /// Add this script to an item to make it graspable.
+    /// Todo: we will need to add support for having more than one
+    /// hand interact with a graspable at once (both hovering, contacting, and grasping)
+    /// </summary>
     public class GraspableItem : MonoBehaviour
     {
         // These influence the state of all grasp-related functions,
@@ -40,6 +45,7 @@ namespace Instrumental.Interaction
 
         bool isGrasped;
         bool isHovering;
+        float hoverTValue;
         Handedness graspingHand; // we'll want to change this if we
                                  // ever decide to add two handed grasping.
 
@@ -57,7 +63,7 @@ namespace Instrumental.Interaction
 		{
             itemCollider = GetComponent<SphereCollider>();
             rigidBody = GetComponent<Rigidbody>();
-            meshRenderer = GetComponent<MeshRenderer>();
+            meshRenderer = GetComponentInChildren<MeshRenderer>();
 
             if (!rigidBody)
             {
@@ -172,8 +178,35 @@ namespace Instrumental.Interaction
             if (isGrasped)
             {
                 rigidBody.position = currentGraspData.GraspCenter;
-            }
+			}
 		}
+
+		void StartHover(InstrumentalHand hand)
+		{
+            isHovering = true;
+        }
+
+        void StopHover(InstrumentalHand hand)
+		{
+            isHovering = false;
+		}
+
+        float HoverDistSqr(InstrumentalHand hand)
+		{
+            Vector3 hoverPoint = hand.GraspPinch.PinchCenter;
+
+            // check to see if we should distance hover
+            Vector3 hoverClosestPoint = (hoverPoint -
+                currentGraspData.ItemCenter);
+            float hoverSqrDistanceToCenter = hoverClosestPoint.sqrMagnitude;
+            float hoverDistSqr = hoverSqrDistanceToCenter - (itemCollider.radius * itemCollider.radius);
+
+            return hoverSqrDistanceToCenter;
+        }
+
+        /*
+         * StartHover(hand);*/
+
 
 		// Update is called once per frame
 		void Update()
@@ -196,20 +229,63 @@ namespace Instrumental.Interaction
             else if (isHovering)
 			{
                 // check to see if we should grasp
-                // check to see if we should distance un-hover
-                Vector3 hoverClosestPoint = (currentGraspData.GraspCenter -
-                    currentGraspData.ItemCenter);
-                float hoverDistanceToCenter = hoverClosestPoint.magnitude;
-                hoverClosestPoint = hoverClosestPoint.normalized * itemCollider.radius;
+                bool shouldGrasp = CheckHandGrasp(hand, currentGraspData);
 
-                // if hover distance is lower than radius, then hover clamp hover distance to 0
-                // aside from that, inverse lerp
-                
+                if (shouldGrasp)
+                {
+                    Grasp(hand);
+                }
+                else
+                {
+                    // check to see if we should distance un-hover
+                    Vector3 hoverClosestPoint = (currentGraspData.GraspCenter -
+                        currentGraspData.ItemCenter);
+                    float hoverDistanceToCenter = hoverClosestPoint.magnitude;
+                    Vector3 hoverDirection = (hoverClosestPoint / hoverDistanceToCenter);
+                    hoverClosestPoint = hoverDirection * itemCollider.radius;
+
+                    float hoverAmount = Mathf.Max(0, hoverDistanceToCenter - itemCollider.radius);
+                    hoverTValue = 1 - Mathf.InverseLerp(0, hoverAmount, hoverDistance);
+                    Debug.Log("Hover amount: " + hoverAmount);
+
+                    // if hover distance is lower than radius, then hover clamp hover distance to 0
+                    // aside from that, inverse lerp
+                    if (hoverAmount > hoverDistance)
+                    {
+                        StopHover(hand);
+                    }
+                }
             }
-            else
+            else // we should look at either hand to figure out if hovering should start.
 			{
-                // check to see if we should distance hover
-			}
+                float leftHoverDistSqr = InstrumentalHand.LeftHand.IsTracking ?
+                    HoverDistSqr(InstrumentalHand.LeftHand) : float.PositiveInfinity;
+                float rightHoverDistSqr = InstrumentalHand.RightHand.IsTracking ?
+                    HoverDistSqr(InstrumentalHand.RightHand) : 0;
+
+                bool leftHoverClose = (leftHoverDistSqr < hoverDistance);
+                bool rightHoverClose = (rightHoverDistSqr < hoverDistance);
+
+                if (leftHoverClose && rightHoverClose)
+                {
+                    InstrumentalHand hoverHand = (leftHoverDistSqr < rightHoverDistSqr) ?
+                        InstrumentalHand.LeftHand : InstrumentalHand.RightHand;
+
+                    StartHover(hoverHand);
+                }
+                else if (leftHoverClose) StartHover(InstrumentalHand.LeftHand);
+                else if (rightHoverClose) StartHover(InstrumentalHand.RightHand);
+            }
+
+            Color hoverColor = Color.Lerp(Color.white, Color.cyan, hoverTValue);
+            Color graspColor = Color.green;
+            Color debugColor = Color.white;
+
+            if (isGrasped) debugColor = graspColor;
+            else if (isHovering) debugColor = hoverColor;
+
+            meshRenderer.material.color = debugColor;
+            
         }
 
 		private void OnDrawGizmos()
