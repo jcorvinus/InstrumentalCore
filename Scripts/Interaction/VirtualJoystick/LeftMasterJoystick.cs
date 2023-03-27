@@ -12,6 +12,8 @@ namespace Instrumental.Interaction.VirtualJoystick
         LogicTrigger logicTrigger;
         RingActivator ringActivator;
         [SerializeField] Joystick joystick;
+        [Range(1, 2)]
+        [SerializeField] float outerRadiusMultiplier = 1.5f;
 
 		private void Awake()
 		{
@@ -38,6 +40,30 @@ namespace Instrumental.Interaction.VirtualJoystick
             };
         }
 
+        void DoDistanceJoystickFeedback()
+		{
+            float distance = float.PositiveInfinity;
+
+            if(hand.IsTracking)
+			{
+                distance = Vector3.Distance(hand.GraspPinch.PinchCenter,
+                    joystick.transform.position);
+
+                distance -= ringActivator.Radius;
+                distance = Mathf.Max(0, distance);
+			}
+
+            float outerRadius = GetOuterRadius();
+
+            joystick.SignifierValue = 1 - Mathf.InverseLerp(0, outerRadius, distance);
+		}
+
+        float GetOuterRadius()
+		{
+            return ((ringActivator) ? ringActivator.Radius :
+                0.1f) * outerRadiusMultiplier;
+        }
+
         // Update is called once per frame
         void Update()
         {
@@ -48,7 +74,16 @@ namespace Instrumental.Interaction.VirtualJoystick
 
                 ringActivator.enabled = logicTrigger.IsActive && 
                     !joystick.gameObject.activeInHierarchy;
+
+
+                DoDistanceJoystickFeedback();
             }
         }
-    }
+
+		private void OnDrawGizmos()
+		{
+            Gizmos.DrawWireSphere(joystick.transform.position,
+                GetOuterRadius());
+		}
+	}
 }

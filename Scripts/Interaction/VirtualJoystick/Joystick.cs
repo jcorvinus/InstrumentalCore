@@ -12,21 +12,35 @@ namespace Instrumental.Interaction.VirtualJoystick
         [SerializeField] LineRenderer lineRenderer;
         Vector3[] linePositions;
 
+        /// <summary>
+        /// Forward this to input simulator so that it knows
+        /// when the virtual touchpad should be 'touched'
+        /// </summary>
+        public bool InputActive { get { return bulb.IsGrasped; } }
+
+        private float signifierValue=1;
+        public float SignifierValue { set { signifierValue = value; } }
+
 		private void Awake()
 		{
             joystickMasterControl = GetComponentInParent<LeftMasterJoystick>();
             linePositions = new Vector3[2];
 		}
 
-		private void OnDisable()
-		{
-			
-		}
-
 		// Start is called before the first frame update
 		void Start()
         {
         
+        }
+
+		private void OnEnable()
+		{
+            signifierValue = 1;
+		}
+
+		private void OnDisable()
+        {
+            signifierValue = 1;
         }
 
         void UpdateGraspable()
@@ -65,6 +79,14 @@ namespace Instrumental.Interaction.VirtualJoystick
         void Update()
         {
             UpdateLineRenderer();
+
+            if (bulb.IsGrasped) signifierValue = 1;
+            else
+			{
+                outerCylinder.transform.localScale = Vector3.one * signifierValue;
+			}
+
+            if (signifierValue == 0) gameObject.SetActive(false);
         }
     }
 }

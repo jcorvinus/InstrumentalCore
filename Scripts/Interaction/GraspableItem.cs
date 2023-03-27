@@ -52,8 +52,7 @@ namespace Instrumental.Interaction
         GraspDataVars currentGraspData;
 
         [Range(0.05f, 0.3f)]
-        [SerializeField]
-        float hoverDistance = 0.2f;
+        float hoverDistance = 0.125f;
 
         public bool IsGrasped { get { return isGrasped; } }
         public bool IsHovering { get { return isHovering; } }
@@ -117,7 +116,7 @@ namespace Instrumental.Interaction
 
             Vector3 graspCenter = (indexTip.position + 
                 middleTip.position + 
-                thumbTip.position) * 0.333f;
+                thumbTip.position) * 0.33333f;
 
             return new GraspDataVars()
             {
@@ -206,10 +205,6 @@ namespace Instrumental.Interaction
             return hoverSqrDistanceToCenter;
         }
 
-        /*
-         * StartHover(hand);*/
-
-
 		// Update is called once per frame
 		void Update()
         {
@@ -244,19 +239,19 @@ namespace Instrumental.Interaction
                         currentGraspData.ItemCenter);
                     float hoverDistanceToCenter = hoverClosestPoint.magnitude;
                     Vector3 hoverDirection = (hoverClosestPoint / hoverDistanceToCenter);
-                    hoverClosestPoint = hoverDirection * itemCollider.radius;
+                    hoverClosestPoint = currentGraspData.ItemCenter +
+                        (hoverDirection * (itemCollider.radius * transform.lossyScale.x));
 
-                    float hoverAmount = Mathf.Max(0, hoverDistanceToCenter - itemCollider.radius);
-                    hoverTValue = 1 - Mathf.InverseLerp(0, hoverAmount, hoverDistance);
-                    Debug.Log("Hover amount: " + hoverAmount);
+                    float distance = Vector3.Distance(currentGraspData.GraspCenter, hoverClosestPoint);
+                    hoverTValue = 1 - Mathf.InverseLerp(0, hoverDistance, distance);
 
-                    // if hover distance is lower than radius, then hover clamp hover distance to 0
-                    // aside from that, inverse lerp
-                    /*if (hoverAmount > hoverDistance)
-                    {
-                        StopHover(hand);
-                    }*/
-                }
+					// if hover distance is lower than radius, then hover clamp hover distance to 0
+					// aside from that, inverse lerp
+					if (distance > hoverDistance)
+					{
+						StopHover(hand);
+					}
+				}
             }
             else // we should look at either hand to figure out if hovering should start.
 			{

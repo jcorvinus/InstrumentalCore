@@ -408,6 +408,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   joystick: {fileID: 111588352196338885}
+  outerRadiusMultiplier: 2
 --- !u!1 &8345928674383443593
 GameObject:
   m_ObjectHideFlags: 0
@@ -504,7 +505,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a24e7d2d087accc4baefa54147d59da0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverDistance: 0.2
 --- !u!135 &6805511277055185826
 SphereCollider:
   m_ObjectHideFlags: 0
