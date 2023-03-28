@@ -14,6 +14,11 @@ namespace Instrumental.Interaction.VirtualJoystick
         float ungraspTime = 0;
         const float returnToCenterDuration = 0.15f;
         Vector3 ungraspStartLocation;
+        Transform headTransform;
+
+        Vector2 joystickValue;
+
+        [SerializeField] GameObject headRelativeVisualizer;
 
         /// <summary>
         /// Forward this to input simulator so that it knows
@@ -34,6 +39,7 @@ namespace Instrumental.Interaction.VirtualJoystick
 		void Start()
         {
 			bulb.OnUngrasped += Bulb_OnUngrasped;
+            headTransform = InstrumentalBody.Instance.Head;
         }
 
 		private void Bulb_OnUngrasped(GraspableItem sender, InstrumentalHand hand)
@@ -64,11 +70,34 @@ namespace Instrumental.Interaction.VirtualJoystick
                     ungraspTime);
                 //bulb.transform.localPosition = Vector3.Lerp(ungraspStartLocation, Vector3.zero, returnTValue); // uncomment if we ever want to do our ungrasp return-to-center
                 bulb.transform.localPosition = Vector3.zero;
+                joystickValue = Vector2.zero;
+
+                if(headRelativeVisualizer)
+				{
+                    headRelativeVisualizer.SetActive(false);
+                }
             }
             else
 			{
                 ungraspTime = 0;
                 ungraspStartLocation = bulb.transform.localPosition;
+
+                // transform joystick into head space
+                Vector3 rawDirection = (bulb.transform.position - transform.position);
+                rawDirection = Vector3.Scale(rawDirection, new Vector3(1, 0, 1)).normalized;
+
+                Vector3 headForwardFlattened = Vector3.Scale(headTransform.forward, new Vector3(1, 0, 1));
+                Quaternion rotation = Quaternion.FromToRotation(headForwardFlattened, rawDirection);
+                Vector3 forward = rotation * Vector3.forward;
+                joystickValue = new Vector2(forward.x, forward.z);
+
+                if(headRelativeVisualizer)
+				{
+                    Vector3 headLocal = new Vector3(joystickValue.x, joystickValue.y, 3);
+                    headRelativeVisualizer.transform.position =
+                        headTransform.TransformPoint(headLocal * 0.1f);
+                    headRelativeVisualizer.SetActive(true);
+				}
 			}
 		}
 
