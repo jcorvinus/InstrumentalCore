@@ -11,6 +11,9 @@ namespace Instrumental.Interaction.VirtualJoystick
         [SerializeField] MeshRenderer outerCylinder;
         [SerializeField] LineRenderer lineRenderer;
         Vector3[] linePositions;
+        float ungraspTime = 0;
+        const float returnToCenterDuration = 0.15f;
+        Vector3 ungraspStartLocation;
 
         /// <summary>
         /// Forward this to input simulator so that it knows
@@ -30,7 +33,12 @@ namespace Instrumental.Interaction.VirtualJoystick
 		// Start is called before the first frame update
 		void Start()
         {
-        
+			bulb.OnUngrasped += Bulb_OnUngrasped;
+        }
+
+		private void Bulb_OnUngrasped(GraspableItem sender, InstrumentalHand hand)
+		{
+            transform.position = bulb.transform.position;
         }
 
 		private void OnEnable()
@@ -49,8 +57,19 @@ namespace Instrumental.Interaction.VirtualJoystick
             if (!bulb.IsGrasped)
             {
                 //bulb.RigidBody.position = transform.position;
-                bulb.transform.position = transform.position;
+                ungraspTime += Time.fixedDeltaTime;
+                ungraspTime = Mathf.Clamp(ungraspTime, 0, returnToCenterDuration);
+
+                float returnTValue = Mathf.InverseLerp(0, returnToCenterDuration,
+                    ungraspTime);
+                //bulb.transform.localPosition = Vector3.Lerp(ungraspStartLocation, Vector3.zero, returnTValue); // uncomment if we ever want to do our ungrasp return-to-center
+                bulb.transform.localPosition = Vector3.zero;
             }
+            else
+			{
+                ungraspTime = 0;
+                ungraspStartLocation = bulb.transform.localPosition;
+			}
 		}
 
 		private void FixedUpdate()
@@ -72,7 +91,6 @@ namespace Instrumental.Interaction.VirtualJoystick
 			{
                 lineRenderer.enabled = false;
 			}
-
 		}
 
         // Update is called once per frame
@@ -80,11 +98,14 @@ namespace Instrumental.Interaction.VirtualJoystick
         {
             UpdateLineRenderer();
 
-            if (bulb.IsGrasped) signifierValue = 1;
+            if (bulb.IsGrasped)
+            {
+                signifierValue = 1;
+            }
             else
-			{
+            {
                 outerCylinder.transform.localScale = Vector3.one * signifierValue;
-			}
+            }
 
             if (signifierValue == 0) gameObject.SetActive(false);
         }

@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using Instrumental.Space;
+
 namespace Instrumental.Interaction
 {
     /// <summary>
@@ -50,6 +52,7 @@ namespace Instrumental.Interaction
                                  // ever decide to add two handed grasping.
 
         GraspDataVars currentGraspData;
+        AudioSource graspSource;
 
         [Range(0.05f, 0.3f)]
         float hoverDistance = 0.125f;
@@ -68,6 +71,9 @@ namespace Instrumental.Interaction
             {
                 AddRigidBody();
             }
+
+            graspSource = GetComponent<AudioSource>();
+            if (!graspSource) AddAudioSource();
 		}
 
         void AddRigidBody()
@@ -77,11 +83,17 @@ namespace Instrumental.Interaction
             rigidBody.useGravity = false;
         }
 
+        void AddAudioSource()
+		{
+            graspSource = gameObject.AddComponent<AudioSource>();
+            graspSource.playOnAwake = false;
+        }
+
 		// Start is called before the first frame update
 		void Start()
 		{
-
-		}
+            graspSource.clip = GlobalSpace.Instance.UICommon.GrabClip;
+        }
 
         GraspDataVars CalulcateGraspVars(InstrumentalHand hand)
 		{
@@ -135,7 +147,6 @@ namespace Instrumental.Interaction
             };
         }
 
-
         bool CheckHandGrasp(InstrumentalHand hand, GraspDataVars graspVars)
 		{
             if (hand == null) return false;
@@ -163,6 +174,7 @@ namespace Instrumental.Interaction
         void Grasp(InstrumentalHand hand)
 		{
             isGrasped = true;
+            graspSource.Play();
 
             if(OnGrasped != null)
 			{
