@@ -29,6 +29,8 @@ namespace Instrumental.Interaction.VirtualJoystick
         private float signifierValue=1;
         public float SignifierValue { set { signifierValue = value; } }
 
+        public Vector2 Value { get { return joystickValue; } }
+
 		private void Awake()
 		{
             joystickMasterControl = GetComponentInParent<LeftMasterJoystick>();
