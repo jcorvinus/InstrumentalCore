@@ -58,6 +58,11 @@ namespace Instrumental.Interaction.VirtualJoystick
             joystick.SignifierValue = 1 - Mathf.InverseLerp(0, outerRadius, distance);
 		}
 
+        public float GetInnerRadius()
+		{
+            return ringActivator.Radius;
+		}
+
         float GetOuterRadius()
 		{
             return ((ringActivator) ? ringActivator.Radius :

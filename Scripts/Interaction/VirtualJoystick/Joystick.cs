@@ -86,12 +86,17 @@ namespace Instrumental.Interaction.VirtualJoystick
 
                 // transform joystick into head space
                 Vector3 rawDirection = (bulb.transform.position - transform.position);
-                rawDirection = Vector3.Scale(rawDirection, new Vector3(1, 0, 1)).normalized;
+                rawDirection = Vector3.Scale(rawDirection, new Vector3(1, 0, 1));
+                float distance = rawDirection.magnitude;
+                rawDirection /= distance;
+
+                float normalizedDistance = Mathf.InverseLerp(0, joystickMasterControl.GetInnerRadius(),
+                    distance);
 
                 Vector3 headForwardFlattened = Vector3.Scale(headTransform.forward, new Vector3(1, 0, 1));
                 Quaternion rotation = Quaternion.FromToRotation(headForwardFlattened, rawDirection);
                 Vector3 forward = rotation * Vector3.forward;
-                joystickValue = new Vector2(forward.x, forward.z);
+                joystickValue = new Vector2(forward.x, forward.z) * normalizedDistance;
 
                 if(headRelativeVisualizer)
 				{
