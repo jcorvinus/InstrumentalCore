@@ -63,7 +63,7 @@ namespace Instrumental.Interaction.VirtualJoystick
             return ringActivator.Radius;
 		}
 
-        float GetOuterRadius()
+        public float GetOuterRadius()
 		{
             return ((ringActivator) ? ringActivator.Radius :
                 0.1f) * outerRadiusMultiplier;
