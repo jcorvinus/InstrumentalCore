@@ -19,18 +19,19 @@ namespace Instrumental.Interaction
         public struct GraspDataVars
         {
             public bool IsValid;
-            public Vector3 IndexTip;
-            public Vector3 MiddleTip;
-            public Vector3 ThumbTip;
+            //public Vector3 IndexTip;
+            //public Vector3 MiddleTip;
+            //public Vector3 ThumbTip;
             public Vector3 ItemCenter;
             public Vector3 GraspCenter;
 
             public Vector3 IndexDirection;
             public float IndexDistance;
+            public float IndexPinchDistance; // this is the index-thumbtip distance
 
             public Vector3 MiddleDirection;
             public float MiddleDistance;
-
+            public float MiddlePinchDistance; // this is the middle-thumbtip distance
 
             public Vector3 ThumbDirection;
             public float ThumbDistance;
@@ -43,7 +44,7 @@ namespace Instrumental.Interaction
 
         SphereCollider itemCollider;
         Rigidbody rigidBody;
-        MeshRenderer meshRenderer; // simple debugging for now
+
 
         bool isGrasped;
         bool isHovering;
@@ -59,13 +60,13 @@ namespace Instrumental.Interaction
 
         public bool IsGrasped { get { return isGrasped; } }
         public bool IsHovering { get { return isHovering; } }
+        public float HoverTValue { get { return hoverTValue; } }
         public Rigidbody RigidBody { get { return rigidBody; } }
 
 		private void Awake()
 		{
             itemCollider = GetComponent<SphereCollider>();
             rigidBody = GetComponent<Rigidbody>();
-            meshRenderer = GetComponentInChildren<MeshRenderer>();
 
             if (!rigidBody)
             {
@@ -118,9 +119,9 @@ namespace Instrumental.Interaction
             float indexDistance = indexDirection.magnitude;
             indexDirection /= indexDistance;
 
-            Vector3 middleDireciton = (middleTip.position - center);
-            float middleDistance = middleDireciton.magnitude;
-            middleDireciton /= middleDistance;
+            Vector3 middleDirection = (middleTip.position - center);
+            float middleDistance = middleDirection.magnitude;
+            middleDirection /= middleDistance;
 
             Vector3 thumbDirection = (thumbTip.position - center);
             float thumbDistance = thumbDirection.magnitude;
@@ -130,38 +131,65 @@ namespace Instrumental.Interaction
                 middleTip.position + 
                 thumbTip.position) * 0.33333f;
 
+            float indexPinchDistance = 0;
+            float middlePinchDistance = 0;
+
+            if (isValid)
+            {
+                PinchInfo indexPinch, middlePinch;
+                indexPinch = hand.GetPinchInfo(Finger.Index);
+                middlePinch = hand.GetPinchInfo(Finger.Middle);
+
+                indexPinchDistance = indexPinch.PinchDistance;
+                middlePinchDistance = middlePinch.PinchDistance;
+            }
+
             return new GraspDataVars()
             {
                 IsValid = isValid,
                 ItemCenter = center,
-                IndexDirection = indexDirection,
+
                 IndexDistance = indexDistance,
-                IndexTip = indexTip.position,
-                MiddleDirection = middleDireciton,
+                IndexPinchDistance = indexPinchDistance,
                 MiddleDistance = middleDistance,
-                MiddleTip = middleTip.position,
-                ThumbTip = thumbTip.position,
-                ThumbDirection = thumbDirection,
-                ThumbDistance = thumbDistance, 
+                MiddlePinchDistance = middlePinchDistance,
+                ThumbDistance = thumbDistance,
                 GraspCenter = graspCenter
+                //IndexDirection = indexDirection, // get rid of these 
+                //IndexTip = indexTip.position, // if they wind up not being necessary.
+                //MiddleDirection = middleDireciton,
+                //MiddleTip = middleTip.position,
+                //ThumbTip = thumbTip.position,
+                //ThumbDirection = thumbDirection
             };
-        }
-
-        bool CheckHandGrasp(InstrumentalHand hand, GraspDataVars graspVars)
-		{
-            if (hand == null) return false;
-            if (!hand.IsTracking) return false; // may want to replace untracked ungrasp
-                                                // with untracked suspend at some point in the future. Possibly
-                                                // with predicted motion
-
-            bool thumbDistancePasses = graspVars.ThumbDistance < itemCollider.radius;
-            bool indexDistancePasses = graspVars.IndexDistance < itemCollider.radius;
-            bool middleDistancePasses = graspVars.MiddleDistance < itemCollider.radius;
-            
-            return thumbDistancePasses && (indexDistancePasses || middleDistancePasses);
 		}
 
-        void Ungrasp(InstrumentalHand hand)
+		bool CheckHandGrasp(InstrumentalHand hand, GraspDataVars graspVars)
+		{
+			if (hand == null) return false;
+			if (!hand.IsTracking) return false; // may want to replace untracked ungrasp
+												// with untracked suspend at some point in the future. Possibly
+												// with predicted motion
+
+			bool thumbDistancePasses = graspVars.ThumbDistance < itemCollider.radius;
+			bool indexDistancePasses = graspVars.IndexDistance < itemCollider.radius;
+			bool middleDistancePasses = graspVars.MiddleDistance < itemCollider.radius;
+
+			return thumbDistancePasses && (indexDistancePasses || middleDistancePasses);
+		}
+
+        bool CheckHandUngrasp(InstrumentalHand hand, GraspDataVars graspVars)
+		{
+            if (hand == null) return true;
+            if (!hand.IsTracking) return false; // we can suspend like this, kinda.
+
+            float maxPinchDistance = Mathf.Max(graspVars.IndexDistance,
+                graspVars.MiddlePinchDistance);
+
+            return (maxPinchDistance > itemCollider.radius * 2.25f);
+		}
+
+		void Ungrasp(InstrumentalHand hand)
 		{
             isGrasped = false;
 
@@ -214,7 +242,7 @@ namespace Instrumental.Interaction
             float hoverSqrDistanceToCenter = hoverClosestPoint.sqrMagnitude;
             float hoverDistSqr = hoverSqrDistanceToCenter - (itemCollider.radius * itemCollider.radius);
 
-            return hoverSqrDistanceToCenter;
+            return hoverDistSqr;
         }
 
 		// Update is called once per frame
@@ -232,7 +260,7 @@ namespace Instrumental.Interaction
             if (isGrasped)
 			{
                 // check to see if we should ungrasp
-                bool stillGrasping = CheckHandGrasp(hand, currentGraspData);
+                bool stillGrasping = !CheckHandUngrasp(hand, currentGraspData);
                 if (!stillGrasping) Ungrasp(hand);
 			}
             else if (isHovering)
@@ -284,17 +312,7 @@ namespace Instrumental.Interaction
                 }
                 else if (leftHoverClose) StartHover(InstrumentalHand.LeftHand);
                 else if (rightHoverClose) StartHover(InstrumentalHand.RightHand);
-            }
-
-            Color hoverColor = Color.Lerp(Color.white, Color.cyan, hoverTValue);
-            Color graspColor = Color.green;
-            Color debugColor = Color.white;
-
-            if (isGrasped) debugColor = graspColor;
-            else if (isHovering) debugColor = hoverColor;
-
-            meshRenderer.material.color = debugColor;
-            
+            }            
         }
 
 		private void OnDrawGizmos()

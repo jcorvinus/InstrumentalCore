@@ -10,6 +10,10 @@ namespace Instrumental.Interaction.VirtualJoystick
         [SerializeField] GraspableItem bulb;
         [SerializeField] MeshRenderer outerCylinder;
         [SerializeField] LineRenderer lineRenderer;
+
+        [Range(0, 1)]
+        [SerializeField] float deadzone = 0.1f;
+
         Vector3[] linePositions;
         float ungraspTime = 0;
         const float returnToCenterDuration = 0.15f;
@@ -93,9 +97,16 @@ namespace Instrumental.Interaction.VirtualJoystick
                 float normalizedDistance = Mathf.InverseLerp(0, joystickMasterControl.GetInnerRadius(),
                     distance);
 
-                Vector3 headForwardFlattened = Vector3.Scale(headTransform.forward, new Vector3(1, 0, 1));
-                Quaternion rotation = Quaternion.FromToRotation(headForwardFlattened, rawDirection);
-                Vector3 forward = rotation * Vector3.forward;
+                Vector3 forward = Vector3.forward;
+
+                float absDeadzone = (joystickMasterControl.GetInnerRadius() * deadzone);
+                if (distance > absDeadzone)
+                {
+                    Vector3 headForwardFlattened = Vector3.Scale(headTransform.forward, new Vector3(1, 0, 1));
+                    Quaternion rotation = Quaternion.FromToRotation(headForwardFlattened, rawDirection);
+                    forward = rotation * Vector3.forward;
+                }
+
                 joystickValue = new Vector2(forward.x, forward.z) * normalizedDistance;
 
                 if(headRelativeVisualizer)

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Instrumental.Interaction
+namespace Instrumental.Interaction.Feedback
 {
     public class GrabPinchVisualization : PinchVisualization
     {

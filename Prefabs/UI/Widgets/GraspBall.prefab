@@ -93,6 +93,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6426599945980187599}
   - component: {fileID: 2120835899425370432}
+  - component: {fileID: 8814220343641043466}
   - component: {fileID: 5725066112586327942}
   m_Layer: 0
   m_Name: GraspBall
@@ -129,6 +130,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a24e7d2d087accc4baefa54147d59da0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &8814220343641043466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7847121902293345025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b2b6d80e4535cf4489a47f952251ee8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  noInteractColor: {r: 1, g: 1, b: 1, a: 1}
+  hoverColor: {r: 0, g: 1, b: 1, a: 1}
+  graspColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!135 &5725066112586327942
 SphereCollider:
   m_ObjectHideFlags: 0

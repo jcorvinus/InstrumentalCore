@@ -20,6 +20,9 @@ namespace Instrumental.Interaction.VirtualJoystick
         Vector3 deployementSourcePosition;
         bool freshDeployment = true;
         Vector3 velocity;
+        Vector3 direction;
+
+        Vector3[] linePoints;
 
         [SerializeField] GraspableItem handle;
         [Range(0, 1)]
@@ -32,7 +35,8 @@ namespace Instrumental.Interaction.VirtualJoystick
 		private void Awake()
 		{
             joystickMaster = joystick.GetComponentInParent<LeftMasterJoystick>();
-		}
+            linePoints = new Vector3[2];
+        }
 
 		// Start is called before the first frame update
 		void Start()
@@ -49,6 +53,7 @@ namespace Instrumental.Interaction.VirtualJoystick
             freshDeployment = true;
             handle.transform.localScale = Vector3.one * Mathf.Epsilon;
             handle.gameObject.SetActive(true);
+            direction = GetDirection();
         }
 
         public void StopDeployment()
@@ -103,6 +108,12 @@ namespace Instrumental.Interaction.VirtualJoystick
                             Mathf.InverseLerp(0, deployedTimeDuration, deployedTime));
                     }
                 }
+
+                // handle line renderer stuff
+                linePoints[0] = GetStartPosition();
+                linePoints[1] = targetPosition;
+                outboundRenderer.SetPositions(linePoints);
+                outboundRenderer.enabled = true;
             }
             else
 			{
@@ -150,8 +161,6 @@ namespace Instrumental.Interaction.VirtualJoystick
                 if (joystick)
                 {
                     // get our joystick relative position
-                    Vector3 direction = GetDirection();
-
                     return joystick.transform.position + (direction * joystickMaster.GetInnerRadius());
                 }
                 else return transform.position;
@@ -161,7 +170,6 @@ namespace Instrumental.Interaction.VirtualJoystick
 
 		private void OnDrawGizmos()
 		{
-            Vector3 direction = GetDirection();
             Vector3 startPosition = GetStartPosition();
             Vector3 graspPoint = GetTargetPosition(1);
             Gizmos.DrawLine(startPosition, graspPoint);
