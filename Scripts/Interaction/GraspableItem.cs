@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Instrumental.Space;
+using Instrumental.Interaction.Constraints;
 
 namespace Instrumental.Interaction
 {
@@ -44,7 +45,7 @@ namespace Instrumental.Interaction
 
         SphereCollider itemCollider;
         Rigidbody rigidBody;
-
+        GraspConstraint constraint;
 
         bool isGrasped;
         bool isHovering;
@@ -75,6 +76,11 @@ namespace Instrumental.Interaction
 
             graspSource = GetComponent<AudioSource>();
             if (!graspSource) AddAudioSource();
+		}
+
+        public void SetConstraint(GraspConstraint constraint)
+		{
+            this.constraint = constraint;
 		}
 
         void AddRigidBody()
@@ -216,7 +222,9 @@ namespace Instrumental.Interaction
             // todo: if we're going to apply constraints, do so here.
             if (isGrasped)
             {
-                rigidBody.position = currentGraspData.GraspCenter;
+                Pose currentPose = new Pose(currentGraspData.GraspCenter, transform.rotation);
+                if (constraint) currentPose = constraint.DoConstraint(currentPose);
+                rigidBody.position = currentPose.position;
 			}
 		}
 
