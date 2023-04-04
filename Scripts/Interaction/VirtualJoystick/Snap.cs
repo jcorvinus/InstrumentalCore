@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Instrumental.Interaction;
+using Instrumental.Interaction.Constraints;
 using Instrumental.Interaction.VirtualJoystick;
 
 namespace Instrumental.Interaction.VirtualJoystick
@@ -29,6 +30,7 @@ namespace Instrumental.Interaction.VirtualJoystick
         [SerializeField] float graspDistance = 0.21f;
         [Range(0, 0.1f)]
         [SerializeField] float graspRadius = 0.1f;
+        LinearConstraint linearConstraint;
 
         public bool IsDeployed { get { return isDeployed; } }
 
@@ -36,6 +38,7 @@ namespace Instrumental.Interaction.VirtualJoystick
 		{
             joystickMaster = joystick.GetComponentInParent<LeftMasterJoystick>();
             linePoints = new Vector3[2];
+            linearConstraint = handle.GetComponent<LinearConstraint>();
         }
 
 		// Start is called before the first frame update
@@ -114,6 +117,7 @@ namespace Instrumental.Interaction.VirtualJoystick
                 linePoints[1] = targetPosition;
                 outboundRenderer.SetPositions(linePoints);
                 outboundRenderer.enabled = true;
+                linearConstraint.SetPoints(linePoints[0], GetMaxConstraintPos());
             }
             else
 			{
@@ -128,10 +132,15 @@ namespace Instrumental.Interaction.VirtualJoystick
             }
         }
 
+        Vector3 GetMaxConstraintPos()
+		{
+            return GetStartPosition() + (direction);
+		}
+
         Vector3 GetTargetPosition(float tValue)
 		{
             return GetStartPosition() +
-                (GetDirection() * (graspDistance * tValue));
+                (direction * (graspDistance * tValue));
         }
 
         Vector3 GetDirection()
