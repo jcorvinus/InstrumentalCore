@@ -32,6 +32,11 @@ namespace Instrumental.Interaction.VirtualJoystick
         [SerializeField] float graspRadius = 0.1f;
         LinearConstraint linearConstraint;
 
+        // snap amount signifiers
+        [SerializeField] Transform signifierContainer;
+        [SerializeField] ConeSignifier leftCone;
+        [SerializeField] ConeSignifier rightCone;
+
         public bool IsDeployed { get { return isDeployed; } }
 
 		private void Awake()
@@ -111,6 +116,11 @@ namespace Instrumental.Interaction.VirtualJoystick
                             Mathf.InverseLerp(0, deployedTimeDuration, deployedTime));
                     }
                 }
+                else
+				{
+                    // handle our cone signifiers and 
+                    // actual processing of snap turning
+				}
 
                 // handle line renderer stuff
                 linePoints[0] = GetStartPosition();

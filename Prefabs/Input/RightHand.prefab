@@ -2139,6 +2139,8 @@ MonoBehaviour:
   - {fileID: 5839845816935610060}
   - {fileID: 5920079663169489674}
   dataHand: {fileID: 4155457126680334142}
+  pinchMaxDistance: 0.09
+  pinchMinDistance: 0.01
 --- !u!114 &5936511968759538195
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2404,7 +2406,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 440e61ae0c5b619489bc0bd5a3eef270, type: 2}
+      objectReference: {fileID: 2100000, guid: cf11eb3573775454e969edfa3904d562, type: 2}
     m_RemovedComponents:
     - {fileID: 114000012673113748, guid: 6def53d002137b747aec0b29551e0e25, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 6def53d002137b747aec0b29551e0e25, type: 3}

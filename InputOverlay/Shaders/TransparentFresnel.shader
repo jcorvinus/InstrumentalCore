@@ -1,4 +1,4 @@
-﻿Shader "InstrumentalOverlay/HandShaderOverlay" 
+﻿Shader "InstrumentalOverlay/TransparentFresnel" 
 {
     Properties 
     {
@@ -11,19 +11,19 @@
 		Tags { "RenderType" = "Transparent" "RenderQueue" = "Transparent" }
        
 		// extra pass that renders to depth buffer only
-		/*Pass 
+		Pass 
 		{
 			ZWrite On
 			ColorMask 0
-		}*/
+		}
 
 		Cull Back
-		//Blend SrcAlpha OneMinusSrcAlpha
+		Blend SrcAlpha OneMinusSrcAlpha
 		//Blend One One
-		ZWrite On
+		ZWrite Off
        
 		CGPROGRAM
-		#pragma surface surf Lambert
+		#pragma surface surf Lambert alpha
        
 		struct Input 
 		{
@@ -39,7 +39,8 @@
 			o.Albedo = _InnerColor.rgb;
 			half rim = 1.0 - saturate(dot (normalize(IN.viewDir), o.Normal));
 			o.Emission = _RimColor.rgb * pow (rim, _RimPower);
-			o.Alpha = 1;
+			o.Alpha = rim;
+			//o.Alpha = 1;
 		}
 		ENDCG
     }
