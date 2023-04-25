@@ -61,7 +61,7 @@ namespace Instrumental.Interaction
         void Update()
         {
             // get shoulder positions
-            if(Input.GetKeyUp(avatarSwitchKey))
+            if(UnityEngine.Input.GetKeyUp(avatarSwitchKey))
 			{
                 if (handAvatar == HandAvatar.Glove) handAvatar = HandAvatar.Capsule;
                 else handAvatar = HandAvatar.Glove;
