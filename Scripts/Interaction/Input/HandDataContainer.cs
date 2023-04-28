@@ -61,13 +61,32 @@ namespace Instrumental.Interaction.Input
                 SteamVR_Skeleton_JointIndexEnum jointIndexEnum = (SteamVR_Skeleton_JointIndexEnum)i;
 				SteamVR_Utils.RigidTransform jointTransform = referenceData[(int)jointIndexEnum];
 
+				Vector3 up, forward; // for us, up is... well up, and forward goes distal
+				up = jointTransform.rot * Vector3.up;
+				forward = jointTransform.rot * Vector3.forward;
+
+				if(!isLeft)
+				{
+					up = jointTransform.rot * Vector3.up;
+					forward = jointTransform.rot * Vector3.right;
+				}
+				else
+				{
+					up = jointTransform.rot * Vector3.up * -1;
+					forward = jointTransform.rot * Vector3.right * -1;
+				}
+
+				Quaternion rotation = Quaternion.LookRotation(forward, up);
+
+				// note that on the right hand from steamVR, x is forward, and y is up
+				// on the left hand, this is flipped.
 				switch (jointIndexEnum)
 				{
 					case SteamVR_Skeleton_JointIndexEnum.root:
 						break;
 					case SteamVR_Skeleton_JointIndexEnum.wrist:
 						Data.WristPose = new Pose(jointTransform.pos,
-							jointTransform.rot);
+							rotation);
 
 						break;
 					//case SteamVR_Skeleton_JointIndexEnum.thumbMetacarpal:
@@ -75,14 +94,14 @@ namespace Instrumental.Interaction.Input
 					case SteamVR_Skeleton_JointIndexEnum.thumbProximal: // also thumb metacarpal
 						Data.ThumbJoints[0] = new Joint()
 						{
-							Pose = new Pose(jointTransform.pos, jointTransform.rot),
+							Pose = new Pose(jointTransform.pos, rotation),
 							Radius = jointRadius,
 							Type = JointType.Metacarpal
 						};
 
 						Data.ThumbJoints[1] = new Joint()
 						{
-							Pose = new Pose(jointTransform.pos, jointTransform.rot),
+							Pose = new Pose(jointTransform.pos, rotation),
 							Radius = jointRadius,
 							Type = JointType.Proximal
 						};
@@ -90,7 +109,7 @@ namespace Instrumental.Interaction.Input
 					case SteamVR_Skeleton_JointIndexEnum.thumbMiddle:
 						Data.ThumbJoints[2] = new Joint()
 						{
-							Pose = new Pose(jointTransform.pos, jointTransform.rot),
+							Pose = new Pose(jointTransform.pos, rotation),
 							Radius = jointRadius,
 							Type = JointType.Medial
 						};
@@ -99,7 +118,7 @@ namespace Instrumental.Interaction.Input
 					case SteamVR_Skeleton_JointIndexEnum.thumbDistal:
 						Data.ThumbJoints[3] = new Joint()
 						{
-							Pose = new Pose(jointTransform.pos, jointTransform.rot),
+							Pose = new Pose(jointTransform.pos, rotation),
 							Radius = jointRadius,
 							Type = JointType.Distal
 						};
@@ -112,7 +131,7 @@ namespace Instrumental.Interaction.Input
 					case SteamVR_Skeleton_JointIndexEnum.indexMetacarpal:
 						Data.IndexJoints[0] = new Joint()
 						{
-							Pose = new Pose(jointTransform.pos, jointTransform.rot),
+							Pose = new Pose(jointTransform.pos, rotation),
 							Radius = jointRadius,
 							Type = JointType.Metacarpal
 						};
@@ -121,7 +140,7 @@ namespace Instrumental.Interaction.Input
 					case SteamVR_Skeleton_JointIndexEnum.indexProximal:
 						Data.IndexJoints[1] = new Joint()
 						{
-							Pose = new Pose(jointTransform.pos, jointTransform.rot),
+							Pose = new Pose(jointTransform.pos, rotation),
 							Radius = jointRadius,
 							Type = JointType.Proximal
 						};
@@ -130,7 +149,7 @@ namespace Instrumental.Interaction.Input
 					case SteamVR_Skeleton_JointIndexEnum.indexMiddle:
 						Data.IndexJoints[2] = new Joint()
 						{
-							Pose = new Pose(jointTransform.pos, jointTransform.rot),
+							Pose = new Pose(jointTransform.pos, rotation),
 							Radius = jointRadius,
 							Type = JointType.Medial
 						};
@@ -139,7 +158,7 @@ namespace Instrumental.Interaction.Input
 					case SteamVR_Skeleton_JointIndexEnum.indexDistal:
 						Data.IndexJoints[3] = new Joint()
 						{
-							Pose = new Pose(jointTransform.pos, jointTransform.rot),
+							Pose = new Pose(jointTransform.pos, rotation),
 							Radius = jointRadius,
 							Type = JointType.Distal
 						};
@@ -152,7 +171,7 @@ namespace Instrumental.Interaction.Input
 					case SteamVR_Skeleton_JointIndexEnum.middleMetacarpal:
 						Data.MiddleJoints[0] = new Joint()
 						{
-							Pose = new Pose(jointTransform.pos, jointTransform.rot),
+							Pose = new Pose(jointTransform.pos, rotation),
 							Radius = jointRadius,
 							Type = JointType.Metacarpal
 						};
@@ -161,7 +180,7 @@ namespace Instrumental.Interaction.Input
 					case SteamVR_Skeleton_JointIndexEnum.middleProximal:
 						Data.MiddleJoints[1] = new Joint()
 						{
-							Pose = new Pose(jointTransform.pos, jointTransform.rot),
+							Pose = new Pose(jointTransform.pos, rotation),
 							Radius = jointRadius,
 							Type = JointType.Proximal
 						};
@@ -170,7 +189,7 @@ namespace Instrumental.Interaction.Input
 					case SteamVR_Skeleton_JointIndexEnum.middleMiddle:
 						Data.MiddleJoints[2] = new Joint()
 						{
-							Pose = new Pose(jointTransform.pos, jointTransform.rot),
+							Pose = new Pose(jointTransform.pos, rotation),
 							Radius = jointRadius,
 							Type = JointType.Medial
 						};
@@ -179,7 +198,7 @@ namespace Instrumental.Interaction.Input
 					case SteamVR_Skeleton_JointIndexEnum.middleDistal:
 						Data.MiddleJoints[3] = new Joint()
 						{
-							Pose = new Pose(jointTransform.pos, jointTransform.rot),
+							Pose = new Pose(jointTransform.pos, rotation),
 							Radius = jointRadius,
 							Type = JointType.Distal
 						};
@@ -192,7 +211,7 @@ namespace Instrumental.Interaction.Input
 					case SteamVR_Skeleton_JointIndexEnum.ringMetacarpal:
 						Data.RingJoints[0] = new Joint()
 						{
-							Pose = new Pose(jointTransform.pos, jointTransform.rot),
+							Pose = new Pose(jointTransform.pos, rotation),
 							Radius = jointRadius,
 							Type = JointType.Metacarpal
 						};
@@ -201,7 +220,7 @@ namespace Instrumental.Interaction.Input
 					case SteamVR_Skeleton_JointIndexEnum.ringProximal:
 						Data.RingJoints[1] = new Joint()
 						{
-							Pose = new Pose(jointTransform.pos, jointTransform.rot),
+							Pose = new Pose(jointTransform.pos, rotation),
 							Radius = jointRadius,
 							Type = JointType.Proximal
 						};
@@ -209,7 +228,7 @@ namespace Instrumental.Interaction.Input
 					case SteamVR_Skeleton_JointIndexEnum.ringMiddle:
 						Data.RingJoints[2] = new Joint()
 						{
-							Pose = new Pose(jointTransform.pos, jointTransform.rot),
+							Pose = new Pose(jointTransform.pos, rotation),
 							Radius = jointRadius,
 							Type = JointType.Medial
 						};
@@ -217,7 +236,7 @@ namespace Instrumental.Interaction.Input
 					case SteamVR_Skeleton_JointIndexEnum.ringDistal:
 						Data.RingJoints[3] = new Joint()
 						{
-							Pose = new Pose(jointTransform.pos, jointTransform.rot),
+							Pose = new Pose(jointTransform.pos, rotation),
 							Radius = jointRadius,
 							Type = JointType.Distal
 						};
@@ -230,7 +249,7 @@ namespace Instrumental.Interaction.Input
 					case SteamVR_Skeleton_JointIndexEnum.pinkyMetacarpal:
 						Data.PinkyJoints[0] = new Joint()
 						{
-							Pose = new Pose(jointTransform.pos, jointTransform.rot),
+							Pose = new Pose(jointTransform.pos, rotation),
 							Radius = jointRadius,
 							Type = JointType.Metacarpal
 						};
@@ -239,7 +258,7 @@ namespace Instrumental.Interaction.Input
 					case SteamVR_Skeleton_JointIndexEnum.pinkyProximal:
 						Data.PinkyJoints[1] = new Joint()
 						{
-							Pose = new Pose(jointTransform.pos, jointTransform.rot),
+							Pose = new Pose(jointTransform.pos, rotation),
 							Radius = jointRadius,
 							Type = JointType.Proximal
 						};
@@ -248,7 +267,7 @@ namespace Instrumental.Interaction.Input
 					case SteamVR_Skeleton_JointIndexEnum.pinkyMiddle:
 						Data.PinkyJoints[2] = new Joint()
 						{
-							Pose = new Pose(jointTransform.pos, jointTransform.rot),
+							Pose = new Pose(jointTransform.pos, rotation),
 							Radius = jointRadius,
 							Type = JointType.Medial
 						};
@@ -257,7 +276,7 @@ namespace Instrumental.Interaction.Input
 					case SteamVR_Skeleton_JointIndexEnum.pinkyDistal:
 						Data.PinkyJoints[3] = new Joint()
 						{
-							Pose = new Pose(jointTransform.pos, jointTransform.rot),
+							Pose = new Pose(jointTransform.pos, rotation),
 							Radius = jointRadius,
 							Type = JointType.Distal
 						};

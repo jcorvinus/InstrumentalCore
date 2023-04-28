@@ -196,7 +196,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &478980072
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -215,122 +215,122 @@ MonoBehaviour:
     - Type: 0
       Pose:
         position: {x: 0.017754002, y: 0.02914625, z: -0.02467269}
-        rotation: {x: -0.18202923, y: -0.54119444, z: -0.2763868, w: -0.77303576}
+        rotation: {x: -0.06672087, y: 0.9293011, z: 0.32414907, w: 0.16393656}
       Radius: 0.08
     - Type: 1
       Pose:
         position: {x: 0.017754002, y: 0.02914625, z: -0.02467269}
-        rotation: {x: -0.18202923, y: -0.54119444, z: -0.2763868, w: -0.77303576}
+        rotation: {x: -0.06672087, y: 0.9293011, z: 0.32414907, w: 0.16393656}
       Radius: 0.08
     - Type: 2
       Pose:
         position: {x: 0.028317703, y: 0.054373275, z: -0.05441571}
-        rotation: {x: 0.042747688, y: 0.5704363, z: 0.07762472, w: 0.81654733}
+        rotation: {x: -0.024661792, y: 0.9807455, z: 0.085116155, w: 0.17402674}
       Radius: 0.08
     - Type: 3
       Pose:
         position: {x: 0.039280854, y: 0.06008116, z: -0.084491804}
-        rotation: {x: -0.045037236, y: 0.5691067, z: -0.048614323, w: 0.8195889}
+        rotation: {x: 0.0025293857, y: 0.98195606, z: -0.066221654, w: 0.17711762}
       Radius: 0.08
     ThumbTip: {x: 0.0498674, y: 0.05609209, z: -0.11277717}
     IndexJoints:
     - Type: 0
       Pose:
         position: {x: 0.0013974358, y: 0.021041313, z: -0.014161155}
-        rotation: {x: 0.3514342, y: -0.5310564, z: -0.5507531, w: -0.5395777}
+        rotation: {x: -0.6379428, y: 0.7570527, z: 0.14093979, w: 0.006025487}
       Radius: 0.08
     - Type: 1
       Pose:
         position: {x: -0.0111997975, y: 0.0373568, z: -0.08502159}
-        rotation: {x: -0.49698383, y: 0.45917684, z: 0.38396484, w: 0.62827915}
+        rotation: {x: -0.6229248, y: 0.76894754, z: -0.079916514, w: 0.119573414}
       Radius: 0.08
     - Type: 2
       Pose:
         position: {x: 0.0010700291, y: 0.038485322, z: -0.12651755}
-        rotation: {x: -0.5713777, y: 0.35624114, z: 0.26381207, w: 0.6906685}
+        rotation: {x: -0.5905684, y: 0.7402769, z: -0.21748175, w: 0.23647587}
       Radius: 0.08
     - Type: 3
       Pose:
         position: {x: 0.018232815, y: 0.037278317, z: -0.14895566}
-        rotation: {x: -0.59722805, y: 0.31232548, z: 0.20955545, w: 0.70841944}
+        rotation: {x: -0.57048213, y: 0.7217756, z: -0.27412593, w: 0.28008065}
       Radius: 0.08
     IndexTip: {x: 0.03459765, y: 0.03554045, z: -0.16476665}
     MiddleJoints:
     - Type: 0
       Pose:
         position: {x: -0.0023371007, y: 0.0070876195, z: -0.01569303}
-        rotation: {x: 0.41973734, y: -0.56174976, z: -0.53342336, w: -0.47298762}
+        rotation: {x: -0.6739864, y: 0.73166984, z: 0.08038815, w: -0.062764294}
       Radius: 0.08
     - Type: 1
       Pose:
         position: {x: -0.016528973, y: 0.0094290245, z: -0.08510397}
-        rotation: {x: -0.53739834, y: 0.4507002, z: 0.41075903, w: 0.58253706}
+        rotation: {x: -0.67044854, y: 0.7306091, z: -0.0895475, w: 0.09322272}
       Radius: 0.08
     - Type: 2
       Pose:
         position: {x: -0.0054804515, y: 0.009177009, z: -0.12677181}
-        rotation: {x: -0.6030952, y: 0.3626821, z: 0.3119235, w: 0.6383116}
+        rotation: {x: -0.6470159, y: 0.7078094, z: -0.20588943, w: 0.19489947}
       Radius: 0.08
     - Type: 3
       Pose:
         position: {x: 0.01256069, y: 0.0078711435, z: -0.15469022}
-        rotation: {x: -0.6470613, y: 0.27117136, z: 0.22114077, w: 0.67740285}
+        rotation: {x: -0.61391157, y: 0.6707432, z: -0.30117127, w: 0.287249}
       Radius: 0.08
     MiddleTip: {x: 0.03211262, y: 0.0065421904, z: -0.17161271}
     RingJoints:
     - Type: 0
       Pose:
         position: {x: -0.00067322294, y: -0.006577047, z: -0.015721984}
-        rotation: {x: 0.49554786, y: -0.5501435, z: -0.5166922, w: -0.4298879}
+        rotation: {x: 0.7157619, y: -0.69298685, z: -0.014951293, w: 0.08503353}
       Radius: 0.08
     - Type: 1
       Pose:
         position: {x: -0.009860706, y: -0.013240861, z: -0.08071329}
-        rotation: {x: -0.6257234, y: 0.4440832, z: 0.38901103, w: 0.50983405}
+        rotation: {x: 0.7175256, y: -0.67452145, z: 0.16738094, w: -0.046492863}
       Radius: 0.08
     - Type: 2
       Pose:
         position: {x: 0.002356464, y: -0.019656926, z: -0.11861026}
-        rotation: {x: -0.67857677, y: 0.35502738, z: 0.3188958, w: 0.5583858}
+        rotation: {x: 0.7053196, y: -0.6458806, z: 0.25433284, w: -0.14379607}
       Radius: 0.08
     - Type: 3
       Pose:
         position: {x: 0.017869227, y: -0.023237694, z: -0.14223531}
-        rotation: {x: -0.72162896, y: 0.26235196, z: 0.23741451, w: 0.5950274}
+        rotation: {x: 0.6781462, y: -0.6062587, z: 0.3423913, w: -0.23523699}
       Radius: 0.08
     RingTip: {x: 0.034683123, y: -0.025393391, z: -0.15692413}
     PinkyJoints:
     - Type: 0
       Pose:
         position: {x: 0.0023183636, y: -0.019013293, z: -0.0145878745}
-        rotation: {x: 0.6150161, y: -0.51532686, z: -0.48575756, w: -0.34674636}
+        rotation: {x: 0.77836454, y: -0.60957783, z: 0.091399595, w: 0.119204424}
       Radius: 0.08
     - Type: 1
       Pose:
         position: {x: 0.0021269955, y: -0.037681405, z: -0.07460703}
-        rotation: {x: -0.6528093, y: 0.43628052, z: 0.4596366, w: 0.4150102}
+        rotation: {x: 0.78661805, y: -0.6019535, z: 0.13659374, w: 0.015040375}
       Radius: 0.08
     - Type: 2
       Pose:
         position: {x: 0.008005876, y: -0.043300904, z: -0.103352994}
-        rotation: {x: -0.7099322, y: 0.3508216, z: 0.3929082, w: 0.46748647}
+        rotation: {x: 0.7798259, y: -0.57863116, z: 0.22416984, w: -0.08249451}
       Radius: 0.08
     - Type: 3
       Pose:
         position: {x: 0.016008032, y: -0.045651928, z: -0.11928006}
-        rotation: {x: -0.7390305, y: 0.26548392, z: 0.34899983, w: 0.5114209}
+        rotation: {x: 0.7693536, y: -0.5493547, z: 0.2757933, w: -0.17390372}
       Radius: 0.08
     PinkyTip: {x: 0.027096897, y: -0.04629023, z: -0.13346723}
     HasForearm: 0
     ForearmJoint:
-      Type: 4
+      Type: 0
       Pose:
         position: {x: 0, y: 0, z: 0}
         rotation: {x: 0, y: 0, z: 0, w: 0}
       Radius: 0
     WristPose:
       position: {x: -0.00015978733, y: -0.000031924497, z: 0.00062570866}
-      rotation: {x: -6.123234e-17, y: -1, z: 6.123234e-17, w: 3.7493994e-33}
+      rotation: {x: -8.659561e-17, y: -0.7071068, z: 0, w: 0.7071068}
     PalmPose:
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
@@ -534,6 +534,104 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &840432355
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1000010304998954, guid: 6def53d002137b747aec0b29551e0e25, type: 3}
+      propertyPath: m_Name
+      value: vr_glove_right_model_slim
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000012632842626, guid: 6def53d002137b747aec0b29551e0e25, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000012125075130, guid: 6def53d002137b747aec0b29551e0e25, type: 3}
+      propertyPath: m_RootOrder
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000012125075130, guid: 6def53d002137b747aec0b29551e0e25, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000012125075130, guid: 6def53d002137b747aec0b29551e0e25, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000012125075130, guid: 6def53d002137b747aec0b29551e0e25, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000012125075130, guid: 6def53d002137b747aec0b29551e0e25, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000012125075130, guid: 6def53d002137b747aec0b29551e0e25, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000012125075130, guid: 6def53d002137b747aec0b29551e0e25, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000012125075130, guid: 6def53d002137b747aec0b29551e0e25, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000012125075130, guid: 6def53d002137b747aec0b29551e0e25, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000012125075130, guid: 6def53d002137b747aec0b29551e0e25, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000012125075130, guid: 6def53d002137b747aec0b29551e0e25, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000012673113748, guid: 6def53d002137b747aec0b29551e0e25,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000012673113748, guid: 6def53d002137b747aec0b29551e0e25,
+        type: 3}
+      propertyPath: skeletonMainPose
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000012673113748, guid: 6def53d002137b747aec0b29551e0e25,
+        type: 3}
+      propertyPath: poseNames.Array.data[0]
+      value: '[not set]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000012673113748, guid: 6def53d002137b747aec0b29551e0e25,
+        type: 3}
+      propertyPath: poseNames.Array.data[1]
+      value: '[not set]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000012673113748, guid: 6def53d002137b747aec0b29551e0e25,
+        type: 3}
+      propertyPath: poseNames.Array.data[2]
+      value: '[not set]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 114000012673113748, guid: 6def53d002137b747aec0b29551e0e25,
+        type: 3}
+      propertyPath: overridePreviewLeftHandPrefab
+      value: 
+      objectReference: {fileID: 1000013348574242, guid: 638779290bce1af49b356f33dcc6fccf,
+        type: 3}
+    - target: {fileID: 114000012673113748, guid: 6def53d002137b747aec0b29551e0e25,
+        type: 3}
+      propertyPath: overridePreviewRightHandPrefab
+      value: 
+      objectReference: {fileID: 1000010304998954, guid: 6def53d002137b747aec0b29551e0e25,
+        type: 3}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6def53d002137b747aec0b29551e0e25, type: 3}
 --- !u!1001 &1196937148
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -555,7 +653,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4000013303659494, guid: 638779290bce1af49b356f33dcc6fccf, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.5516324
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4000013303659494, guid: 638779290bce1af49b356f33dcc6fccf, type: 3}
       propertyPath: m_LocalPosition.y
@@ -563,7 +661,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4000013303659494, guid: 638779290bce1af49b356f33dcc6fccf, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.63726306
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4000013303659494, guid: 638779290bce1af49b356f33dcc6fccf, type: 3}
       propertyPath: m_LocalRotation.w
@@ -650,126 +748,126 @@ MonoBehaviour:
     - Type: 0
       Pose:
         position: {x: -0.017754015, y: 0.029146114, z: -0.02467261}
-        rotation: {x: 0.77303576, y: -0.2763868, z: 0.54119444, w: -0.18202923}
+        rotation: {x: 0.066720866, y: 0.9293011, z: 0.32414907, w: -0.16393656}
       Radius: 0.08
     - Type: 1
       Pose:
         position: {x: -0.017754015, y: 0.029146114, z: -0.02467261}
-        rotation: {x: 0.77303576, y: -0.2763868, z: 0.54119444, w: -0.18202923}
+        rotation: {x: 0.066720866, y: 0.9293011, z: 0.32414907, w: -0.16393656}
       Radius: 0.08
     - Type: 2
       Pose:
         position: {x: -0.028317705, y: 0.054373287, z: -0.05441574}
-        rotation: {x: -0.81654733, y: 0.07762473, z: -0.5704363, w: 0.04274769}
+        rotation: {x: 0.024661798, y: 0.9807455, z: 0.08511616, w: -0.17402674}
       Radius: 0.08
     - Type: 3
       Pose:
         position: {x: -0.03928087, y: 0.060081232, z: -0.08449184}
-        rotation: {x: -0.8195889, y: -0.04861432, z: -0.5691067, w: -0.045037232}
+        rotation: {x: -0.0025293885, y: 0.98195606, z: -0.066221654, w: -0.1771176}
       Radius: 0.08
     ThumbTip: {x: -0.04986737, y: 0.056091987, z: -0.11277731}
     IndexJoints:
     - Type: 0
       Pose:
         position: {x: -0.0013974576, y: 0.021041306, z: -0.014161264}
-        rotation: {x: -0.5395777, y: 0.5507531, z: -0.5310564, w: -0.3514342}
+        rotation: {x: 0.6379428, y: 0.7570527, z: 0.14093979, w: -0.006025487}
       Radius: 0.08
     - Type: 1
       Pose:
         position: {x: 0.011199768, y: 0.03735687, z: -0.08502162}
-        rotation: {x: 0.62827915, y: -0.38396484, z: 0.45917684, w: 0.49698383}
+        rotation: {x: 0.6229248, y: 0.76894754, z: -0.079916514, w: -0.11957341}
       Radius: 0.08
     - Type: 2
       Pose:
         position: {x: -0.0010700347, y: 0.03848523, z: -0.12651747}
-        rotation: {x: 0.6906685, y: -0.26381207, z: 0.35624117, w: 0.57137764}
+        rotation: {x: 0.5905683, y: 0.740277, z: -0.2174817, w: -0.23647583}
       Radius: 0.08
     - Type: 3
       Pose:
         position: {x: -0.018232826, y: 0.037278354, z: -0.1489556}
-        rotation: {x: 0.70841944, y: -0.20955545, z: 0.3123255, w: 0.597228}
+        rotation: {x: 0.57048196, y: 0.7217757, z: -0.27412584, w: -0.28008068}
       Radius: 0.08
     IndexTip: {x: -0.034597665, y: 0.03554043, z: -0.16476682}
     MiddleJoints:
     - Type: 0
       Pose:
         position: {x: 0.0023370923, y: 0.007087619, z: -0.015693126}
-        rotation: {x: -0.47298762, y: 0.53342336, z: -0.56174976, w: -0.41973734}
+        rotation: {x: 0.6739864, y: 0.73166984, z: 0.08038815, w: 0.062764294}
       Radius: 0.08
     - Type: 1
       Pose:
         position: {x: 0.01652884, y: 0.009429009, z: -0.08510402}
-        rotation: {x: 0.58253706, y: -0.41075903, z: 0.4507002, w: 0.53739834}
+        rotation: {x: 0.67044854, y: 0.7306091, z: -0.0895475, w: -0.09322274}
       Radius: 0.08
     - Type: 2
       Pose:
         position: {x: 0.005480433, y: 0.009176982, z: -0.12677194}
-        rotation: {x: 0.6383116, y: -0.3119235, z: 0.3626821, w: 0.6030952}
+        rotation: {x: 0.64701587, y: 0.70780945, z: -0.20588942, w: -0.19489948}
       Radius: 0.08
     - Type: 3
       Pose:
         position: {x: -0.012560701, y: 0.007871132, z: -0.15469028}
-        rotation: {x: 0.67740285, y: -0.22114077, z: 0.27117136, w: 0.6470613}
+        rotation: {x: 0.61391157, y: 0.6707433, z: -0.30117124, w: -0.287249}
       Radius: 0.08
     MiddleTip: {x: -0.032112636, y: 0.0065421793, z: -0.17161265}
     RingJoints:
     - Type: 0
       Pose:
         position: {x: 0.00067321, y: -0.006577051, z: -0.015721953}
-        rotation: {x: -0.4298879, y: 0.5166922, z: -0.5501435, w: -0.49554786}
+        rotation: {x: 0.7157619, y: 0.69298685, z: 0.014951296, w: 0.085033536}
       Radius: 0.08
     - Type: 1
       Pose:
         position: {x: 0.009860715, y: -0.013240876, z: -0.08071335}
-        rotation: {x: 0.50983405, y: -0.38901103, z: 0.4440832, w: 0.62572336}
+        rotation: {x: 0.7175256, y: 0.6745214, z: -0.16738091, w: -0.046492882}
       Radius: 0.08
     - Type: 2
       Pose:
         position: {x: -0.002356464, y: -0.019656943, z: -0.11861035}
-        rotation: {x: 0.5583858, y: -0.3188958, z: 0.35502738, w: 0.6785767}
+        rotation: {x: 0.7053196, y: 0.64588064, z: -0.25433278, w: -0.14379612}
       Radius: 0.08
     - Type: 3
       Pose:
         position: {x: -0.017869238, y: -0.02323778, z: -0.1422354}
-        rotation: {x: 0.5950274, y: -0.2374145, z: 0.26235196, w: 0.7216289}
+        rotation: {x: 0.67814606, y: 0.60625875, z: -0.34239125, w: -0.23523705}
       Radius: 0.08
     RingTip: {x: -0.034683134, y: -0.025393434, z: -0.15692408}
     PinkyJoints:
     - Type: 0
       Pose:
         position: {x: -0.00231837, y: -0.019013299, z: -0.014587931}
-        rotation: {x: -0.34674636, y: 0.48575756, z: -0.51532686, w: -0.6150161}
+        rotation: {x: 0.7783645, y: 0.6095779, z: -0.09139961, w: 0.11920443}
       Radius: 0.08
     - Type: 1
       Pose:
         position: {x: -0.0021270167, y: -0.03768138, z: -0.07460708}
-        rotation: {x: 0.4150102, y: -0.45963663, z: 0.43628052, w: 0.6528093}
+        rotation: {x: 0.78661805, y: 0.6019535, z: -0.1365937, w: 0.015040385}
       Radius: 0.08
     - Type: 2
       Pose:
         position: {x: -0.008005896, y: -0.043300986, z: -0.10335311}
-        rotation: {x: 0.46748647, y: -0.39290822, z: 0.35082164, w: 0.7099322}
+        rotation: {x: 0.7798259, y: 0.5786312, z: -0.2241698, w: -0.08249448}
       Radius: 0.08
     - Type: 3
       Pose:
         position: {x: -0.016008042, y: -0.04565187, z: -0.119280025}
-        rotation: {x: 0.5114209, y: -0.34899986, z: 0.26548392, w: 0.7390305}
+        rotation: {x: 0.7693536, y: 0.54935473, z: -0.27579328, w: -0.17390373}
       Radius: 0.08
     PinkyTip: {x: -0.027096897, y: -0.04629024, z: -0.13346717}
     HasForearm: 0
     ForearmJoint:
-      Type: 4
+      Type: 0
       Pose:
         position: {x: 0, y: 0, z: 0}
         rotation: {x: 0, y: 0, z: 0, w: 0}
       Radius: 0
     WristPose:
       position: {x: 0.00015978745, y: -0.000031924377, z: 0.0006257091}
-      rotation: {x: -6.123234e-17, y: -1, z: 6.123234e-17, w: 3.7493994e-33}
+      rotation: {x: 0.7071068, y: 0, z: 0.7071068, w: 8.659561e-17}
     PalmPose:
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
-  isLeft: 0
+  isLeft: 1
   skeleton:
     actionPath: /actions/default/in/SkeletonLeftHand
     needsReinit: 0

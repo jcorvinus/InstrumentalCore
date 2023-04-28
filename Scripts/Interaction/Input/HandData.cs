@@ -113,25 +113,25 @@ namespace Instrumental.Interaction.Input
 					{
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.01775401f, 0.02914611f, -0.02467261f), new Quaternion(0.7730358f, -0.2763868f, 0.5411944f, -0.1820292f)),
+							Pose = new Pose(new Vector3(-0.01775401f, 0.02914611f, -0.02467261f), new Quaternion(0.06672087f, 0.9293011f, 0.3241491f, -0.1639366f)),
 							Radius = 0.08f,
 							Type = JointType.Metacarpal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.01775401f, 0.02914611f, -0.02467261f), new Quaternion(0.7730358f, -0.2763868f, 0.5411944f, -0.1820292f)),
+							Pose = new Pose(new Vector3(-0.01775401f, 0.02914611f, -0.02467261f), new Quaternion(0.06672087f, 0.9293011f, 0.3241491f, -0.1639366f)),
 							Radius = 0.08f,
 							Type = JointType.Proximal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.0283177f, 0.05437329f, -0.05441574f), new Quaternion(-0.8165473f, 0.07762473f, -0.5704363f, 0.04274769f)),
+							Pose = new Pose(new Vector3(-0.0283177f, 0.05437329f, -0.05441574f), new Quaternion(0.0246618f, 0.9807455f, 0.08511616f, -0.1740267f)),
 							Radius = 0.08f,
 							Type = JointType.Medial
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.03928087f, 0.06008123f, -0.08449184f), new Quaternion(-0.8195889f, -0.04861432f, -0.5691067f, -0.04503723f)),
+							Pose = new Pose(new Vector3(-0.03928087f, 0.06008123f, -0.08449184f), new Quaternion(-0.002529389f, 0.9819561f, -0.06622165f, -0.1771176f)),
 							Radius = 0.08f,
 							Type = JointType.Distal
 						}
@@ -141,25 +141,25 @@ namespace Instrumental.Interaction.Input
 					{
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.001397458f, 0.02104131f, -0.01416126f), new Quaternion(-0.5395777f, 0.5507531f, -0.5310564f, -0.3514342f)),
+							Pose = new Pose(new Vector3(-0.001397458f, 0.02104131f, -0.01416126f), new Quaternion(0.6379428f, 0.7570527f, 0.1409398f, -0.006025487f)),
 							Radius = 0.08f,
 							Type = JointType.Metacarpal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.01119977f, 0.03735687f, -0.08502162f), new Quaternion(0.6282791f, -0.3839648f, 0.4591768f, 0.4969838f)),
+							Pose = new Pose(new Vector3(0.01119977f, 0.03735687f, -0.08502162f), new Quaternion(0.6229248f, 0.7689475f, -0.07991651f, -0.1195734f)),
 							Radius = 0.08f,
 							Type = JointType.Proximal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.001070035f, 0.03848523f, -0.1265175f), new Quaternion(0.6906685f, -0.2638121f, 0.3562412f, 0.5713776f)),
+							Pose = new Pose(new Vector3(-0.001070035f, 0.03848523f, -0.1265175f), new Quaternion(0.5905683f, 0.740277f, -0.2174817f, -0.2364758f)),
 							Radius = 0.08f,
 							Type = JointType.Medial
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.01823283f, 0.03727835f, -0.1489556f), new Quaternion(0.7084194f, -0.2095554f, 0.3123255f, 0.597228f)),
+							Pose = new Pose(new Vector3(-0.01823283f, 0.03727835f, -0.1489556f), new Quaternion(0.570482f, 0.7217757f, -0.2741258f, -0.2800807f)),
 							Radius = 0.08f,
 							Type = JointType.Distal
 						}
@@ -169,25 +169,25 @@ namespace Instrumental.Interaction.Input
 					{
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.002337092f, 0.007087619f, -0.01569313f), new Quaternion(-0.4729876f, 0.5334234f, -0.5617498f, -0.4197373f)),
+							Pose = new Pose(new Vector3(0.002337092f, 0.007087619f, -0.01569313f), new Quaternion(0.6739864f, 0.7316698f, 0.08038815f, 0.06276429f)),
 							Radius = 0.08f,
 							Type = JointType.Metacarpal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.01652884f, 0.009429009f, -0.08510402f), new Quaternion(0.5825371f, -0.410759f, 0.4507002f, 0.5373983f)),
+							Pose = new Pose(new Vector3(0.01652884f, 0.009429009f, -0.08510402f), new Quaternion(0.6704485f, 0.7306091f, -0.0895475f, -0.09322274f)),
 							Radius = 0.08f,
 							Type = JointType.Proximal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.005480433f, 0.009176982f, -0.1267719f), new Quaternion(0.6383116f, -0.3119235f, 0.3626821f, 0.6030952f)),
+							Pose = new Pose(new Vector3(0.005480433f, 0.009176982f, -0.1267719f), new Quaternion(0.6470159f, 0.7078094f, -0.2058894f, -0.1948995f)),
 							Radius = 0.08f,
 							Type = JointType.Medial
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.0125607f, 0.007871132f, -0.1546903f), new Quaternion(0.6774029f, -0.2211408f, 0.2711714f, 0.6470613f)),
+							Pose = new Pose(new Vector3(-0.0125607f, 0.007871132f, -0.1546903f), new Quaternion(0.6139116f, 0.6707433f, -0.3011712f, -0.287249f)),
 							Radius = 0.08f,
 							Type = JointType.Distal
 						}
@@ -197,25 +197,25 @@ namespace Instrumental.Interaction.Input
 					{
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.00067321f, -0.006577051f, -0.01572195f), new Quaternion(-0.4298879f, 0.5166922f, -0.5501435f, -0.4955479f)),
+							Pose = new Pose(new Vector3(0.00067321f, -0.006577051f, -0.01572195f), new Quaternion(0.7157619f, 0.6929868f, 0.0149513f, 0.08503354f)),
 							Radius = 0.08f,
 							Type = JointType.Metacarpal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.009860715f, -0.01324088f, -0.08071335f), new Quaternion(0.5098341f, -0.389011f, 0.4440832f, 0.6257234f)),
+							Pose = new Pose(new Vector3(0.009860715f, -0.01324088f, -0.08071335f), new Quaternion(0.7175256f, 0.6745214f, -0.1673809f, -0.04649288f)),
 							Radius = 0.08f,
 							Type = JointType.Proximal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.002356464f, -0.01965694f, -0.1186104f), new Quaternion(0.5583858f, -0.3188958f, 0.3550274f, 0.6785767f)),
+							Pose = new Pose(new Vector3(-0.002356464f, -0.01965694f, -0.1186104f), new Quaternion(0.7053196f, 0.6458806f, -0.2543328f, -0.1437961f)),
 							Radius = 0.08f,
 							Type = JointType.Medial
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.01786924f, -0.02323778f, -0.1422354f), new Quaternion(0.5950274f, -0.2374145f, 0.262352f, 0.7216289f)),
+							Pose = new Pose(new Vector3(-0.01786924f, -0.02323778f, -0.1422354f), new Quaternion(0.6781461f, 0.6062587f, -0.3423913f, -0.235237f)),
 							Radius = 0.08f,
 							Type = JointType.Distal
 						}
@@ -225,25 +225,25 @@ namespace Instrumental.Interaction.Input
 					{
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.00231837f, -0.0190133f, -0.01458793f), new Quaternion(-0.3467464f, 0.4857576f, -0.5153269f, -0.6150161f)),
+							Pose = new Pose(new Vector3(-0.00231837f, -0.0190133f, -0.01458793f), new Quaternion(0.7783645f, 0.6095779f, -0.09139961f, 0.1192044f)),
 							Radius = 0.08f,
 							Type = JointType.Metacarpal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.002127017f, -0.03768138f, -0.07460708f), new Quaternion(0.4150102f, -0.4596366f, 0.4362805f, 0.6528093f)),
+							Pose = new Pose(new Vector3(-0.002127017f, -0.03768138f, -0.07460708f), new Quaternion(0.7866181f, 0.6019535f, -0.1365937f, 0.01504038f)),
 							Radius = 0.08f,
 							Type = JointType.Proximal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.008005896f, -0.04330099f, -0.1033531f), new Quaternion(0.4674865f, -0.3929082f, 0.3508216f, 0.7099322f)),
+							Pose = new Pose(new Vector3(-0.008005896f, -0.04330099f, -0.1033531f), new Quaternion(0.7798259f, 0.5786312f, -0.2241698f, -0.08249448f)),
 							Radius = 0.08f,
 							Type = JointType.Medial
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.01600804f, -0.04565187f, -0.11928f), new Quaternion(0.5114209f, -0.3489999f, 0.2654839f, 0.7390305f)),
+							Pose = new Pose(new Vector3(-0.01600804f, -0.04565187f, -0.11928f), new Quaternion(0.7693536f, 0.5493547f, -0.2757933f, -0.1739037f)),
 							Radius = 0.08f,
 							Type = JointType.Distal
 						}
@@ -253,9 +253,9 @@ namespace Instrumental.Interaction.Input
 					{
 						Pose = new Pose(new Vector3(0f, 0f, 0f), new Quaternion(0f, 0f, 0f, 0f)),
 						Radius = 0f,
-						Type = JointType.Forearm
+						Type = JointType.Metacarpal
 					},
-					WristPose = new Pose(new Vector3(0.0001597875f, -3.192438E-05f, 0.0006257091f), new Quaternion(-6.123234E-17f, -1f, 6.123234E-17f, 3.749399E-33f)),
+					WristPose = new Pose(new Vector3(0.0001597875f, -3.192438E-05f, 0.0006257091f), new Quaternion(0.7071068f, 0f, 0.7071068f, 8.659561E-17f)),
 					PalmPose = new Pose(new Vector3(0f, 0f, 0f), new Quaternion(0f, 0f, 0f, 1f))
 				};
 			}
@@ -268,25 +268,25 @@ namespace Instrumental.Interaction.Input
 					{
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.017754f, 0.02914625f, -0.02467269f), new Quaternion(-0.1820292f, -0.5411944f, -0.2763868f, -0.7730358f)),
+							Pose = new Pose(new Vector3(0.017754f, 0.02914625f, -0.02467269f), new Quaternion(-0.06672087f, 0.9293011f, 0.3241491f, 0.1639366f)),
 							Radius = 0.08f,
 							Type = JointType.Metacarpal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.017754f, 0.02914625f, -0.02467269f), new Quaternion(-0.1820292f, -0.5411944f, -0.2763868f, -0.7730358f)),
+							Pose = new Pose(new Vector3(0.017754f, 0.02914625f, -0.02467269f), new Quaternion(-0.06672087f, 0.9293011f, 0.3241491f, 0.1639366f)),
 							Radius = 0.08f,
 							Type = JointType.Proximal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.0283177f, 0.05437328f, -0.05441571f), new Quaternion(0.04274769f, 0.5704363f, 0.07762472f, 0.8165473f)),
+							Pose = new Pose(new Vector3(0.0283177f, 0.05437328f, -0.05441571f), new Quaternion(-0.02466179f, 0.9807455f, 0.08511616f, 0.1740267f)),
 							Radius = 0.08f,
 							Type = JointType.Medial
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.03928085f, 0.06008116f, -0.0844918f), new Quaternion(-0.04503724f, 0.5691067f, -0.04861432f, 0.8195889f)),
+							Pose = new Pose(new Vector3(0.03928085f, 0.06008116f, -0.0844918f), new Quaternion(0.002529386f, 0.9819561f, -0.06622165f, 0.1771176f)),
 							Radius = 0.08f,
 							Type = JointType.Distal
 						}
@@ -296,25 +296,25 @@ namespace Instrumental.Interaction.Input
 					{
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.001397436f, 0.02104131f, -0.01416115f), new Quaternion(0.3514342f, -0.5310564f, -0.5507531f, -0.5395777f)),
+							Pose = new Pose(new Vector3(0.001397436f, 0.02104131f, -0.01416115f), new Quaternion(-0.6379428f, 0.7570527f, 0.1409398f, 0.006025487f)),
 							Radius = 0.08f,
 							Type = JointType.Metacarpal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.0111998f, 0.0373568f, -0.08502159f), new Quaternion(-0.4969838f, 0.4591768f, 0.3839648f, 0.6282791f)),
+							Pose = new Pose(new Vector3(-0.0111998f, 0.0373568f, -0.08502159f), new Quaternion(-0.6229248f, 0.7689475f, -0.07991651f, 0.1195734f)),
 							Radius = 0.08f,
 							Type = JointType.Proximal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.001070029f, 0.03848532f, -0.1265175f), new Quaternion(-0.5713777f, 0.3562411f, 0.2638121f, 0.6906685f)),
+							Pose = new Pose(new Vector3(0.001070029f, 0.03848532f, -0.1265175f), new Quaternion(-0.5905684f, 0.7402769f, -0.2174817f, 0.2364759f)),
 							Radius = 0.08f,
 							Type = JointType.Medial
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.01823281f, 0.03727832f, -0.1489557f), new Quaternion(-0.5972281f, 0.3123255f, 0.2095554f, 0.7084194f)),
+							Pose = new Pose(new Vector3(0.01823281f, 0.03727832f, -0.1489557f), new Quaternion(-0.5704821f, 0.7217756f, -0.2741259f, 0.2800806f)),
 							Radius = 0.08f,
 							Type = JointType.Distal
 						}
@@ -324,25 +324,25 @@ namespace Instrumental.Interaction.Input
 					{
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.002337101f, 0.00708762f, -0.01569303f), new Quaternion(0.4197373f, -0.5617498f, -0.5334234f, -0.4729876f)),
+							Pose = new Pose(new Vector3(-0.002337101f, 0.00708762f, -0.01569303f), new Quaternion(-0.6739864f, 0.7316698f, 0.08038815f, -0.06276429f)),
 							Radius = 0.08f,
 							Type = JointType.Metacarpal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.01652897f, 0.009429025f, -0.08510397f), new Quaternion(-0.5373983f, 0.4507002f, 0.410759f, 0.5825371f)),
+							Pose = new Pose(new Vector3(-0.01652897f, 0.009429025f, -0.08510397f), new Quaternion(-0.6704485f, 0.7306091f, -0.0895475f, 0.09322272f)),
 							Radius = 0.08f,
 							Type = JointType.Proximal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.005480452f, 0.009177009f, -0.1267718f), new Quaternion(-0.6030952f, 0.3626821f, 0.3119235f, 0.6383116f)),
+							Pose = new Pose(new Vector3(-0.005480452f, 0.009177009f, -0.1267718f), new Quaternion(-0.6470159f, 0.7078094f, -0.2058894f, 0.1948995f)),
 							Radius = 0.08f,
 							Type = JointType.Medial
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.01256069f, 0.007871144f, -0.1546902f), new Quaternion(-0.6470613f, 0.2711714f, 0.2211408f, 0.6774029f)),
+							Pose = new Pose(new Vector3(0.01256069f, 0.007871144f, -0.1546902f), new Quaternion(-0.6139116f, 0.6707432f, -0.3011713f, 0.287249f)),
 							Radius = 0.08f,
 							Type = JointType.Distal
 						}
@@ -352,25 +352,25 @@ namespace Instrumental.Interaction.Input
 					{
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.0006732229f, -0.006577047f, -0.01572198f), new Quaternion(0.4955479f, -0.5501435f, -0.5166922f, -0.4298879f)),
+							Pose = new Pose(new Vector3(-0.0006732229f, -0.006577047f, -0.01572198f), new Quaternion(0.7157619f, -0.6929868f, -0.01495129f, 0.08503353f)),
 							Radius = 0.08f,
 							Type = JointType.Metacarpal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.009860706f, -0.01324086f, -0.08071329f), new Quaternion(-0.6257234f, 0.4440832f, 0.389011f, 0.5098341f)),
+							Pose = new Pose(new Vector3(-0.009860706f, -0.01324086f, -0.08071329f), new Quaternion(0.7175256f, -0.6745214f, 0.1673809f, -0.04649286f)),
 							Radius = 0.08f,
 							Type = JointType.Proximal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.002356464f, -0.01965693f, -0.1186103f), new Quaternion(-0.6785768f, 0.3550274f, 0.3188958f, 0.5583858f)),
+							Pose = new Pose(new Vector3(0.002356464f, -0.01965693f, -0.1186103f), new Quaternion(0.7053196f, -0.6458806f, 0.2543328f, -0.1437961f)),
 							Radius = 0.08f,
 							Type = JointType.Medial
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.01786923f, -0.02323769f, -0.1422353f), new Quaternion(-0.721629f, 0.262352f, 0.2374145f, 0.5950274f)),
+							Pose = new Pose(new Vector3(0.01786923f, -0.02323769f, -0.1422353f), new Quaternion(0.6781462f, -0.6062587f, 0.3423913f, -0.235237f)),
 							Radius = 0.08f,
 							Type = JointType.Distal
 						}
@@ -380,25 +380,25 @@ namespace Instrumental.Interaction.Input
 					{
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.002318364f, -0.01901329f, -0.01458787f), new Quaternion(0.6150161f, -0.5153269f, -0.4857576f, -0.3467464f)),
+							Pose = new Pose(new Vector3(0.002318364f, -0.01901329f, -0.01458787f), new Quaternion(0.7783645f, -0.6095778f, 0.0913996f, 0.1192044f)),
 							Radius = 0.08f,
 							Type = JointType.Metacarpal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.002126995f, -0.0376814f, -0.07460703f), new Quaternion(-0.6528093f, 0.4362805f, 0.4596366f, 0.4150102f)),
+							Pose = new Pose(new Vector3(0.002126995f, -0.0376814f, -0.07460703f), new Quaternion(0.7866181f, -0.6019535f, 0.1365937f, 0.01504038f)),
 							Radius = 0.08f,
 							Type = JointType.Proximal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.008005876f, -0.0433009f, -0.103353f), new Quaternion(-0.7099322f, 0.3508216f, 0.3929082f, 0.4674865f)),
+							Pose = new Pose(new Vector3(0.008005876f, -0.0433009f, -0.103353f), new Quaternion(0.7798259f, -0.5786312f, 0.2241698f, -0.08249451f)),
 							Radius = 0.08f,
 							Type = JointType.Medial
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.01600803f, -0.04565193f, -0.1192801f), new Quaternion(-0.7390305f, 0.2654839f, 0.3489998f, 0.5114209f)),
+							Pose = new Pose(new Vector3(0.01600803f, -0.04565193f, -0.1192801f), new Quaternion(0.7693536f, -0.5493547f, 0.2757933f, -0.1739037f)),
 							Radius = 0.08f,
 							Type = JointType.Distal
 						}
@@ -408,9 +408,9 @@ namespace Instrumental.Interaction.Input
 					{
 						Pose = new Pose(new Vector3(0f, 0f, 0f), new Quaternion(0f, 0f, 0f, 0f)),
 						Radius = 0f,
-						Type = JointType.Forearm
+						Type = JointType.Metacarpal
 					},
-					WristPose = new Pose(new Vector3(-0.0001597873f, -3.19245E-05f, 0.0006257087f), new Quaternion(-6.123234E-17f, -1f, 6.123234E-17f, 3.749399E-33f)),
+					WristPose = new Pose(new Vector3(-0.0001597873f, -3.19245E-05f, 0.0006257087f), new Quaternion(-8.659561E-17f, -0.7071068f, 0f, 0.7071068f)),
 					PalmPose = new Pose(new Vector3(0f, 0f, 0f), new Quaternion(0f, 0f, 0f, 1f))
 				};
 			}
