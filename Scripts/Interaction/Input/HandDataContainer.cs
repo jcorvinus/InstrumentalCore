@@ -13,6 +13,8 @@ namespace Instrumental.Interaction.Input
 		[SerializeField] bool isLeft;
         [SerializeField] SteamVR_Action_Skeleton skeleton;
         [SerializeField] bool convertTestData;
+		[SerializeField] bool getStaticTestData;
+		[SerializeField] bool printTestDataStruct;
 
 		[Range(0, 0.1f)]
 		[SerializeField] float jointRadius = 0.08f;
@@ -310,13 +312,27 @@ namespace Instrumental.Interaction.Input
 				ConvertData();
 			}
 
+			if(getStaticTestData)
+			{
+				getStaticTestData = false;
+				Data = HandData.GetTestData(isLeft);
+			}
+
+			if(printTestDataStruct)
+			{
+				printTestDataStruct = false;
+				Debug.Log(Data.PrintInitCode());
+			}
+
 			// draw the hand
 			for (int fingerIndx=0; fingerIndx < 5; fingerIndx++)
 			{
                 Finger finger = (Finger)fingerIndx;
 
 				Joint[] joints = Data.GetJointForFinger(finger);
-                
+
+				if (joints.Length == 0) continue;
+
                 // draw our joints
                 for(int jointIndx=0; jointIndx < 5; jointIndx++)
 				{

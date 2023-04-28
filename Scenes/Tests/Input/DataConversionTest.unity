@@ -196,7 +196,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &478980072
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -339,6 +339,8 @@ MonoBehaviour:
     actionPath: /actions/default/in/SkeletonRightHand
     needsReinit: 0
   convertTestData: 0
+  getStaticTestData: 0
+  printTestDataStruct: 0
   jointRadius: 0.08
 --- !u!4 &478980073
 Transform:
@@ -354,6 +356,183 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &692660825
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 692660827}
+  - component: {fileID: 692660826}
+  m_Layer: 0
+  m_Name: RightHandData (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &692660826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 692660825}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 644c8ddbf816d86418e5d281a81134f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Data:
+    Handedness: 2
+    ThumbJoints:
+    - Type: 0
+      Pose:
+        position: {x: 0.017754, y: 0.02914625, z: -0.02467269}
+        rotation: {x: -0.1820292, y: -0.5411944, z: -0.2763868, w: -0.7730358}
+      Radius: 0.08
+    - Type: 1
+      Pose:
+        position: {x: 0.017754, y: 0.02914625, z: -0.02467269}
+        rotation: {x: -0.1820292, y: -0.5411944, z: -0.2763868, w: -0.7730358}
+      Radius: 0.08
+    - Type: 2
+      Pose:
+        position: {x: 0.0283177, y: 0.05437328, z: -0.05441571}
+        rotation: {x: 0.04274769, y: 0.5704363, z: 0.07762472, w: 0.8165473}
+      Radius: 0.08
+    - Type: 3
+      Pose:
+        position: {x: 0.03928085, y: 0.06008116, z: -0.0844918}
+        rotation: {x: -0.04503724, y: 0.5691067, z: -0.04861432, w: 0.8195889}
+      Radius: 0.08
+    ThumbTip: {x: 0.0498674, y: 0.05609209, z: -0.1127772}
+    IndexJoints:
+    - Type: 0
+      Pose:
+        position: {x: 0.001397436, y: 0.02104131, z: -0.01416115}
+        rotation: {x: 0.3514342, y: -0.5310564, z: -0.5507531, w: -0.5395777}
+      Radius: 0.08
+    - Type: 1
+      Pose:
+        position: {x: -0.0111998, y: 0.0373568, z: -0.08502159}
+        rotation: {x: -0.4969838, y: 0.4591768, z: 0.3839648, w: 0.6282791}
+      Radius: 0.08
+    - Type: 2
+      Pose:
+        position: {x: 0.001070029, y: 0.03848532, z: -0.1265175}
+        rotation: {x: -0.5713777, y: 0.3562411, z: 0.2638121, w: 0.6906685}
+      Radius: 0.08
+    - Type: 3
+      Pose:
+        position: {x: 0.01823281, y: 0.03727832, z: -0.1489557}
+        rotation: {x: -0.5972281, y: 0.3123255, z: 0.2095554, w: 0.7084194}
+      Radius: 0.08
+    IndexTip: {x: 0.03459765, y: 0.03554045, z: -0.1647667}
+    MiddleJoints:
+    - Type: 0
+      Pose:
+        position: {x: -0.002337101, y: 0.00708762, z: -0.01569303}
+        rotation: {x: 0.4197373, y: -0.5617498, z: -0.5334234, w: -0.4729876}
+      Radius: 0.08
+    - Type: 1
+      Pose:
+        position: {x: -0.01652897, y: 0.009429025, z: -0.08510397}
+        rotation: {x: -0.5373983, y: 0.4507002, z: 0.410759, w: 0.5825371}
+      Radius: 0.08
+    - Type: 2
+      Pose:
+        position: {x: -0.005480452, y: 0.009177009, z: -0.1267718}
+        rotation: {x: -0.6030952, y: 0.3626821, z: 0.3119235, w: 0.6383116}
+      Radius: 0.08
+    - Type: 3
+      Pose:
+        position: {x: 0.01256069, y: 0.007871144, z: -0.1546902}
+        rotation: {x: -0.6470613, y: 0.2711714, z: 0.2211408, w: 0.6774029}
+      Radius: 0.08
+    MiddleTip: {x: 0.03211262, y: 0.00654219, z: -0.1716127}
+    RingJoints:
+    - Type: 0
+      Pose:
+        position: {x: -0.0006732229, y: -0.006577047, z: -0.01572198}
+        rotation: {x: 0.4955479, y: -0.5501435, z: -0.5166922, w: -0.4298879}
+      Radius: 0.08
+    - Type: 1
+      Pose:
+        position: {x: -0.009860706, y: -0.01324086, z: -0.08071329}
+        rotation: {x: -0.6257234, y: 0.4440832, z: 0.389011, w: 0.5098341}
+      Radius: 0.08
+    - Type: 2
+      Pose:
+        position: {x: 0.002356464, y: -0.01965693, z: -0.1186103}
+        rotation: {x: -0.6785768, y: 0.3550274, z: 0.3188958, w: 0.5583858}
+      Radius: 0.08
+    - Type: 3
+      Pose:
+        position: {x: 0.01786923, y: -0.02323769, z: -0.1422353}
+        rotation: {x: -0.721629, y: 0.262352, z: 0.2374145, w: 0.5950274}
+      Radius: 0.08
+    RingTip: {x: 0.03468312, y: -0.02539339, z: -0.1569241}
+    PinkyJoints:
+    - Type: 0
+      Pose:
+        position: {x: 0.002318364, y: -0.01901329, z: -0.01458787}
+        rotation: {x: 0.6150161, y: -0.5153269, z: -0.4857576, w: -0.3467464}
+      Radius: 0.08
+    - Type: 1
+      Pose:
+        position: {x: 0.002126995, y: -0.0376814, z: -0.07460703}
+        rotation: {x: -0.6528093, y: 0.4362805, z: 0.4596366, w: 0.4150102}
+      Radius: 0.08
+    - Type: 2
+      Pose:
+        position: {x: 0.008005876, y: -0.0433009, z: -0.103353}
+        rotation: {x: -0.7099322, y: 0.3508216, z: 0.3929082, w: 0.4674865}
+      Radius: 0.08
+    - Type: 3
+      Pose:
+        position: {x: 0.01600803, y: -0.04565193, z: -0.1192801}
+        rotation: {x: -0.7390305, y: 0.2654839, z: 0.3489998, w: 0.5114209}
+      Radius: 0.08
+    PinkyTip: {x: 0.0270969, y: -0.04629023, z: -0.1334672}
+    HasForearm: 0
+    ForearmJoint:
+      Type: 4
+      Pose:
+        position: {x: 0, y: 0, z: 0}
+        rotation: {x: 0, y: 0, z: 0, w: 0}
+      Radius: 0
+    WristPose:
+      position: {x: -0.0001597873, y: -0.0000319245, z: 0.0006257087}
+      rotation: {x: -6.123234e-17, y: -1, z: 6.123234e-17, w: 3.749399e-33}
+    PalmPose:
+      position: {x: 0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+  isLeft: 0
+  skeleton:
+    actionPath: 
+    needsReinit: 1
+  convertTestData: 0
+  getStaticTestData: 0
+  printTestDataStruct: 0
+  jointRadius: 0.08
+--- !u!4 &692660827
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 692660825}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1196937148
 PrefabInstance:
@@ -595,6 +774,8 @@ MonoBehaviour:
     actionPath: /actions/default/in/SkeletonLeftHand
     needsReinit: 0
   convertTestData: 0
+  getStaticTestData: 0
+  printTestDataStruct: 0
   jointRadius: 0.08
 --- !u!4 &1635876320
 Transform:
