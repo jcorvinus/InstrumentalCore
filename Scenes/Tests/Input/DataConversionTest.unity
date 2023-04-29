@@ -134,6 +134,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: '[SteamVR]'
       objectReference: {fileID: 0}
+    - target: {fileID: 132594, guid: 4f35fa249b5008c44ac2998be6f82d4d, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 458990, guid: 4f35fa249b5008c44ac2998be6f82d4d, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -342,6 +346,7 @@ MonoBehaviour:
   getStaticTestData: 0
   printTestDataStruct: 0
   jointRadius: 0.08
+  doSetDetails: 0
 --- !u!4 &478980073
 Transform:
   m_ObjectHideFlags: 0
@@ -519,6 +524,7 @@ MonoBehaviour:
   getStaticTestData: 0
   printTestDataStruct: 0
   jointRadius: 0.08
+  doSetDetails: 0
 --- !u!4 &692660827
 Transform:
   m_ObjectHideFlags: 0
@@ -544,6 +550,10 @@ PrefabInstance:
     - target: {fileID: 1000010304998954, guid: 6def53d002137b747aec0b29551e0e25, type: 3}
       propertyPath: m_Name
       value: vr_glove_right_model_slim
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000010304998954, guid: 6def53d002137b747aec0b29551e0e25, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1000012632842626, guid: 6def53d002137b747aec0b29551e0e25, type: 3}
       propertyPath: m_IsActive
@@ -643,7 +653,15 @@ PrefabInstance:
       propertyPath: m_Name
       value: vr_glove_left_model_slim
       objectReference: {fileID: 0}
+    - target: {fileID: 1000013348574242, guid: 638779290bce1af49b356f33dcc6fccf, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1000013407791194, guid: 638779290bce1af49b356f33dcc6fccf, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000014056406610, guid: 638779290bce1af49b356f33dcc6fccf, type: 3}
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
@@ -875,6 +893,7 @@ MonoBehaviour:
   getStaticTestData: 0
   printTestDataStruct: 0
   jointRadius: 0.08
+  doSetDetails: 0
 --- !u!4 &1635876320
 Transform:
   m_ObjectHideFlags: 0
