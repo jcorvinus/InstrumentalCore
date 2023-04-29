@@ -33,7 +33,7 @@ namespace Instrumental.Interaction.Input
 		// Start is called before the first frame update
 		void Start()
         {
-
+			InitializeData();
 		}
 
         // Update is called once per frame
@@ -42,18 +42,7 @@ namespace Instrumental.Interaction.Input
 			ConvertData(skeleton.bonePositions, skeleton.boneRotations);
 		}
 
-		/// <summary>
-		///  ok so I think using this rigid transform array will cause a bit of a problem.
-		///  It only works in a special context - that being getting the reference transforms.
-		///  I can probably get the data in a different format from SteamVR_ActionSkeleton,
-		///  by using the bone positions and bone rotations as they are stored. I don't want to have
-		///  to convert these to RigidTransform though, since that would incur overhead.
-		///  
-		/// It does look like some data filtering is going on in SteamVR_Skeleton_Source though, flipping and rotating
-		/// and whatnot, and I'd like to get rid of those.
-		/// </summary>
-		/// <param name="referenceData"></param>
-        void ConvertData(Vector3[] bonePositions, Quaternion[] boneRotations)
+		private void InitializeData()
 		{
 			Data = new HandData()
 			{
@@ -69,7 +58,167 @@ namespace Instrumental.Interaction.Input
 				PalmPose = new Pose(Vector3.zero, Quaternion.identity)
 			};
 
+			// wrist joint 
+			Data.WristPose = new Pose(Vector3.zero, Quaternion.identity);
 
+			#region Thumb Joints
+			Data.ThumbJoints[0] = new Joint()
+			{
+				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Radius = jointRadius,
+				Type = JointType.Metacarpal
+			};
+
+			Data.ThumbJoints[1] = new Joint()
+			{
+				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Radius = jointRadius,
+				Type = JointType.Proximal
+			};
+
+			Data.ThumbJoints[2] = new Joint()
+			{
+				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Radius = jointRadius,
+				Type = JointType.Medial
+			};
+
+			Data.ThumbJoints[3] = new Joint()
+			{
+				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Radius = jointRadius,
+				Type = JointType.Distal
+			};
+			#endregion
+
+			#region Index Joints
+			Data.IndexJoints[0] = new Joint()
+			{
+				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Radius = jointRadius,
+				Type = JointType.Metacarpal
+			};
+
+			Data.IndexJoints[1] = new Joint()
+			{
+				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Radius = jointRadius,
+				Type = JointType.Proximal
+			};
+
+			Data.IndexJoints[2] = new Joint()
+			{
+				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Radius = jointRadius,
+				Type = JointType.Medial
+			};
+
+			Data.MiddleJoints[3] = new Joint()
+			{
+				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Radius = jointRadius,
+				Type = JointType.Distal
+			};
+			#endregion
+
+			#region MiddleJoints
+			Data.MiddleJoints[0] = new Joint()
+			{
+				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Radius = jointRadius,
+				Type = JointType.Metacarpal
+			};
+			Data.MiddleJoints[1] = new Joint()
+			{
+				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Radius = jointRadius,
+				Type = JointType.Proximal
+			};
+			Data.MiddleJoints[2] = new Joint()
+			{
+				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Radius = jointRadius,
+				Type = JointType.Medial
+			};
+			Data.MiddleJoints[3] = new Joint()
+			{
+				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Radius = jointRadius,
+				Type = JointType.Distal
+			};
+			#endregion
+
+			#region Ring Joints
+			Data.RingJoints[0] = new Joint()
+			{
+				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Radius = jointRadius,
+				Type = JointType.Metacarpal
+			};
+			Data.RingJoints[1] = new Joint()
+			{
+				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Radius = jointRadius,
+				Type = JointType.Proximal
+			};
+			Data.RingJoints[2] = new Joint()
+			{
+				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Radius = jointRadius,
+				Type = JointType.Medial
+			};
+			Data.RingJoints[3] = new Joint()
+			{
+				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Radius = jointRadius,
+				Type = JointType.Distal
+			};
+			#endregion
+
+			#region Pinky Joints
+			Data.PinkyJoints[0] = new Joint()
+			{
+				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Radius = jointRadius,
+				Type = JointType.Metacarpal
+			};
+
+			Data.PinkyJoints[1] = new Joint()
+			{
+				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Radius = jointRadius,
+				Type = JointType.Proximal
+			};
+
+			Data.PinkyJoints[2] = new Joint()
+			{
+				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Radius = jointRadius,
+				Type = JointType.Medial
+			};
+
+			Data.PinkyJoints[3] = new Joint()
+			{
+				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Radius = jointRadius,
+				Type = JointType.Distal
+			};
+			#endregion
+		}
+
+		/// <summary>
+		///  ok so I think using this rigid transform array will cause a bit of a problem.
+		///  It only works in a special context - that being getting the reference transforms.
+		///  I can probably get the data in a different format from SteamVR_ActionSkeleton,
+		///  by using the bone positions and bone rotations as they are stored. I don't want to have
+		///  to convert these to RigidTransform though, since that would incur overhead.
+		///  
+		/// It does look like some data filtering is going on in SteamVR_Skeleton_Source though, flipping and rotating
+		/// and whatnot, and I'd like to get rid of those.
+		/// </summary>
+		/// <param name="referenceData"></param>
+		void ConvertData(Vector3[] bonePositions, Quaternion[] boneRotations)
+		{
 			// turn the rigid transforms into poses (GetReferenceTransforms already fixes them for us!)
 			for (int i=0; i < bonePositions.Length; i++)
 			{
@@ -104,43 +253,27 @@ namespace Instrumental.Interaction.Input
 					case SteamVR_Skeleton_JointIndexEnum.root:
 						break;
 					case SteamVR_Skeleton_JointIndexEnum.wrist:
-						Data.WristPose = new Pose(bonePosition,
-							rotation);
+						Data.WristPose.position = bonePosition;
+						Data.WristPose.rotation = rotation;
 
 						break;
 					//case SteamVR_Skeleton_JointIndexEnum.thumbMetacarpal:
 					//	break;
 					case SteamVR_Skeleton_JointIndexEnum.thumbProximal: // also thumb metacarpal
-						Data.ThumbJoints[0] = new Joint()
-						{
-							Pose = new Pose(bonePosition, rotation),
-							Radius = jointRadius,
-							Type = JointType.Metacarpal
-						};
+						Data.ThumbJoints[0].Pose.position = bonePosition;
+						Data.ThumbJoints[0].Pose.rotation = rotation;
 
-						Data.ThumbJoints[1] = new Joint()
-						{
-							Pose = new Pose(bonePosition, rotation),
-							Radius = jointRadius,
-							Type = JointType.Proximal
-						};
+						Data.ThumbJoints[1].Pose.position = bonePosition;
+						Data.ThumbJoints[1].Pose.rotation = rotation;
 						break;
 					case SteamVR_Skeleton_JointIndexEnum.thumbMiddle:
-						Data.ThumbJoints[2] = new Joint()
-						{
-							Pose = new Pose(bonePosition, rotation),
-							Radius = jointRadius,
-							Type = JointType.Medial
-						};
+						Data.ThumbJoints[2].Pose.position = bonePosition;
+						Data.ThumbJoints[2].Pose.rotation = rotation;
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.thumbDistal:
-						Data.ThumbJoints[3] = new Joint()
-						{
-							Pose = new Pose(bonePosition, rotation),
-							Radius = jointRadius,
-							Type = JointType.Distal
-						};
+						Data.ThumbJoints[3].Pose.position = bonePosition;
+						Data.ThumbJoints[3].Pose.rotation = rotation;
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.thumbTip:
@@ -148,39 +281,23 @@ namespace Instrumental.Interaction.Input
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.indexMetacarpal:
-						Data.IndexJoints[0] = new Joint()
-						{
-							Pose = new Pose(bonePosition, rotation),
-							Radius = jointRadius,
-							Type = JointType.Metacarpal
-						};
+						Data.IndexJoints[0].Pose.position = bonePosition;
+						Data.IndexJoints[0].Pose.rotation = rotation;
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.indexProximal:
-						Data.IndexJoints[1] = new Joint()
-						{
-							Pose = new Pose(bonePosition, rotation),
-							Radius = jointRadius,
-							Type = JointType.Proximal
-						};
+						Data.IndexJoints[1].Pose.position = bonePosition;
+						Data.IndexJoints[1].Pose.rotation = rotation;
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.indexMiddle:
-						Data.IndexJoints[2] = new Joint()
-						{
-							Pose = new Pose(bonePosition, rotation),
-							Radius = jointRadius,
-							Type = JointType.Medial
-						};
+						Data.IndexJoints[2].Pose.position = bonePosition;
+						Data.IndexJoints[2].Pose.rotation = boneRotation;
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.indexDistal:
-						Data.IndexJoints[3] = new Joint()
-						{
-							Pose = new Pose(bonePosition, rotation),
-							Radius = jointRadius,
-							Type = JointType.Distal
-						};
+						Data.IndexJoints[3].Pose.position = bonePosition;
+						Data.IndexJoints[3].Pose.rotation = rotation;
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.indexTip:
@@ -188,39 +305,23 @@ namespace Instrumental.Interaction.Input
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.middleMetacarpal:
-						Data.MiddleJoints[0] = new Joint()
-						{
-							Pose = new Pose(bonePosition, rotation),
-							Radius = jointRadius,
-							Type = JointType.Metacarpal
-						};
+						Data.MiddleJoints[0].Pose.position = bonePosition;
+						Data.MiddleJoints[0].Pose.rotation = rotation;
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.middleProximal:
-						Data.MiddleJoints[1] = new Joint()
-						{
-							Pose = new Pose(bonePosition, rotation),
-							Radius = jointRadius,
-							Type = JointType.Proximal
-						};
+						Data.MiddleJoints[1].Pose.position = bonePosition;
+						Data.MiddleJoints[1].Pose.rotation = rotation;
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.middleMiddle:
-						Data.MiddleJoints[2] = new Joint()
-						{
-							Pose = new Pose(bonePosition, rotation),
-							Radius = jointRadius,
-							Type = JointType.Medial
-						};
+						Data.MiddleJoints[2].Pose.position = bonePosition;
+						Data.MiddleJoints[2].Pose.rotation = rotation;
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.middleDistal:
-						Data.MiddleJoints[3] = new Joint()
-						{
-							Pose = new Pose(bonePosition, rotation),
-							Radius = jointRadius,
-							Type = JointType.Distal
-						};
+						Data.MiddleJoints[3].Pose.position = bonePosition;
+						Data.MiddleJoints[3].Pose.rotation = rotation;
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.middleTip:
@@ -228,37 +329,21 @@ namespace Instrumental.Interaction.Input
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.ringMetacarpal:
-						Data.RingJoints[0] = new Joint()
-						{
-							Pose = new Pose(bonePosition, rotation),
-							Radius = jointRadius,
-							Type = JointType.Metacarpal
-						};
+						Data.RingJoints[0].Pose.position = bonePosition;
+						Data.RingJoints[0].Pose.rotation = rotation;
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.ringProximal:
-						Data.RingJoints[1] = new Joint()
-						{
-							Pose = new Pose(bonePosition, rotation),
-							Radius = jointRadius,
-							Type = JointType.Proximal
-						};
+						Data.RingJoints[1].Pose.position = bonePosition;
+						Data.RingJoints[1].Pose.rotation = rotation;
 						break;
 					case SteamVR_Skeleton_JointIndexEnum.ringMiddle:
-						Data.RingJoints[2] = new Joint()
-						{
-							Pose = new Pose(bonePosition, rotation),
-							Radius = jointRadius,
-							Type = JointType.Medial
-						};
+						Data.RingJoints[2].Pose.position = bonePosition;
+						Data.RingJoints[2].Pose.rotation = rotation;
 						break;
 					case SteamVR_Skeleton_JointIndexEnum.ringDistal:
-						Data.RingJoints[3] = new Joint()
-						{
-							Pose = new Pose(bonePosition, rotation),
-							Radius = jointRadius,
-							Type = JointType.Distal
-						};
+						Data.RingJoints[3].Pose.position = bonePosition;
+						Data.RingJoints[3].Pose.rotation = rotation;
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.ringTip:
@@ -266,39 +351,23 @@ namespace Instrumental.Interaction.Input
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.pinkyMetacarpal:
-						Data.PinkyJoints[0] = new Joint()
-						{
-							Pose = new Pose(bonePosition, rotation),
-							Radius = jointRadius,
-							Type = JointType.Metacarpal
-						};
+						Data.PinkyJoints[0].Pose.position = bonePosition;
+						Data.PinkyJoints[0].Pose.rotation = rotation;
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.pinkyProximal:
-						Data.PinkyJoints[1] = new Joint()
-						{
-							Pose = new Pose(bonePosition, rotation),
-							Radius = jointRadius,
-							Type = JointType.Proximal
-						};
+						Data.PinkyJoints[1].Pose.position = bonePosition;
+						Data.PinkyJoints[1].Pose.rotation = rotation;
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.pinkyMiddle:
-						Data.PinkyJoints[2] = new Joint()
-						{
-							Pose = new Pose(bonePosition, rotation),
-							Radius = jointRadius,
-							Type = JointType.Medial
-						};
+						Data.PinkyJoints[2].Pose.position = bonePosition;
+						Data.PinkyJoints[2].Pose.rotation = rotation;
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.pinkyDistal:
-						Data.PinkyJoints[3] = new Joint()
-						{
-							Pose = new Pose(bonePosition, rotation),
-							Radius = jointRadius,
-							Type = JointType.Distal
-						};
+						Data.PinkyJoints[3].Pose.position = bonePosition;
+						Data.PinkyJoints[3].Pose.rotation = rotation;
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.pinkyTip:
@@ -336,6 +405,7 @@ namespace Instrumental.Interaction.Input
 				boneRotations[i] = referenceData[i].rot;
 			}
 
+			InitializeData();
 			ConvertData(bonePositions, boneRotations);
 		}
 
