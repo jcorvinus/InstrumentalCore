@@ -90,7 +90,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Data:
-    Handedness: 2
+    Handedness: 1
     ThumbJoints:
     - Type: 0
       Pose:
@@ -214,7 +214,7 @@ MonoBehaviour:
     PalmPose:
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
-  isLeft: 0
+  isLeft: 1
   skeleton:
     actionPath: /actions/default/in/SkeletonLeftHand
     needsReinit: 0

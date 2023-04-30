@@ -17,6 +17,9 @@ namespace Instrumental.Interaction.Input
 		[SerializeField] EVRSkeletalReferencePose testDataPose = EVRSkeletalReferencePose.BindPose;
 		[SerializeField] bool printTestDataStruct;
 		[SerializeField] bool doUpdate;
+		[SerializeField] bool drawBones;
+		[SerializeField] bool drawBoneBasis;
+		[SerializeField] bool drawPalmPose;
 
 		[Range(0, 0.1f)]
 		[SerializeField] float jointRadius = 0.08f;
@@ -26,8 +29,8 @@ namespace Instrumental.Interaction.Input
 		const float palmUpOffset = 0.06f;
 		const float palmRightOffset = 0.0074f;
 
-		Vector3 skeletonPosition;
-		Quaternion skeletonRotation;
+		Vector3 skeletonPosition = Vector3.zero;
+		Quaternion skeletonRotation= Quaternion.identity;
 
 		private void Awake()
 		{
@@ -232,9 +235,10 @@ namespace Instrumental.Interaction.Input
 		/// <param name="referenceData"></param>
 		void ConvertData(Vector3[] bonePositions, Quaternion[] boneRotations)
 		{
+			Matrix4x4 skeletonMatrix = Matrix4x4.identity;
 			Quaternion rootOffset = Quaternion.AngleAxis(180, Vector3.forward);
 			Quaternion rootOffset2 = Quaternion.AngleAxis(180, Vector3.right);
-			Matrix4x4 skeletonMatrix = Matrix4x4.TRS(skeletonPosition, skeletonRotation *
+			skeletonMatrix = Matrix4x4.TRS(skeletonPosition, skeletonRotation.normalized *
 				(rootOffset * rootOffset2), Vector3.one);
 
 			for (int i=0; i < bonePositions.Length; i++)
@@ -288,11 +292,14 @@ namespace Instrumental.Interaction.Input
 						Data.WristPose.position = combined.GetPosition();
 						Data.WristPose.rotation = combined.GetRotation();
 
-						Vector3 palmOffset = (Vector3.forward * -palmForwardOffset) +
-							(Vector3.up * palmUpOffset) + (Vector3.right * palmRightOffset);
-						palmOffset = combined.GetRotation() * palmOffset;
+						Quaternion combinedRotation = combined.GetRotation();
+
+						Vector3 palmOffset = (Vector3.right * palmRightOffset) +
+							(Vector3.up * -palmForwardOffset) + (Vector3.forward * palmUpOffset);
+						palmOffset = combinedRotation * palmOffset;
 						Data.PalmPose = new Pose(combined.GetPosition() + palmOffset,
-							Quaternion.Inverse(combined.GetRotation()));
+							Quaternion.LookRotation(combinedRotation * Vector3.up * -1,
+							combinedRotation * Vector3.forward));
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.thumbProximal: // also thumb metacarpal
@@ -487,42 +494,53 @@ namespace Instrumental.Interaction.Input
 				Debug.Log(Data.PrintInitCode());
 			}
 
-			DrawBasis(new Pose(skeletonPosition, skeletonRotation));
-
-			// draw the hand
-			for (int fingerIndx=0; fingerIndx < 5; fingerIndx++)
+			if(drawPalmPose)
 			{
-                Finger finger = (Finger)fingerIndx;
+				DrawBasis(Data.PalmPose);
+			}
 
-				Joint[] joints = Data.GetJointForFinger(finger);
-
-				if (joints.Length == 0) continue;
-
-                // draw our joints
-                for(int jointIndx=0; jointIndx < 5; jointIndx++)
+			if (drawBones)
+			{
+				if (drawBoneBasis)
 				{
-                    Vector3 start, end;
-					if(jointIndx == 0)
-					{
-						start = Data.WristPose.position;
-						end = joints[jointIndx].Pose.position;
-						DrawBasis(Data.WristPose);
-					}
-					else if (jointIndx == 4)
-					{
-						start = joints[jointIndx - 1].Pose.position;
-						DrawBasis(joints[jointIndx - 1]);
-						end = Data.GetFingertip(finger);
-					}
-					else
-					{
-						start = joints[jointIndx - 1].Pose.position;
-						end = joints[jointIndx].Pose.position;
-						DrawBasis(joints[jointIndx - 1]);
-					}
+					DrawBasis(new Pose(skeletonPosition, skeletonRotation));
+				}
 
-					Gizmos.color = Color.white;
-					Gizmos.DrawLine(start, end);
+				// draw the hand
+				for (int fingerIndx = 0; fingerIndx < 5; fingerIndx++)
+				{
+					Finger finger = (Finger)fingerIndx;
+
+					Joint[] joints = Data.GetJointForFinger(finger);
+
+					if (joints.Length == 0) continue;
+
+					// draw our joints
+					for (int jointIndx = 0; jointIndx < 5; jointIndx++)
+					{
+						Vector3 start, end;
+						if (jointIndx == 0)
+						{
+							start = Data.WristPose.position;
+							end = joints[jointIndx].Pose.position;
+							if (drawBoneBasis) DrawBasis(Data.WristPose);
+						}
+						else if (jointIndx == 4)
+						{
+							start = joints[jointIndx - 1].Pose.position;
+							if (drawBoneBasis) DrawBasis(joints[jointIndx - 1]);
+							end = Data.GetFingertip(finger);
+						}
+						else
+						{
+							start = joints[jointIndx - 1].Pose.position;
+							end = joints[jointIndx].Pose.position;
+							if (drawBoneBasis) DrawBasis(joints[jointIndx - 1]);
+						}
+
+						Gizmos.color = Color.white;
+						Gizmos.DrawLine(start, end);
+					}
 				}
 			}
 		}

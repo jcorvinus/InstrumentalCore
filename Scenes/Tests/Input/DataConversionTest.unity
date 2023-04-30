@@ -156,8 +156,8 @@ Transform:
   - {fileID: 324353548}
   - {fileID: 4000014365389914}
   - {fileID: 4000011890723929}
-  - {fileID: 7237645616191103976}
   - {fileID: 3304067593381262724}
+  - {fileID: 7237645616191103976}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -988,7 +988,7 @@ PrefabInstance:
     - target: {fileID: 268414743116295093, guid: bb5625f7e9d32394989ebbab1add136e,
         type: 3}
       propertyPath: m_RootOrder
-      value: 5
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 268414743116295093, guid: bb5625f7e9d32394989ebbab1add136e,
         type: 3}
@@ -1040,6 +1040,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4070567997938538206, guid: bb5625f7e9d32394989ebbab1add136e,
+        type: 3}
+      propertyPath: dataContainer
+      value: 
+      objectReference: {fileID: 478980072}
     - target: {fileID: 8460014560929582876, guid: bb5625f7e9d32394989ebbab1add136e,
         type: 3}
       propertyPath: origin
@@ -1059,6 +1064,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: CapsuleHandLeft
       objectReference: {fileID: 0}
+    - target: {fileID: 2073197052190370313, guid: 6aa48b402e391f34ebdc86014ab5da86,
+        type: 3}
+      propertyPath: dataContainer
+      value: 
+      objectReference: {fileID: 1635876319}
     - target: {fileID: 4133397685321217903, guid: 6aa48b402e391f34ebdc86014ab5da86,
         type: 3}
       propertyPath: origin
@@ -1067,7 +1077,7 @@ PrefabInstance:
     - target: {fileID: 6794118101628802934, guid: 6aa48b402e391f34ebdc86014ab5da86,
         type: 3}
       propertyPath: m_RootOrder
-      value: 6
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 6794118101628802934, guid: 6aa48b402e391f34ebdc86014ab5da86,
         type: 3}
