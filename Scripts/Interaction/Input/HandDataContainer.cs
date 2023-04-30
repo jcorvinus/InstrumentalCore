@@ -227,6 +227,11 @@ namespace Instrumental.Interaction.Input
 		/// <param name="referenceData"></param>
 		void ConvertData(Vector3[] bonePositions, Quaternion[] boneRotations)
 		{
+			Quaternion rootOffset = Quaternion.AngleAxis(180, Vector3.forward);
+			Quaternion rootOffset2 = Quaternion.AngleAxis(180, Vector3.right);
+			Matrix4x4 skeletonMatrix = Matrix4x4.TRS(skeletonPosition, skeletonRotation *
+				(rootOffset * rootOffset2), Vector3.one);
+
 			for (int i=0; i < bonePositions.Length; i++)
 			{
                 SteamVR_Skeleton_JointIndexEnum jointIndexEnum = (SteamVR_Skeleton_JointIndexEnum)i;
@@ -250,6 +255,8 @@ namespace Instrumental.Interaction.Input
 				}
 
 				Quaternion rotation = Quaternion.LookRotation(forward, up);
+				Matrix4x4 boneMatrix = Matrix4x4.TRS(bonePosition, rotation, Vector3.one);
+				Matrix4x4 combined = skeletonMatrix * boneMatrix;
 
 				// note that on the right hand from steamVR, x is forward, and y is up
 				// on the left hand, this is flipped.
@@ -270,126 +277,126 @@ namespace Instrumental.Interaction.Input
 						}
 
 						rotation = Quaternion.LookRotation(forward, up);
+						boneMatrix = Matrix4x4.TRS(bonePosition, rotation, Vector3.one);
+						combined = skeletonMatrix * boneMatrix;
 
-						Data.WristPose.position = bonePosition;
-						Data.WristPose.rotation = rotation;
-
+						Data.WristPose.position = combined.GetPosition();
+						Data.WristPose.rotation = combined.GetRotation();
 						break;
-					//case SteamVR_Skeleton_JointIndexEnum.thumbMetacarpal:
-					//	break;
-					case SteamVR_Skeleton_JointIndexEnum.thumbProximal: // also thumb metacarpal
-						Data.ThumbJoints[0].Pose.position = bonePosition;
-						Data.ThumbJoints[0].Pose.rotation = rotation;
 
-						Data.ThumbJoints[1].Pose.position = bonePosition;
-						Data.ThumbJoints[1].Pose.rotation = rotation;
+					case SteamVR_Skeleton_JointIndexEnum.thumbProximal: // also thumb metacarpal
+						Data.ThumbJoints[0].Pose.position = combined.GetPosition(); //bonePosition;
+						Data.ThumbJoints[0].Pose.rotation = combined.GetRotation(); //rotation;
+
+						Data.ThumbJoints[1].Pose.position = combined.GetPosition(); //bonePosition;
+						Data.ThumbJoints[1].Pose.rotation = combined.GetRotation(); // rotation;
 						break;
 					case SteamVR_Skeleton_JointIndexEnum.thumbMiddle:
-						Data.ThumbJoints[2].Pose.position = bonePosition;
-						Data.ThumbJoints[2].Pose.rotation = rotation;
+						Data.ThumbJoints[2].Pose.position = combined.GetPosition(); //bonePosition;
+						Data.ThumbJoints[2].Pose.rotation = combined.GetRotation();//rotation;
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.thumbDistal:
-						Data.ThumbJoints[3].Pose.position = bonePosition;
-						Data.ThumbJoints[3].Pose.rotation = rotation;
+						Data.ThumbJoints[3].Pose.position = combined.GetPosition();
+						Data.ThumbJoints[3].Pose.rotation = combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.thumbTip:
-						Data.ThumbTip = bonePosition;
+						Data.ThumbTip = combined.GetPosition();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.indexMetacarpal:
-						Data.IndexJoints[0].Pose.position = bonePosition;
-						Data.IndexJoints[0].Pose.rotation = rotation;
+						Data.IndexJoints[0].Pose.position = combined.GetPosition();
+						Data.IndexJoints[0].Pose.rotation = combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.indexProximal:
-						Data.IndexJoints[1].Pose.position = bonePosition;
-						Data.IndexJoints[1].Pose.rotation = rotation;
+						Data.IndexJoints[1].Pose.position = combined.GetPosition();
+						Data.IndexJoints[1].Pose.rotation = combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.indexMiddle:
-						Data.IndexJoints[2].Pose.position = bonePosition;
-						Data.IndexJoints[2].Pose.rotation = rotation;
+						Data.IndexJoints[2].Pose.position = combined.GetPosition();
+						Data.IndexJoints[2].Pose.rotation = combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.indexDistal:
-						Data.IndexJoints[3].Pose.position = bonePosition;
-						Data.IndexJoints[3].Pose.rotation = rotation;
+						Data.IndexJoints[3].Pose.position = combined.GetPosition();
+						Data.IndexJoints[3].Pose.rotation = combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.indexTip:
-						Data.IndexTip = bonePosition;
+						Data.IndexTip = combined.GetPosition();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.middleMetacarpal:
-						Data.MiddleJoints[0].Pose.position = bonePosition;
-						Data.MiddleJoints[0].Pose.rotation = rotation;
+						Data.MiddleJoints[0].Pose.position = combined.GetPosition();
+						Data.MiddleJoints[0].Pose.rotation = combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.middleProximal:
-						Data.MiddleJoints[1].Pose.position = bonePosition;
-						Data.MiddleJoints[1].Pose.rotation = rotation;
+						Data.MiddleJoints[1].Pose.position = combined.GetPosition();
+						Data.MiddleJoints[1].Pose.rotation = combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.middleMiddle:
-						Data.MiddleJoints[2].Pose.position = bonePosition;
-						Data.MiddleJoints[2].Pose.rotation = rotation;
+						Data.MiddleJoints[2].Pose.position = combined.GetPosition();
+						Data.MiddleJoints[2].Pose.rotation = combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.middleDistal:
-						Data.MiddleJoints[3].Pose.position = bonePosition;
-						Data.MiddleJoints[3].Pose.rotation = rotation;
+						Data.MiddleJoints[3].Pose.position = combined.GetPosition();
+						Data.MiddleJoints[3].Pose.rotation = combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.middleTip:
-						Data.MiddleTip = bonePosition;
+						Data.MiddleTip = combined.GetPosition();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.ringMetacarpal:
-						Data.RingJoints[0].Pose.position = bonePosition;
-						Data.RingJoints[0].Pose.rotation = rotation;
+						Data.RingJoints[0].Pose.position = combined.GetPosition();
+						Data.RingJoints[0].Pose.rotation = combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.ringProximal:
-						Data.RingJoints[1].Pose.position = bonePosition;
-						Data.RingJoints[1].Pose.rotation = rotation;
+						Data.RingJoints[1].Pose.position = combined.GetPosition();
+						Data.RingJoints[1].Pose.rotation = combined.GetRotation();
 						break;
 					case SteamVR_Skeleton_JointIndexEnum.ringMiddle:
-						Data.RingJoints[2].Pose.position = bonePosition;
-						Data.RingJoints[2].Pose.rotation = rotation;
+						Data.RingJoints[2].Pose.position = combined.GetPosition();
+						Data.RingJoints[2].Pose.rotation = combined.GetRotation();
 						break;
 					case SteamVR_Skeleton_JointIndexEnum.ringDistal:
-						Data.RingJoints[3].Pose.position = bonePosition;
-						Data.RingJoints[3].Pose.rotation = rotation;
+						Data.RingJoints[3].Pose.position = combined.GetPosition();
+						Data.RingJoints[3].Pose.rotation = combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.ringTip:
-						Data.RingTip = bonePosition;
+						Data.RingTip = combined.GetPosition();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.pinkyMetacarpal:
-						Data.PinkyJoints[0].Pose.position = bonePosition;
-						Data.PinkyJoints[0].Pose.rotation = rotation;
+						Data.PinkyJoints[0].Pose.position = combined.GetPosition();
+						Data.PinkyJoints[0].Pose.rotation = combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.pinkyProximal:
-						Data.PinkyJoints[1].Pose.position = bonePosition;
-						Data.PinkyJoints[1].Pose.rotation = rotation;
+						Data.PinkyJoints[1].Pose.position = combined.GetPosition();
+						Data.PinkyJoints[1].Pose.rotation = combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.pinkyMiddle:
-						Data.PinkyJoints[2].Pose.position = bonePosition;
-						Data.PinkyJoints[2].Pose.rotation = rotation;
+						Data.PinkyJoints[2].Pose.position = combined.GetPosition();
+						Data.PinkyJoints[2].Pose.rotation = combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.pinkyDistal:
-						Data.PinkyJoints[3].Pose.position = bonePosition;
-						Data.PinkyJoints[3].Pose.rotation = rotation;
+						Data.PinkyJoints[3].Pose.position = combined.GetPosition();
+						Data.PinkyJoints[3].Pose.rotation = combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.pinkyTip:
-						Data.PinkyTip = bonePosition;
+						Data.PinkyTip = combined.GetPosition();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.thumbAux: // these have already been filled
@@ -424,6 +431,8 @@ namespace Instrumental.Interaction.Input
 			}
 
 			InitializeData();
+			skeletonPosition = Vector3.zero;
+			skeletonRotation = Quaternion.identity;
 			ConvertData(bonePositions, boneRotations);
 		}
 

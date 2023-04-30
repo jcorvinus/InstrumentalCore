@@ -238,6 +238,7 @@ GameObject:
   - component: {fileID: 324353548}
   - component: {fileID: 324353550}
   - component: {fileID: 324353549}
+  - component: {fileID: 324353551}
   m_Layer: 0
   m_Name: Camera
   m_TagString: Untagged
@@ -311,6 +312,24 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+--- !u!114 &324353551
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 324353547}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a2a9c34df4095f47b9ca8f975175f5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Device: 0
+  m_PoseSource: 2
+  m_PoseProviderComponent: {fileID: 0}
+  m_TrackingType: 0
+  m_UpdateType: 0
+  m_UseRelativeTransform: 0
 --- !u!1 &478980071
 GameObject:
   m_ObjectHideFlags: 0
@@ -473,7 +492,7 @@ MonoBehaviour:
   getStaticTestData: 0
   testDataPose: 0
   printTestDataStruct: 0
-  doUpdate: 0
+  doUpdate: 1
   jointRadius: 0.08
 --- !u!4 &478980073
 Transform:
@@ -831,7 +850,7 @@ MonoBehaviour:
   getStaticTestData: 0
   testDataPose: 1
   printTestDataStruct: 0
-  doUpdate: 0
+  doUpdate: 1
   jointRadius: 0.08
 --- !u!4 &1635876320
 Transform:
@@ -3664,8 +3683,8 @@ MonoBehaviour:
   inputSource: 2
   rangeOfMotion: 1
   skeletonRoot: {fileID: 1043930558934814179}
-  origin: {fileID: 226886512}
-  updatePose: 1
+  origin: {fileID: 0}
+  updatePose: 0
   onlySetRotations: 0
   skeletonBlend: 1
   onBoneTransformsUpdated:
@@ -4530,8 +4549,8 @@ MonoBehaviour:
   inputSource: 1
   rangeOfMotion: 1
   skeletonRoot: {fileID: 6212107669086850025}
-  origin: {fileID: 226886512}
-  updatePose: 1
+  origin: {fileID: 0}
+  updatePose: 0
   onlySetRotations: 0
   skeletonBlend: 1
   onBoneTransformsUpdated:
