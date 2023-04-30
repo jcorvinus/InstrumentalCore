@@ -14,14 +14,15 @@ namespace Instrumental.Interaction.Input
         [SerializeField] SteamVR_Action_Skeleton skeleton;
         [SerializeField] bool convertTestData;
 		[SerializeField] bool getStaticTestData;
+		[SerializeField] EVRSkeletalReferencePose testDataPose = EVRSkeletalReferencePose.BindPose;
 		[SerializeField] bool printTestDataStruct;
+		[SerializeField] bool doUpdate;
 
 		[Range(0, 0.1f)]
 		[SerializeField] float jointRadius = 0.08f;
 
-		[SerializeField] bool doSetDetails;
-
-		SteamVR_Action_Source_Map sourceMap;
+		Vector3 skeletonPosition;
+		Quaternion skeletonRotation;
 
 		private void Awake()
 		{
@@ -39,7 +40,19 @@ namespace Instrumental.Interaction.Input
         // Update is called once per frame
         void Update()
         {
-			ConvertData(skeleton.bonePositions, skeleton.boneRotations);
+			if (doUpdate)
+			{
+				skeletonPosition = skeleton.GetLocalPosition();
+				skeletonRotation = skeleton.GetLocalRotation();
+
+				if (transform.parent)
+				{
+					skeletonPosition = transform.parent.TransformPoint(skeletonPosition);
+					skeletonRotation = transform.parent.rotation * skeletonRotation;
+				}
+
+				ConvertData(skeleton.bonePositions, skeleton.boneRotations);
+			}
 		}
 
 		private void InitializeData()
@@ -204,30 +217,22 @@ namespace Instrumental.Interaction.Input
 				Type = JointType.Distal
 			};
 			#endregion
+
+			skeletonPosition = Vector3.zero;
+			skeletonRotation = Quaternion.identity;
 		}
 
 		/// <summary>
-		///  ok so I think using this rigid transform array will cause a bit of a problem.
-		///  It only works in a special context - that being getting the reference transforms.
-		///  I can probably get the data in a different format from SteamVR_ActionSkeleton,
-		///  by using the bone positions and bone rotations as they are stored. I don't want to have
-		///  to convert these to RigidTransform though, since that would incur overhead.
-		///  
-		/// It does look like some data filtering is going on in SteamVR_Skeleton_Source though, flipping and rotating
-		/// and whatnot, and I'd like to get rid of those.
-		/// </summary>
+		/// Converts SteamVR tracking data to our internal data format.
 		/// <param name="referenceData"></param>
 		void ConvertData(Vector3[] bonePositions, Quaternion[] boneRotations)
 		{
-			// turn the rigid transforms into poses (GetReferenceTransforms already fixes them for us!)
 			for (int i=0; i < bonePositions.Length; i++)
 			{
                 SteamVR_Skeleton_JointIndexEnum jointIndexEnum = (SteamVR_Skeleton_JointIndexEnum)i;
-				//SteamVR_Utils.RigidTransform jointTransform = referenceData[(int)jointIndexEnum];
 
 				Vector3 bonePosition = bonePositions[i];
 				Quaternion boneRotation = boneRotations[i];
-
 
 				Vector3 up, forward; // for us, up is... well up, and forward goes distal
 				up = boneRotation * Vector3.up;
@@ -253,6 +258,19 @@ namespace Instrumental.Interaction.Input
 					case SteamVR_Skeleton_JointIndexEnum.root:
 						break;
 					case SteamVR_Skeleton_JointIndexEnum.wrist:
+						if(!isLeft)
+						{
+							up = boneRotation * Vector3.right;
+							forward = boneRotation * Vector3.forward;
+						}
+						else
+						{
+							up = boneRotation * -Vector3.right;
+							forward = boneRotation * Vector3.forward;
+						}
+
+						rotation = Quaternion.LookRotation(forward, up);
+
 						Data.WristPose.position = bonePosition;
 						Data.WristPose.rotation = rotation;
 
@@ -292,7 +310,7 @@ namespace Instrumental.Interaction.Input
 
 					case SteamVR_Skeleton_JointIndexEnum.indexMiddle:
 						Data.IndexJoints[2].Pose.position = bonePosition;
-						Data.IndexJoints[2].Pose.rotation = boneRotation;
+						Data.IndexJoints[2].Pose.rotation = rotation;
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.indexDistal:
@@ -394,7 +412,7 @@ namespace Instrumental.Interaction.Input
 		{
 			// convert data to bone arrays
 			SteamVR_Utils.RigidTransform[] referenceData = skeleton.GetReferenceTransforms(EVRSkeletalTransformSpace.Model,
-				EVRSkeletalReferencePose.BindPose);
+				testDataPose);
 
 			Vector3[] bonePositions = new Vector3[referenceData.Length];
 			Quaternion[] boneRotations = new Quaternion[referenceData.Length];
@@ -408,7 +426,6 @@ namespace Instrumental.Interaction.Input
 			InitializeData();
 			ConvertData(bonePositions, boneRotations);
 		}
-
 
 		void DrawBasis(Joint joint)
 		{
@@ -449,6 +466,8 @@ namespace Instrumental.Interaction.Input
 				printTestDataStruct = false;
 				Debug.Log(Data.PrintInitCode());
 			}
+
+			DrawBasis(new Pose(skeletonPosition, skeletonRotation));
 
 			// draw the hand
 			for (int fingerIndx=0; fingerIndx < 5; fingerIndx++)

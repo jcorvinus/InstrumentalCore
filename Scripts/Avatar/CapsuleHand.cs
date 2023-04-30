@@ -4,7 +4,7 @@ using UnityEngine;
 
 using Valve.VR;
 
-namespace Instrumental
+namespace Instrumental.Avatar
 {
     public class CapsuleHand : MonoBehaviour
     {

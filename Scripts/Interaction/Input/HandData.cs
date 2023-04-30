@@ -113,149 +113,149 @@ namespace Instrumental.Interaction.Input
 					{
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.01775401f, 0.02914611f, -0.02467261f), new Quaternion(0.06672087f, 0.9293011f, 0.3241491f, -0.1639366f)),
+							Pose = new Pose(new Vector3(0.0158929f, 0.03720177f, 0.1296259f), new Quaternion(0.1024715f, 0.9808373f, 0.1491119f, -0.07227269f)),
 							Radius = 0.08f,
 							Type = JointType.Metacarpal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.01775401f, 0.02914611f, -0.02467261f), new Quaternion(0.06672087f, 0.9293011f, 0.3241491f, -0.1639366f)),
+							Pose = new Pose(new Vector3(0.0158929f, 0.03720177f, 0.1296259f), new Quaternion(0.1024715f, 0.9808373f, 0.1491119f, -0.07227269f)),
 							Radius = 0.08f,
 							Type = JointType.Proximal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.0283177f, 0.05437329f, -0.05441574f), new Quaternion(0.0246618f, 0.9807455f, 0.08511616f, -0.1740267f)),
+							Pose = new Pose(new Vector3(0.01139905f, 0.04961932f, 0.09143889f), new Quaternion(0.01370804f, 0.991088f, 0.1022565f, -0.08426324f)),
 							Radius = 0.08f,
 							Type = JointType.Medial
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.03928087f, 0.06008123f, -0.08449184f), new Quaternion(-0.002529389f, 0.9819561f, -0.06622165f, -0.1771176f)),
+							Pose = new Pose(new Vector3(0.006059121f, 0.05628523f, 0.06006386f), new Quaternion(0.03301888f, 0.9415163f, 0.3197442f, -0.1010963f)),
 							Radius = 0.08f,
 							Type = JointType.Distal
 						}
 					},
-					ThumbTip = new Vector3(-0.04986737f, 0.05609199f, -0.1127773f),
+					ThumbTip = new Vector3(0.000902975f, 0.07483073f, 0.03645181f),
 					IndexJoints = new Joint[]
 					{
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.001397458f, 0.02104131f, -0.01416126f), new Quaternion(0.6379428f, 0.7570527f, 0.1409398f, -0.006025487f)),
+							Pose = new Pose(new Vector3(0.02901937f, 0.04476842f, 0.1355028f), new Quaternion(0.690018f, 0.6562133f, -0.1621175f, 0.2587995f)),
 							Radius = 0.08f,
 							Type = JointType.Metacarpal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.01119977f, 0.03735687f, -0.08502162f), new Quaternion(0.6229248f, 0.7689475f, -0.07991651f, -0.1195734f)),
+							Pose = new Pose(new Vector3(0.04255126f, 0.002261709f, 0.07599282f), new Quaternion(0.6986173f, 0.6336015f, -0.2478836f, 0.2214423f)),
 							Radius = 0.08f,
 							Type = JointType.Proximal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.001070035f, 0.03848523f, -0.1265175f), new Quaternion(0.5905683f, 0.740277f, -0.2174817f, -0.2364758f)),
+							Pose = new Pose(new Vector3(0.0396634f, -0.02512968f, 0.04176969f), new Quaternion(0.6584769f, 0.6761305f, -0.2268985f, 0.2403594f)),
 							Radius = 0.08f,
 							Type = JointType.Medial
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.01823283f, 0.03727835f, -0.1489556f), new Quaternion(0.570482f, 0.7217757f, -0.2741258f, -0.2800807f)),
-							Radius = 0.08f,
-							Type = JointType.Distal
+							Pose = new Pose(new Vector3(0.04041553f, -0.04301763f, 0.01934458f), new Quaternion(0.6486021f, 0.6746782f, -0.2331988f, 0.2640889f)),
+							Radius = 0f,
+							Type = JointType.Metacarpal
 						}
 					},
-					IndexTip = new Vector3(-0.03459767f, 0.03554043f, -0.1647668f),
+					IndexTip = new Vector3(0.04164416f, -0.05801683f, 0.002188532f),
 					MiddleJoints = new Joint[]
 					{
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.002337092f, 0.007087619f, -0.01569313f), new Quaternion(0.6739864f, 0.7316698f, 0.08038815f, 0.06276429f)),
+							Pose = new Pose(new Vector3(0.03416368f, 0.03017576f, 0.1479382f), new Quaternion(0.5705046f, 0.7381278f, -0.2350368f, 0.2728544f)),
 							Radius = 0.08f,
 							Type = JointType.Metacarpal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.01652884f, 0.009429009f, -0.08510402f), new Quaternion(0.6704485f, 0.7306091f, -0.0895475f, -0.09322274f)),
+							Pose = new Pose(new Vector3(0.04315938f, -0.01743053f, 0.09608619f), new Quaternion(0.6830919f, 0.5903111f, -0.2810158f, 0.3254972f)),
 							Radius = 0.08f,
 							Type = JointType.Proximal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.005480433f, 0.009176982f, -0.1267719f), new Quaternion(0.6470159f, 0.7078094f, -0.2058894f, -0.1948995f)),
+							Pose = new Pose(new Vector3(0.04317523f, -0.05090264f, 0.0689208f), new Quaternion(0.693973f, 0.5891962f, -0.312798f, 0.2709368f)),
 							Radius = 0.08f,
 							Type = JointType.Medial
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.0125607f, 0.007871132f, -0.1546903f), new Quaternion(0.6139116f, 0.6707433f, -0.3011712f, -0.287249f)),
+							Pose = new Pose(new Vector3(0.03935372f, -0.07567403f, 0.04704835f), new Quaternion(0.6673292f, 0.5984473f, -0.291596f, 0.3339227f)),
 							Radius = 0.08f,
 							Type = JointType.Distal
 						}
 					},
-					MiddleTip = new Vector3(-0.03211264f, 0.006542179f, -0.1716127f),
+					MiddleTip = new Vector3(0.03962541f, -0.09625024f, 0.03133338f),
 					RingJoints = new Joint[]
 					{
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.00067321f, -0.006577051f, -0.01572195f), new Quaternion(0.7157619f, 0.6929868f, 0.0149513f, 0.08503354f)),
+							Pose = new Pose(new Vector3(0.03507797f, 0.02042013f, 0.1576069f), new Quaternion(0.5727981f, 0.7043664f, -0.2818755f, 0.3103492f)),
 							Radius = 0.08f,
 							Type = JointType.Metacarpal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.009860715f, -0.01324088f, -0.08071335f), new Quaternion(0.7175256f, 0.6745214f, -0.1673809f, -0.04649288f)),
+							Pose = new Pose(new Vector3(0.04095789f, -0.02992787f, 0.1154904f), new Quaternion(0.6024527f, 0.6119634f, -0.3703441f, 0.3541141f)),
 							Radius = 0.08f,
 							Type = JointType.Proximal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.002356464f, -0.01965694f, -0.1186104f), new Quaternion(0.7053196f, 0.6458806f, -0.2543328f, -0.1437961f)),
+							Pose = new Pose(new Vector3(0.04043607f, -0.06573886f, 0.0961637f), new Quaternion(0.6142027f, 0.5991966f, -0.3877887f, 0.3366577f)),
 							Radius = 0.08f,
 							Type = JointType.Medial
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.01786924f, -0.02323778f, -0.1422354f), new Quaternion(0.6781461f, 0.6062587f, -0.3423913f, -0.235237f)),
+							Pose = new Pose(new Vector3(0.03834013f, -0.09098659f, 0.0825789f), new Quaternion(0.6227691f, 0.5782678f, -0.4192132f, 0.319414f)),
 							Radius = 0.08f,
 							Type = JointType.Distal
 						}
 					},
-					RingTip = new Vector3(-0.03468313f, -0.02539343f, -0.1569241f),
+					RingTip = new Vector3(0.03491442f, -0.1107853f, 0.07260934f),
 					PinkyJoints = new Joint[]
 					{
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.00231837f, -0.0190133f, -0.01458793f), new Quaternion(0.7783645f, 0.6095779f, -0.09139961f, 0.1192044f)),
+							Pose = new Pose(new Vector3(0.0345086f, 0.01220977f, 0.167464f), new Quaternion(0.6205293f, 0.6076928f, -0.2976757f, 0.3962854f)),
 							Radius = 0.08f,
 							Type = JointType.Metacarpal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.002127017f, -0.03768138f, -0.07460708f), new Quaternion(0.7866181f, 0.6019535f, -0.1365937f, 0.01504038f)),
+							Pose = new Pose(new Vector3(0.03872009f, -0.04178508f, 0.1353904f), new Quaternion(0.6356088f, 0.4884204f, -0.3959487f, 0.4479638f)),
 							Radius = 0.08f,
 							Type = JointType.Proximal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.008005896f, -0.04330099f, -0.1033531f), new Quaternion(0.7798259f, 0.5786312f, -0.2241698f, -0.08249448f)),
+							Pose = new Pose(new Vector3(0.03673316f, -0.07068235f, 0.1267747f), new Quaternion(0.6787023f, 0.4446436f, -0.4466219f, 0.3770732f)),
 							Radius = 0.08f,
 							Type = JointType.Medial
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.01600804f, -0.04565187f, -0.11928f), new Quaternion(0.7693536f, 0.5493547f, -0.2757933f, -0.1739037f)),
+							Pose = new Pose(new Vector3(0.031806f, -0.08721431f, 0.1210154f), new Quaternion(0.6258499f, 0.4546704f, -0.4466999f, 0.4494952f)),
 							Radius = 0.08f,
 							Type = JointType.Distal
 						}
 					},
-					PinkyTip = new Vector3(-0.0270969f, -0.04629024f, -0.1334672f),
+					PinkyTip = new Vector3(0.02909627f, -0.1046707f, 0.1174689f),
 					ForearmJoint = new Joint()
 					{
 						Pose = new Pose(new Vector3(0f, 0f, 0f), new Quaternion(0f, 0f, 0f, 0f)),
 						Radius = 0f,
 						Type = JointType.Metacarpal
 					},
-					WristPose = new Pose(new Vector3(0.0001597875f, -3.192438E-05f, 0.0006257091f), new Quaternion(0.7071068f, 0f, 0.7071068f, 8.659561E-17f)),
+					WristPose = new Pose(new Vector3(0.03403769f, 0.03650266f, 0.1647216f), new Quaternion(0.5951514f, 0.7063201f, -0.3071976f, 0.2292084f)),
 					PalmPose = new Pose(new Vector3(0f, 0f, 0f), new Quaternion(0f, 0f, 0f, 1f))
 				};
 			}
@@ -268,149 +268,149 @@ namespace Instrumental.Interaction.Input
 					{
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.017754f, 0.02914625f, -0.02467269f), new Quaternion(-0.06672087f, 0.9293011f, 0.3241491f, 0.1639366f)),
+							Pose = new Pose(new Vector3(-0.0158929f, 0.03720177f, 0.1296259f), new Quaternion(-0.1024715f, 0.9808373f, 0.149112f, 0.07227268f)),
 							Radius = 0.08f,
 							Type = JointType.Metacarpal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.017754f, 0.02914625f, -0.02467269f), new Quaternion(-0.06672087f, 0.9293011f, 0.3241491f, 0.1639366f)),
+							Pose = new Pose(new Vector3(-0.0158929f, 0.03720177f, 0.1296259f), new Quaternion(-0.1024715f, 0.9808373f, 0.149112f, 0.07227268f)),
 							Radius = 0.08f,
 							Type = JointType.Proximal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.0283177f, 0.05437328f, -0.05441571f), new Quaternion(-0.02466179f, 0.9807455f, 0.08511616f, 0.1740267f)),
+							Pose = new Pose(new Vector3(-0.01139906f, 0.04961932f, 0.09143889f), new Quaternion(-0.01370804f, 0.991088f, 0.1022566f, 0.08426323f)),
 							Radius = 0.08f,
 							Type = JointType.Medial
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.03928085f, 0.06008116f, -0.0844918f), new Quaternion(0.002529386f, 0.9819561f, -0.06622165f, 0.1771176f)),
+							Pose = new Pose(new Vector3(-0.006059127f, 0.05628524f, 0.06006386f), new Quaternion(-0.03301888f, 0.9415163f, 0.3197443f, 0.1010964f)),
 							Radius = 0.08f,
 							Type = JointType.Distal
 						}
 					},
-					ThumbTip = new Vector3(0.0498674f, 0.05609209f, -0.1127772f),
+					ThumbTip = new Vector3(-0.000902975f, 0.07483073f, 0.03645182f),
 					IndexJoints = new Joint[]
 					{
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.001397436f, 0.02104131f, -0.01416115f), new Quaternion(-0.6379428f, 0.7570527f, 0.1409398f, 0.006025487f)),
+							Pose = new Pose(new Vector3(-0.02901937f, 0.04476842f, 0.1355028f), new Quaternion(0.6900179f, -0.6562134f, 0.1621175f, 0.2587994f)),
 							Radius = 0.08f,
 							Type = JointType.Metacarpal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.0111998f, 0.0373568f, -0.08502159f), new Quaternion(-0.6229248f, 0.7689475f, -0.07991651f, 0.1195734f)),
+							Pose = new Pose(new Vector3(-0.04255127f, 0.002261713f, 0.07599282f), new Quaternion(0.6986173f, -0.6336015f, 0.2478837f, 0.2214422f)),
 							Radius = 0.08f,
 							Type = JointType.Proximal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.001070029f, 0.03848532f, -0.1265175f), new Quaternion(-0.5905684f, 0.7402769f, -0.2174817f, 0.2364759f)),
+							Pose = new Pose(new Vector3(-0.0396634f, -0.02512967f, 0.04176969f), new Quaternion(-0.658477f, 0.6761306f, -0.2268986f, -0.2403593f)),
 							Radius = 0.08f,
 							Type = JointType.Medial
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.01823281f, 0.03727832f, -0.1489557f), new Quaternion(-0.5704821f, 0.7217756f, -0.2741259f, 0.2800806f)),
-							Radius = 0.08f,
-							Type = JointType.Distal
+							Pose = new Pose(new Vector3(-0.04041553f, -0.04301761f, 0.01934458f), new Quaternion(-0.6486021f, 0.6746782f, -0.2331989f, -0.2640888f)),
+							Radius = 0f,
+							Type = JointType.Metacarpal
 						}
 					},
-					IndexTip = new Vector3(0.03459765f, 0.03554045f, -0.1647667f),
+					IndexTip = new Vector3(-0.04164416f, -0.05801681f, 0.00218853f),
 					MiddleJoints = new Joint[]
 					{
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.002337101f, 0.00708762f, -0.01569303f), new Quaternion(-0.6739864f, 0.7316698f, 0.08038815f, -0.06276429f)),
+							Pose = new Pose(new Vector3(-0.03416368f, 0.03017576f, 0.1479382f), new Quaternion(-0.5705047f, 0.7381278f, -0.2350368f, -0.2728544f)),
 							Radius = 0.08f,
 							Type = JointType.Metacarpal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.01652897f, 0.009429025f, -0.08510397f), new Quaternion(-0.6704485f, 0.7306091f, -0.0895475f, 0.09322272f)),
+							Pose = new Pose(new Vector3(-0.04315939f, -0.01743052f, 0.09608618f), new Quaternion(0.6830919f, -0.5903111f, 0.2810158f, 0.3254972f)),
 							Radius = 0.08f,
 							Type = JointType.Proximal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.005480452f, 0.009177009f, -0.1267718f), new Quaternion(-0.6470159f, 0.7078094f, -0.2058894f, 0.1948995f)),
+							Pose = new Pose(new Vector3(-0.04317524f, -0.05090264f, 0.06892078f), new Quaternion(0.6939729f, -0.5891963f, 0.312798f, 0.2709368f)),
 							Radius = 0.08f,
 							Type = JointType.Medial
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.01256069f, 0.007871144f, -0.1546902f), new Quaternion(-0.6139116f, 0.6707432f, -0.3011713f, 0.287249f)),
+							Pose = new Pose(new Vector3(-0.03935373f, -0.07567403f, 0.04704833f), new Quaternion(0.6673291f, -0.5984474f, 0.291596f, 0.3339227f)),
 							Radius = 0.08f,
 							Type = JointType.Distal
 						}
 					},
-					MiddleTip = new Vector3(0.03211262f, 0.00654219f, -0.1716127f),
+					MiddleTip = new Vector3(-0.03962542f, -0.09625024f, 0.03133336f),
 					RingJoints = new Joint[]
 					{
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.0006732229f, -0.006577047f, -0.01572198f), new Quaternion(0.7157619f, -0.6929868f, -0.01495129f, 0.08503353f)),
+							Pose = new Pose(new Vector3(-0.03507797f, 0.02042013f, 0.1576069f), new Quaternion(-0.5727981f, 0.7043664f, -0.2818755f, -0.3103492f)),
 							Radius = 0.08f,
 							Type = JointType.Metacarpal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(-0.009860706f, -0.01324086f, -0.08071329f), new Quaternion(0.7175256f, -0.6745214f, 0.1673809f, -0.04649286f)),
+							Pose = new Pose(new Vector3(-0.04095789f, -0.02992786f, 0.1154904f), new Quaternion(-0.6024528f, 0.6119634f, -0.3703442f, -0.3541141f)),
 							Radius = 0.08f,
 							Type = JointType.Proximal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.002356464f, -0.01965693f, -0.1186103f), new Quaternion(0.7053196f, -0.6458806f, 0.2543328f, -0.1437961f)),
+							Pose = new Pose(new Vector3(-0.04043606f, -0.06573886f, 0.0961637f), new Quaternion(0.6142027f, -0.5991967f, 0.3877887f, 0.3366576f)),
 							Radius = 0.08f,
 							Type = JointType.Medial
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.01786923f, -0.02323769f, -0.1422353f), new Quaternion(0.6781462f, -0.6062587f, 0.3423913f, -0.235237f)),
+							Pose = new Pose(new Vector3(-0.03834012f, -0.09098659f, 0.0825789f), new Quaternion(0.6227692f, -0.5782679f, 0.4192131f, 0.3194141f)),
 							Radius = 0.08f,
 							Type = JointType.Distal
 						}
 					},
-					RingTip = new Vector3(0.03468312f, -0.02539339f, -0.1569241f),
+					RingTip = new Vector3(-0.03491441f, -0.1107853f, 0.07260934f),
 					PinkyJoints = new Joint[]
 					{
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.002318364f, -0.01901329f, -0.01458787f), new Quaternion(0.7783645f, -0.6095778f, 0.0913996f, 0.1192044f)),
+							Pose = new Pose(new Vector3(-0.0345086f, 0.01220977f, 0.167464f), new Quaternion(0.6205293f, -0.6076928f, 0.2976756f, 0.3962854f)),
 							Radius = 0.08f,
 							Type = JointType.Metacarpal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.002126995f, -0.0376814f, -0.07460703f), new Quaternion(0.7866181f, -0.6019535f, 0.1365937f, 0.01504038f)),
+							Pose = new Pose(new Vector3(-0.03872009f, -0.04178508f, 0.1353904f), new Quaternion(0.6356087f, -0.4884205f, 0.3959487f, 0.4479638f)),
 							Radius = 0.08f,
 							Type = JointType.Proximal
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.008005876f, -0.0433009f, -0.103353f), new Quaternion(0.7798259f, -0.5786312f, 0.2241698f, -0.08249451f)),
+							Pose = new Pose(new Vector3(-0.03673317f, -0.07068235f, 0.1267747f), new Quaternion(0.6787022f, -0.4446437f, 0.4466219f, 0.3770732f)),
 							Radius = 0.08f,
 							Type = JointType.Medial
 						},
 						new Joint()
 						{
-							Pose = new Pose(new Vector3(0.01600803f, -0.04565193f, -0.1192801f), new Quaternion(0.7693536f, -0.5493547f, 0.2757933f, -0.1739037f)),
+							Pose = new Pose(new Vector3(-0.03180601f, -0.08721431f, 0.1210154f), new Quaternion(0.6258498f, -0.4546705f, 0.4466999f, 0.4494952f)),
 							Radius = 0.08f,
 							Type = JointType.Distal
 						}
 					},
-					PinkyTip = new Vector3(0.0270969f, -0.04629023f, -0.1334672f),
+					PinkyTip = new Vector3(-0.02909628f, -0.1046707f, 0.1174689f),
 					ForearmJoint = new Joint()
 					{
 						Pose = new Pose(new Vector3(0f, 0f, 0f), new Quaternion(0f, 0f, 0f, 0f)),
 						Radius = 0f,
 						Type = JointType.Metacarpal
 					},
-					WristPose = new Pose(new Vector3(-0.0001597873f, -3.19245E-05f, 0.0006257087f), new Quaternion(-8.659561E-17f, -0.7071068f, 0f, 0.7071068f)),
+					WristPose = new Pose(new Vector3(-0.03403769f, 0.03650266f, 0.1647216f), new Quaternion(-0.5951514f, 0.7063201f, -0.3071976f, -0.2292084f)),
 					PalmPose = new Pose(new Vector3(0f, 0f, 0f), new Quaternion(0f, 0f, 0f, 1f))
 				};
 			}
