@@ -15,7 +15,6 @@ namespace Instrumental.Avatar
             public GameObject EndEpiphysis;
 		}
 
-        SteamVR_Behaviour_Pose pose;
         SteamVR_Behaviour_Skeleton skeleton;
 
         BoneInfo[] proximals;
@@ -28,7 +27,6 @@ namespace Instrumental.Avatar
 		private void Awake()
 		{
             skeleton = GetComponent<SteamVR_Behaviour_Skeleton>();
-            pose = GetComponentInParent<SteamVR_Behaviour_Pose>();
 
             proximals = GenerateBones(false);
             medials = GenerateBones(false);
@@ -104,7 +102,7 @@ namespace Instrumental.Avatar
         // Update is called once per frame
         void Update()
         {
-            if(pose && pose.isValid)
+            if(true)
 			{
                 for(int i=0; i < proximals.Length; i++)
 				{

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Valve.VR;
+using Instrumental.Interaction.Input;
 
 namespace Instrumental.Interaction
 {
@@ -40,16 +41,12 @@ namespace Instrumental.Interaction
 	{
 		InstrumentalBody body;
 
-		[SerializeField] SteamVR_Behaviour_Skeleton[] handAvatars;
-		[SerializeField] SteamVR_Behaviour_Skeleton dataHand;
-		private Handedness hand;
+		[SerializeField] GameObject[] handAvatars;
+		[SerializeField] HandDataContainer dataHand;
+		[SerializeField] private Handedness hand;
 		public Handedness Hand { get { return hand; } }
 
 		const float basisDrawDist = 0.02f;
-
-		const float palmForwardOffset = 0.0153f;
-		const float palmUpOffset = 0.06f;
-		const float palmRightOffset = 0.0074f;
 
 		#region finger extension and curls
 		Pose palmPose;
@@ -146,23 +143,10 @@ namespace Instrumental.Interaction
 		private void Awake()
 		{
 			body = GetComponentInParent<InstrumentalBody>();
+			if (hand == Handedness.Left) leftHand = this;
+			else if (hand == Handedness.Right) rightHand = this;
 
 			pinches = new PinchInfo[5];
-
-			if (dataHand.inputSource == SteamVR_Input_Sources.LeftHand)
-			{
-				hand = Handedness.Left;
-				leftHand = this;
-			}
-			else if (dataHand.inputSource == SteamVR_Input_Sources.RightHand)
-			{
-				hand = Handedness.Right;
-				rightHand = this;
-			}
-			else
-			{
-				Debug.LogError("Hand's pose did not have a valid input source");
-			}
 		}
 
 		// Start is called before the first frame update
@@ -320,59 +304,37 @@ namespace Instrumental.Interaction
 
 		public Pose GetAnchorPose(AnchorPoint anchorPoint)
 		{
-			bool flip = hand == Handedness.Left;
-			Vector3 position = Vector3.zero;
-			Vector3 forward = Vector3.right;
-			Vector3 up = Vector3.up;
-
-			Transform transform=null;
-
 			switch (anchorPoint)
 			{
 				case AnchorPoint.None:
 					return Pose.identity;
 
 				case AnchorPoint.Palm:
-					transform = dataHand.wrist;
-					position = Vector3.zero;
-					forward = Vector3.right * -1;
-					up = Vector3.forward;
-
-					position = new Vector3(
-						-palmForwardOffset, 
-						palmRightOffset /** ((flip) ? -1 : 1)*/,
-						palmUpOffset);
-					break;
+					return dataHand.Data.PalmPose;
 
 				case AnchorPoint.IndexTip:
-					transform = dataHand.indexTip;
-					break;
+					return new Pose(dataHand.Data.IndexTip,
+						dataHand.Data.IndexJoints[3].Pose.rotation);
 
 				case AnchorPoint.MiddleTip:
-					transform = dataHand.middleTip;
-					break;
+					return new Pose(dataHand.Data.MiddleTip,
+						dataHand.Data.MiddleJoints[3].Pose.rotation);
 
 				case AnchorPoint.ThumbTip:
-					transform = dataHand.thumbTip;
-					break;
+					return new Pose(dataHand.Data.ThumbTip,
+						dataHand.Data.ThumbJoints[3].Pose.rotation);
 
 				case AnchorPoint.RingTip:
-					transform = dataHand.ringTip;
-					break;
+					return new Pose(dataHand.Data.RingTip,
+						dataHand.Data.RingJoints[3].Pose.rotation);
 
 				case AnchorPoint.PinkyTip:
-					transform = dataHand.pinkyTip;
-					break;
+					return new Pose(dataHand.Data.PinkyTip,
+						dataHand.Data.PinkyJoints[3].Pose.rotation);
 
 				default:
-					break;
+					return new Pose(Vector3.zero, Quaternion.identity);
 			}
-
-			up = transform.TransformDirection(up);
-			forward = transform.TransformDirection(forward);
-
-			return new Pose(transform.TransformPoint(position), 
-				Quaternion.LookRotation(forward, up));
 		}
 
 		void DrawBasis(Pose pose)

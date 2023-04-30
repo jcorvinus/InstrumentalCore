@@ -21,6 +21,11 @@ namespace Instrumental.Interaction.Input
 		[Range(0, 0.1f)]
 		[SerializeField] float jointRadius = 0.08f;
 
+		// steamVR palm offsets
+		const float palmForwardOffset = 0.0153f;
+		const float palmUpOffset = 0.06f;
+		const float palmRightOffset = 0.0074f;
+
 		Vector3 skeletonPosition;
 		Quaternion skeletonRotation;
 
@@ -282,6 +287,12 @@ namespace Instrumental.Interaction.Input
 
 						Data.WristPose.position = combined.GetPosition();
 						Data.WristPose.rotation = combined.GetRotation();
+
+						Vector3 palmOffset = (Vector3.forward * -palmForwardOffset) +
+							(Vector3.up * palmUpOffset) + (Vector3.right * palmRightOffset);
+						palmOffset = combined.GetRotation() * palmOffset;
+						Data.PalmPose = new Pose(combined.GetPosition() + palmOffset,
+							Quaternion.Inverse(combined.GetRotation()));
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.thumbProximal: // also thumb metacarpal
