@@ -223,6 +223,9 @@ MonoBehaviour:
   testDataPose: 1
   printTestDataStruct: 0
   doUpdate: 1
+  drawBones: 0
+  drawBoneBasis: 0
+  drawPalmPose: 0
   jointRadius: 0.08
 --- !u!1001 &1132620726426666678
 PrefabInstance:
@@ -387,6 +390,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4070567997938538206, guid: bb5625f7e9d32394989ebbab1add136e,
+        type: 3}
+      propertyPath: dataContainer
+      value: 
+      objectReference: {fileID: 7665417268855270952}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bb5625f7e9d32394989ebbab1add136e, type: 3}
 --- !u!1 &2326935768600797255 stripped

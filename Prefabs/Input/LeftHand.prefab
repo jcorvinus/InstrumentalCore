@@ -223,6 +223,9 @@ MonoBehaviour:
   testDataPose: 1
   printTestDataStruct: 0
   doUpdate: 1
+  drawBones: 0
+  drawBoneBasis: 0
+  drawPalmPose: 0
   jointRadius: 0.08
 --- !u!1001 &9075082044496622388
 PrefabInstance:
@@ -241,6 +244,11 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2073197052190370313, guid: 6aa48b402e391f34ebdc86014ab5da86,
+        type: 3}
+      propertyPath: dataContainer
+      value: 
+      objectReference: {fileID: 7842637539183461227}
     - target: {fileID: 6794118101628802934, guid: 6aa48b402e391f34ebdc86014ab5da86,
         type: 3}
       propertyPath: m_RootOrder
