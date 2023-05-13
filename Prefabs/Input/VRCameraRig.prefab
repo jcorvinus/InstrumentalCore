@@ -61,6 +61,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   handAvatar: 0
+  avatarSwitchKey: 282
 --- !u!1 &2315127151603075945
 GameObject:
   m_ObjectHideFlags: 0
@@ -171,6 +172,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2315127150805337353}
     m_Modifications:
+    - target: {fileID: 1962984356255582609, guid: bafe76c898e45e3429460093443c55ae,
+        type: 3}
+      propertyPath: wristPinkyMiddleScaleFactor
+      value: 0.614
+      objectReference: {fileID: 0}
     - target: {fileID: 3215571058187853589, guid: bafe76c898e45e3429460093443c55ae,
         type: 3}
       propertyPath: m_RootOrder
@@ -246,6 +252,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2315127150805337353}
     m_Modifications:
+    - target: {fileID: 5858876857687604616, guid: e01b922ba754e6a48a03a15a2eabeee8,
+        type: 3}
+      propertyPath: wristPinkyMiddleScaleFactor
+      value: 0.614
+      objectReference: {fileID: 0}
     - target: {fileID: 8310594477887294983, guid: e01b922ba754e6a48a03a15a2eabeee8,
         type: 3}
       propertyPath: m_Name

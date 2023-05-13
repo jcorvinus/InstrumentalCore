@@ -117,7 +117,7 @@ namespace Instrumental.Avatar
         // Update is called once per frame
         void Update()
         {
-            if(true)
+            if(dataContainer.Data.IsTracking)
 			{
                 for(int fingerIndx=0; fingerIndx < 5; fingerIndx++)
 				{

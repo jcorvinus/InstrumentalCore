@@ -59,7 +59,7 @@ namespace Instrumental.Interaction.Input
 					skeletonRotation = transform.parent.rotation * skeletonRotation;
 				}
 
-				ConvertData(skeleton.bonePositions, skeleton.boneRotations);
+				ConvertData(skeleton.bonePositions, skeleton.boneRotations, skeleton.poseIsValid);
 			}
 		}
 
@@ -233,8 +233,15 @@ namespace Instrumental.Interaction.Input
 		/// <summary>
 		/// Converts SteamVR tracking data to our internal data format.
 		/// <param name="referenceData"></param>
-		void ConvertData(Vector3[] bonePositions, Quaternion[] boneRotations)
+		void ConvertData(Vector3[] bonePositions, Quaternion[] boneRotations, bool isTracked)
 		{
+			Data.IsTracking = isTracked;
+			if (isTracked)
+			{
+				Data.TrackedForTime += Time.deltaTime;
+			}
+			else Data.TrackedForTime = 0;
+
 			Matrix4x4 skeletonMatrix = Matrix4x4.identity;
 			Quaternion rootOffset = Quaternion.AngleAxis(180, Vector3.forward);
 			Quaternion rootOffset2 = Quaternion.AngleAxis(180, Vector3.right);
@@ -451,7 +458,7 @@ namespace Instrumental.Interaction.Input
 			InitializeData();
 			skeletonPosition = Vector3.zero;
 			skeletonRotation = Quaternion.identity;
-			ConvertData(bonePositions, boneRotations);
+			ConvertData(bonePositions, boneRotations, false);
 		}
 
 		void DrawBasis(Joint joint)

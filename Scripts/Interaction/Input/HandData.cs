@@ -102,6 +102,10 @@ namespace Instrumental.Interaction.Input
 		// palm
 		public Pose PalmPose;
 
+		public bool IsTracking;
+		public float TrackedForTime;
+
+		// hey remember, the test data's palm information has not been updated just so you know
 		public static HandData GetTestData(bool isLeft)
 		{
 			if (isLeft)

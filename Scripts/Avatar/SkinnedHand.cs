@@ -20,15 +20,29 @@ namespace Instrumental.Avatar
         [SerializeField] Transform[] fingers;
         Transform[,] joints;
         [SerializeField] Transform wrist;
+        Vector3 wristDefaultScale;
 
+        Vector3 pinkyProximalInWristSpace;
+        Vector3 dataPinkyInDataWristSpace;
+
+        // need to figure out our curves (If any)
+        [Range(0, 1)]
+        [SerializeField] float wristPinkyMiddleScaleFactor = 0.614f;
         float[] modelFingerLengths;
-        float modelWristToMiddleTipDistance;
+        float modelWristToMiddleProximalDistance;
+        float modelWristToPinkyProximalDistance;
 
+        float dataMiddleFingerLength;
+        float dataWristToMiddleProximalDistance;
+        const float lengthAcquireDuration=0.11f;
+
+        SkinnedMeshRenderer skinnedMeshRenderer;
         [SerializeField] bool drawFingerJointBasis = false;
         [SerializeField] bool drawWristJointBasis = true;
 
 		private void Awake()
 		{
+            skinnedMeshRenderer = GetComponentInChildren<SkinnedMeshRenderer>();
             joints = new Transform[5, 4];
             for(int i=0; i < fingers.Length; i++)
 			{
@@ -57,6 +71,8 @@ namespace Instrumental.Avatar
                     joints[i, 3] = distal;
                 }
 			}
+
+            wristDefaultScale = wrist.transform.localScale;
 		}
 
 		// Start is called before the first frame update
@@ -109,50 +125,127 @@ namespace Instrumental.Avatar
                 }
 			}
 
-            modelWristToMiddleTipDistance = Vector3.Distance(wrist.position, fingers[2].position) + modelFingerLengths[2];
-		}
+            modelWristToMiddleProximalDistance = Vector3.Distance(wrist.position, fingers[2].GetChild(0).position);
+            pinkyProximalInWristSpace = wrist.InverseTransformPoint(fingers[(int)Finger.Pinky].GetChild(0).position);
+            Vector3 scalar = new Vector3(((Mathf.Abs(wristForwardDirection.x) > 0) ? 0 : 1),
+                ((Mathf.Abs(wristForwardDirection.y) > 0) ? 0 : 1),
+                ((Mathf.Abs(wristForwardDirection.z) > 0) ? 0 : 1));
+            pinkyProximalInWristSpace.Scale(scalar);
+
+            modelWristToPinkyProximalDistance = Vector3.Distance(wrist.transform.TransformPoint(pinkyProximalInWristSpace), fingers[(int)Finger.Pinky].GetChild(0).position);
+        }
 
         // Update is called once per frame
         void Update()
         {
-            // do retargeting
-            Quaternion wristRotationOffset = Quaternion.LookRotation(wristForwardDirection, wristUpDirection);
+            if (dataContainer.Data.IsTracking)
+            {
+                skinnedMeshRenderer.enabled = true;
+                // do retargeting
+                Quaternion wristRotationOffset = Quaternion.LookRotation(wristForwardDirection, wristUpDirection);
 
-            wrist.SetPositionAndRotation(dataContainer.Data.WristPose.position,
-                dataContainer.Data.WristPose.rotation * Quaternion.Inverse(wristRotationOffset));
+                wrist.SetPositionAndRotation(dataContainer.Data.WristPose.position,
+                    dataContainer.Data.WristPose.rotation * Quaternion.Inverse(wristRotationOffset));
 
-            // set up the fingers
-            for(int i=0; i < fingers.Length; i++)
-			{
-                // this might result in allocs, look into removing it
-                Interaction.Input.Joint[] fingerJoints = dataContainer.Data.GetJointForFinger((Finger)i);
+                // set up the fingers
+                for (int i = 0; i < fingers.Length; i++)
+                {
+                    // this might result in allocs, look into removing it
+                    Interaction.Input.Joint[] fingerJoints = dataContainer.Data.GetJointForFinger((Finger)i);
 
-                if (i==0) // thumbs!
-				{
-                    for (int jointIndx=0; jointIndx < 3; jointIndx++)
-					{
-                        Transform joint = joints[i, jointIndx];
-                        Quaternion jointRotationOffset = Quaternion.LookRotation(fingerDirection, -palmDirection);
-
-                        Interaction.Input.Joint fingerJoint = fingerJoints[jointIndx + 1];
-                        joint.SetPositionAndRotation(fingerJoint.Pose.position,
-                            fingerJoint.Pose.rotation * Quaternion.Inverse(jointRotationOffset));
-					}
-				}
-                else
-				{
-                    for (int jointIndx = 0; jointIndx < 4; jointIndx++)
+                    if (i == 0) // thumbs!
                     {
-                        Transform joint = joints[i, jointIndx];
-                        Vector3 jointBasisForward, jointBasisUp, jointBasisRight;
-                        GetBasis(joint, out jointBasisRight, out jointBasisForward, out jointBasisUp);
-                        Quaternion jointRotationOffset = Quaternion.LookRotation(fingerDirection, -palmDirection);
+                        for (int jointIndx = 0; jointIndx < 3; jointIndx++)
+                        {
+                            Transform joint = joints[i, jointIndx];
+                            Quaternion jointRotationOffset = Quaternion.LookRotation(fingerDirection, -palmDirection);
 
-                        Interaction.Input.Joint fingerJoint = fingerJoints[jointIndx];
-                        joint.SetPositionAndRotation(fingerJoint.Pose.position,
-                            fingerJoint.Pose.rotation * Quaternion.Inverse(jointRotationOffset));
+                            Interaction.Input.Joint fingerJoint = fingerJoints[jointIndx + 1];
+                            joint.SetPositionAndRotation(fingerJoint.Pose.position,
+                                fingerJoint.Pose.rotation * Quaternion.Inverse(jointRotationOffset));
+                        }
+                    }
+                    else
+                    {
+                        for (int jointIndx = 0; jointIndx < 4; jointIndx++)
+                        {
+                            Transform joint = joints[i, jointIndx];
+                            Vector3 jointBasisForward, jointBasisUp, jointBasisRight;
+                            GetBasis(joint, out jointBasisRight, out jointBasisForward, out jointBasisUp);
+                            Quaternion jointRotationOffset = Quaternion.LookRotation(fingerDirection, -palmDirection);
+
+                            Interaction.Input.Joint fingerJoint = fingerJoints[jointIndx];
+                            joint.SetPositionAndRotation(fingerJoint.Pose.position,
+                                fingerJoint.Pose.rotation * Quaternion.Inverse(jointRotationOffset));
+                        }
                     }
                 }
+
+                if(true /*dataContainer.Data.TrackedForTime < lengthAcquireDuration*/) // fix this when our istracking value gets fixed
+				{
+                    dataMiddleFingerLength = 0;
+
+                    for(int boneIndx=0; boneIndx < 4; boneIndx++)
+				    {
+                        Instrumental.Interaction.Input.Joint currentJoint = dataContainer.Data.MiddleJoints[boneIndx];
+
+                        // instead of next joint, for the last one we should do the tip
+                        Vector3 endPoint;
+                        if (boneIndx == 3)
+                        {
+                            endPoint = dataContainer.Data.MiddleTip;
+                        }
+                        else
+                        {
+                            Instrumental.Interaction.Input.Joint nextJoint = dataContainer.Data.MiddleJoints[boneIndx + 1];
+                            endPoint = nextJoint.Pose.position;
+                        }
+
+                        dataMiddleFingerLength += Vector3.Distance(currentJoint.Pose.position, endPoint);
+                    }
+
+                    dataWristToMiddleProximalDistance = Vector3.Distance(dataContainer.Data.WristPose.position,
+                        dataContainer.Data.MiddleJoints[1].Pose.position);
+
+                    Pose pinkyDataPose = dataContainer.Data.PinkyJoints[1].Pose;
+                    Pose wristDataPose = dataContainer.Data.WristPose;
+
+                    dataPinkyInDataWristSpace = pinkyDataPose.position - wristDataPose.position;
+                    dataPinkyInDataWristSpace = Quaternion.Inverse(wristDataPose.rotation) * dataPinkyInDataWristSpace;
+                    dataPinkyInDataWristSpace.Scale(new Vector3(1, 0, 0));
+                    dataPinkyInDataWristSpace = wristDataPose.rotation * dataPinkyInDataWristSpace;
+                    dataPinkyInDataWristSpace += wristDataPose.position;
+
+                    float dataWristPinkyLength = Vector3.Distance(dataContainer.Data.PinkyJoints[0].Pose.position, dataPinkyInDataWristSpace);
+
+                    float fullDataLength = dataMiddleFingerLength + dataWristToMiddleProximalDistance;
+                    float fullModelLength = modelFingerLengths[(int)Finger.Middle] + modelWristToMiddleProximalDistance;
+
+                    float fingerRatio = dataMiddleFingerLength / modelFingerLengths[(int)Finger.Middle];
+                    float wristToMiddleRatio = dataWristToMiddleProximalDistance / modelWristToMiddleProximalDistance; // magic number lol
+                    float wristToPinkyRatio = dataWristPinkyLength / modelWristToPinkyProximalDistance;
+                    float fullRatio = fullDataLength / fullModelLength;
+                    float wristRatio = Mathf.Lerp(wristToPinkyRatio, wristToMiddleRatio, wristPinkyMiddleScaleFactor);
+
+                    Debug.Log(string.Format("finger Ratio: {0}    wrist ratio: {1} ", fingerRatio, wristRatio));
+                    Vector3 wristScale = new Vector3(fingerRatio, fingerRatio, fingerRatio);
+
+                    if (Mathf.Abs(wristForwardDirection.x) != 0)
+                    {
+                        wristScale.x = wristRatio;
+                    }
+                    else if (Mathf.Abs(wristForwardDirection.y) != 0)
+                    {
+                        wristScale.y = wristRatio;
+                    }
+                    else wristScale.z = wristRatio;
+
+                    wrist.transform.localScale = Vector3.Scale(wristScale, wristDefaultScale);
+                }
+            }
+            else
+			{
+                skinnedMeshRenderer.enabled = false;
 			}
         }
 
@@ -210,6 +303,14 @@ namespace Instrumental.Avatar
 			{
                 DrawWristBasis(wrist);
 			}
+
+            // draw model pinky in wrist space
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireCube(wrist.TransformPoint(pinkyProximalInWristSpace), Vector3.one * 0.02f);
+
+            // draw data pinky in wrist space
+            Gizmos.color = Color.blue;
+            Gizmos.DrawWireCube(dataPinkyInDataWristSpace, Vector3.one * 0.01f);
 
             if (drawFingerJointBasis)
             {
