@@ -181,7 +181,7 @@ namespace Instrumental.Avatar
                     }
                 }
 
-                if(true /*dataContainer.Data.TrackedForTime < lengthAcquireDuration*/) // fix this when our istracking value gets fixed
+                if(dataContainer.Data.TrackedForTime < lengthAcquireDuration) // fix this when our istracking value gets fixed
 				{
                     dataMiddleFingerLength = 0;
 
