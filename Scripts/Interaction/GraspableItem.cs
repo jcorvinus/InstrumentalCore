@@ -56,6 +56,8 @@ namespace Instrumental.Interaction
         GraspDataVars currentGraspData;
         AudioSource graspSource;
 
+        const float ungraspDistance = 0.003636f;
+
         [Range(0.05f, 0.3f)]
         float hoverDistance = 0.125f;
 
@@ -189,13 +191,16 @@ namespace Instrumental.Interaction
             if (hand == null) return true;
             if (!hand.IsTracking) return false; // we can suspend like this, kinda.
 
-            float maxPinchDistance = Mathf.Max(graspVars.IndexDistance,
+            float minPinchDistance = Mathf.Min(graspVars.IndexPinchDistance,
                 graspVars.MiddlePinchDistance);
 
-            return (maxPinchDistance > itemCollider.radius * 2.25f);
+            return (minPinchDistance > ungraspRadius);
 		}
 
-		void Ungrasp(InstrumentalHand hand)
+        float ungraspRadius { get { return (itemCollider.radius * 2) + ungraspDistance; } }
+
+
+        void Ungrasp(InstrumentalHand hand)
 		{
             isGrasped = false;
 
@@ -219,7 +224,6 @@ namespace Instrumental.Interaction
 		private void FixedUpdate()
 		{
             // move according to grasp position
-            // todo: if we're going to apply constraints, do so here.
             if (isGrasped)
             {
                 Pose currentPose = new Pose(currentGraspData.GraspCenter, transform.rotation);
@@ -326,6 +330,11 @@ namespace Instrumental.Interaction
 		private void OnDrawGizmos()
 		{
             Gizmos.DrawWireSphere(transform.position, hoverDistance);
-		}
+            if (itemCollider)
+            {
+                Gizmos.color = Color.blue;
+                Gizmos.DrawWireSphere(transform.position, ungraspRadius);
+            }
+        }
 	}
 }
