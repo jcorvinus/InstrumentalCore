@@ -12,7 +12,6 @@ namespace Instrumental.Interaction.VirtualJoystick
     {
         [SerializeField] Joystick joystick;
         LeftMasterJoystick joystickMaster;
-        Transform headTransform;
 
         [SerializeField] LineRenderer outboundRenderer;
         bool isDeployed = false;
@@ -49,7 +48,6 @@ namespace Instrumental.Interaction.VirtualJoystick
 		// Start is called before the first frame update
 		void Start()
         {
-            headTransform = Interaction.InstrumentalBody.Instance.Head;
             StopDeployment();
         }
 
@@ -160,10 +158,13 @@ namespace Instrumental.Interaction.VirtualJoystick
                 if (joystick)
                 {
                     // get our joystick relative position
-                    Vector3 headRight = headTransform.right;
-                    headRight = Vector3.Scale(headRight, new Vector3(1, 0, 1)).normalized;
+                    Vector3 shoulderPoint = InstrumentalBody.Instance.RightShoulder;
+                    Vector3 shoulderDirection = (shoulderPoint - joystick.transform.position);
+                    shoulderDirection = Vector3.Scale(shoulderDirection, new Vector3(1, 0, 1)).normalized;
 
-                    return headRight;
+                    Vector3 headRight = Vector3.Scale(InstrumentalBody.Instance.Head.right, new Vector3(1, 0, 1)).normalized;
+
+                    return Vector3.Slerp(shoulderDirection, headRight, 0.65f).normalized;
                 }
                 else return transform.forward;
             }
