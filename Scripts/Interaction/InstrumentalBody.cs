@@ -18,6 +18,14 @@ namespace Instrumental.Interaction
         private InstrumentalHand leftHand, rightHand;
         private Transform head;
 
+        Quaternion torsoRotation;
+        const float headRotationThreshold = 24.45f;
+        const float neckHeadOffset = 0.11f;
+        bool isTorsoSmoothing = false;
+        float torsoSmoothTime = 0;
+        const float torsoSmoothDuration = 1f;
+        Vector3 neckPosition;
+
         private Vector3 leftShoulder;
         private Vector3 rightShoulder;
         private Vector3 forwardDirection;
@@ -54,18 +62,88 @@ namespace Instrumental.Interaction
 		// Start is called before the first frame update
 		void Start()
         {
+            torsoRotation = Quaternion.Euler(0, head.rotation.eulerAngles.y, 0);
+            neckPosition = head.position + (Vector3.down * neckHeadOffset);
+        }
 
+        void UpdateTorso()
+		{
+            Quaternion flattenedNeckRotation = Quaternion.Euler(0, head.rotation.eulerAngles.y, 0);
+
+            if (!isTorsoSmoothing)
+            {
+                // check to see if we should start smoothing to the current rotation
+                float angle = Quaternion.Angle(flattenedNeckRotation, torsoRotation);
+
+                if (angle > headRotationThreshold)
+				{
+                    // start smoothing
+                    torsoSmoothTime = 0;
+                    isTorsoSmoothing = true;
+				}
+            }
+            else
+			{
+                torsoSmoothTime += Time.deltaTime;
+                float tValue = Mathf.InverseLerp(0, torsoSmoothDuration, torsoSmoothTime);
+
+                torsoRotation = Quaternion.Slerp(torsoRotation, flattenedNeckRotation, tValue);
+
+                if(torsoSmoothTime >= torsoSmoothDuration)
+				{
+                    isTorsoSmoothing = false;
+				}
+			}
+
+            Vector3 headLocalNeckRef = head.transform.TransformPoint(Vector3.down * neckHeadOffset);
+            Vector3 headWorldDownRef = head.position + (Vector3.down * neckHeadOffset);
+            neckPosition = (headLocalNeckRef + headWorldDownRef) * 0.5f; // this can SO be improved
+
+            leftShoulder = neckPosition + ((torsoRotation * Vector3.left) * neckHeadOffset);
+            rightShoulder = neckPosition + ((torsoRotation * Vector3.right) * neckHeadOffset);
         }
 
         // Update is called once per frame
         void Update()
         {
+            // track virtual torso
+            UpdateTorso();
+
             // get shoulder positions
+
+
+            // allow avatar switching
             if(UnityEngine.Input.GetKeyUp(avatarSwitchKey))
 			{
                 if (handAvatar == HandAvatar.Glove) handAvatar = HandAvatar.Capsule;
                 else handAvatar = HandAvatar.Glove;
             }
         }
-    }
+
+		private void OnDrawGizmos()
+		{
+            if (head)
+            {
+                // draw our yaw line
+                Vector3 neckDebugPoint = neckPosition;
+                Quaternion flattenedNeckRotation = Quaternion.Euler(0, head.rotation.eulerAngles.y, 0);
+                Gizmos.color = Color.white;
+                Gizmos.DrawLine(neckDebugPoint,
+                    neckDebugPoint + (flattenedNeckRotation * Vector3.forward) * 0.22f);
+
+                Vector3 thresholdMin = (torsoRotation * Vector3.forward);
+                thresholdMin = Quaternion.AngleAxis(-headRotationThreshold, Vector3.up) * thresholdMin;
+                Vector3 thresholdMax = (torsoRotation * Vector3.forward);
+                thresholdMax = Quaternion.AngleAxis(headRotationThreshold, Vector3.up) * thresholdMax;
+                Gizmos.color = Color.blue;
+                Gizmos.DrawLine(neckDebugPoint,
+                    neckDebugPoint + (thresholdMin * 0.22f));
+                Gizmos.DrawLine(neckDebugPoint,
+                    neckDebugPoint + (thresholdMax * 0.22f));
+
+                Gizmos.DrawWireSphere(leftShoulder, 0.01f);
+                Gizmos.DrawWireSphere(rightShoulder, 0.01f);
+            }
+        }
+	}
 }
