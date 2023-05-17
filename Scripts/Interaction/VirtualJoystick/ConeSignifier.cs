@@ -8,12 +8,11 @@ namespace Instrumental.Interaction.VirtualJoystick
     {
         [SerializeField] MeshRenderer innerCone;
         [SerializeField] MeshRenderer outerCone;
+        [SerializeField] Color activeColor = Color.cyan;
 
         private float scale; // between 0 and 1
-        private bool isActive;
 
         public float Scale { get { return scale; } set { scale = value; } }
-        public bool IsActive { get { return isActive; } set { isActive = value; } }
 
         // Start is called before the first frame update
         void Start()
@@ -25,7 +24,11 @@ namespace Instrumental.Interaction.VirtualJoystick
         void Update()
         {
             innerCone.transform.localScale = Vector3.one * scale;
-            outerCone.enabled = IsActive;
+
+            bool isNearMax = scale > 0.99f;
+            outerCone.enabled = !isNearMax; 
+            outerCone.material.color = (isNearMax) ?
+                activeColor : Color.white;
         }
     }
 }

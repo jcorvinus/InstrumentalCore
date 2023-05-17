@@ -164,6 +164,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   innerCone: {fileID: 3271643732003517408}
   outerCone: {fileID: 5452305338540157023}
+  activeColor: {r: 0, g: 1, b: 1, a: 1}
 --- !u!1 &5848786784001728676
 GameObject:
   m_ObjectHideFlags: 0
@@ -217,10 +218,12 @@ MonoBehaviour:
   outboundRenderer: {fileID: 8895836837096894550}
   handle: {fileID: 8912712906370422220}
   graspDistance: 0.136
-  graspRadius: 0.0255
-  signifierContainer: {fileID: 0}
-  leftCone: {fileID: 0}
-  rightCone: {fileID: 0}
+  shoulderHeadRightBlend: 0.797
+  signifierContainer: {fileID: 3164708064348146867}
+  leftCone: {fileID: 900916321973480190}
+  rightCone: {fileID: 5614836050748446579}
+  coneVisDistance: 0.042
+  coneUpOffset: 0.0376
 --- !u!120 &8895836837096894550
 LineRenderer:
   m_ObjectHideFlags: 0
@@ -368,6 +371,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   innerCone: {fileID: 1510110275339669795}
   outerCone: {fileID: 2538255461188608041}
+  activeColor: {r: 0, g: 1, b: 1, a: 1}
 --- !u!1 &8912712905782024443
 GameObject:
   m_ObjectHideFlags: 0

@@ -25,24 +25,36 @@ namespace Instrumental.Interaction.VirtualJoystick
         Vector3[] linePoints;
 
         [SerializeField] GraspableItem handle;
+        SphereCollider handleCollider;
         [Range(0, 1)]
         [SerializeField] float graspDistance = 0.21f;
-        [Range(0, 0.1f)]
-        [SerializeField] float graspRadius = 0.1f;
         LinearConstraint linearConstraint;
+        [Range(0,1)]
+        [SerializeField] float shoulderHeadRightBlend = 0.797f;
 
         // snap amount signifiers
         [SerializeField] Transform signifierContainer;
         [SerializeField] ConeSignifier leftCone;
         [SerializeField] ConeSignifier rightCone;
 
+        [Range(0,0.1f)]
+        [SerializeField] float coneVisDistance = 0.042f;
+        [Range(0, 0.1f)]
+        [SerializeField] float coneUpOffset = 0.0376f;
+        const float coneSnapDist = 0.023f;
+        private bool isSnapLeft = false;
+        private bool isSnapRight = false;
+
         public bool IsDeployed { get { return isDeployed; } }
+        public bool IsSnapLeft { get { return isSnapLeft; } }
+        public bool IsSnapRight { get { return isSnapRight; } }
 
 		private void Awake()
 		{
             joystickMaster = joystick.GetComponentInParent<LeftMasterJoystick>();
             linePoints = new Vector3[2];
             linearConstraint = handle.GetComponent<LinearConstraint>();
+            handleCollider = handle.GetComponent<SphereCollider>();
         }
 
 		// Start is called before the first frame update
@@ -99,6 +111,7 @@ namespace Instrumental.Interaction.VirtualJoystick
 
                 float tValue = Mathf.InverseLerp(0, deployedTimeDuration, deployedTime);
                 Vector3 targetPosition = GetTargetPosition(tValue);
+                Vector3 startPosition = GetStartPosition();
 
                 if (!handle.IsGrasped) // don't move if grasped
                 {
@@ -113,15 +126,47 @@ namespace Instrumental.Interaction.VirtualJoystick
                         handle.transform.position = Vector3.Lerp(deployementSourcePosition, targetPosition,
                             Mathf.InverseLerp(0, deployedTimeDuration, deployedTime));
                     }
+
+                    signifierContainer.gameObject.SetActive(false);
+                    isSnapLeft = false;
+                    isSnapRight = false;
                 }
                 else
 				{
                     // handle our cone signifiers and 
                     // actual processing of snap turning
-				}
+                    signifierContainer.gameObject.SetActive(true);
+
+                    // we can solve the 'where do the cones go?' problem by moving them upwards
+                    // a lot simpler than the other ideas I'd had in mind.
+                    Vector3 coneRef = GetTargetPosition(1) + (direction * handleCollider.radius);
+
+                    // place our left and right cones
+                    Vector3 leftConeLinePosition = coneRef + (direction * -coneVisDistance);
+                    leftCone.transform.position = leftConeLinePosition + (Vector3.up * coneUpOffset);
+                    leftCone.transform.rotation = Quaternion.LookRotation(-direction, Vector3.up);
+
+                    Vector3 rightConeLinePosition = coneRef + (direction * coneVisDistance);
+                    rightCone.transform.position = coneRef + (Vector3.up * coneUpOffset);
+                    rightCone.transform.rotation = Quaternion.LookRotation(direction, Vector3.up);
+
+                    // get our distance. Do it relative to the start point since we know that can
+                    // be done in one distance check instead of two and doesn't have the double-bounds problem
+                    // of my old check. We can also use offset from grab dist to get the baseline.
+                    float dist = Vector3.Distance(handle.transform.position, startPosition);
+                    float zeroed = dist - graspDistance;
+
+                    float leftScale = (zeroed > 0) ? 0 : Mathf.InverseLerp(0, coneSnapDist, Mathf.Abs(zeroed));
+                    float rightScale = (zeroed < 0) ? 0 : Mathf.InverseLerp(0, coneSnapDist, Mathf.Abs(zeroed));
+                    leftCone.Scale = leftScale;
+                    rightCone.Scale = rightScale;
+
+                    isSnapLeft = leftScale > 0.99f;
+                    isSnapRight = rightScale > 0.99f;
+                }
 
                 // handle line renderer stuff
-                linePoints[0] = GetStartPosition();
+                linePoints[0] = startPosition;
                 linePoints[1] = targetPosition;
                 outboundRenderer.SetPositions(linePoints);
                 outboundRenderer.enabled = true;
@@ -137,6 +182,10 @@ namespace Instrumental.Interaction.VirtualJoystick
                         return;
 					}
                 }
+
+                signifierContainer.gameObject.SetActive(false);
+                isSnapLeft = false;
+                isSnapRight = false;
             }
         }
 
@@ -164,7 +213,7 @@ namespace Instrumental.Interaction.VirtualJoystick
 
                     Vector3 headRight = Vector3.Scale(InstrumentalBody.Instance.Head.right, new Vector3(1, 0, 1)).normalized;
 
-                    return Vector3.Slerp(shoulderDirection, headRight, 0.65f).normalized;
+                    return Vector3.Slerp(shoulderDirection, headRight, shoulderHeadRightBlend).normalized;
                 }
                 else return transform.forward;
             }
@@ -187,13 +236,5 @@ namespace Instrumental.Interaction.VirtualJoystick
 			}
             else return transform.position;
 		}
-
-		private void OnDrawGizmos()
-		{
-            Vector3 startPosition = GetStartPosition();
-            Vector3 graspPoint = GetTargetPosition(1);
-            Gizmos.DrawLine(startPosition, graspPoint);
-            Gizmos.DrawWireSphere(graspPoint, graspRadius);
-        }
 	}
 }
