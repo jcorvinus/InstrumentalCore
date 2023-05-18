@@ -45,6 +45,9 @@ namespace Instrumental.Interaction.VirtualJoystick
         private bool isSnapLeft = false;
         private bool isSnapRight = false;
 
+        AudioSource snapSource;
+        [SerializeField] AudioClip[] snapClips;
+
         public bool IsDeployed { get { return isDeployed; } }
         public bool IsSnapLeft { get { return isSnapLeft; } }
         public bool IsSnapRight { get { return isSnapRight; } }
@@ -55,6 +58,7 @@ namespace Instrumental.Interaction.VirtualJoystick
             linePoints = new Vector3[2];
             linearConstraint = handle.GetComponent<LinearConstraint>();
             handleCollider = handle.GetComponent<SphereCollider>();
+            snapSource = GetComponent<AudioSource>();
         }
 
 		// Start is called before the first frame update
@@ -161,8 +165,17 @@ namespace Instrumental.Interaction.VirtualJoystick
                     leftCone.Scale = leftScale;
                     rightCone.Scale = rightScale;
 
+                    bool previousSnapLeft, previousSnapRight;
+                    previousSnapLeft = isSnapLeft;
+                    previousSnapRight = isSnapRight;
+
                     isSnapLeft = leftScale > 0.99f;
                     isSnapRight = rightScale > 0.99f;
+
+                    if(previousSnapLeft != isSnapLeft || previousSnapRight != isSnapRight)
+					{
+                        PlaySnapSound();
+					}
                 }
 
                 // handle line renderer stuff
@@ -188,6 +201,13 @@ namespace Instrumental.Interaction.VirtualJoystick
                 isSnapRight = false;
             }
         }
+
+        void PlaySnapSound()
+		{
+            int snapSoudIndex = Random.Range(0, snapClips.Length);
+
+            snapSource.PlayOneShot(snapClips[snapSoudIndex]);
+		}
 
         Vector3 GetMaxConstraintPos()
 		{
