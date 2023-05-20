@@ -193,6 +193,14 @@ namespace Instrumental.Interaction
 			return angle / 340;
 		}
 
+		float GetThumbCurl(float angle)
+		{
+			if (angle > 3)
+				angle = 360.0f - angle;
+
+			return angle / 90.0f;
+		}
+
 		void CalculateExtension()
 		{
 			Vector3 palmDirection = palmPose.rotation * Vector3.up;
@@ -204,7 +212,13 @@ namespace Instrumental.Interaction
 			Vector3 ringForward = ringPose.rotation * Vector3.forward;
 			Vector3 pinkyForward = pinkyPose.rotation * Vector3.forward;
 
-			thumbCurl = GetFingerCurl(GetFingerAngle(palmThumbRef, thumbForward, palmDirection));
+			Pose thumbMedialPose = dataHand.Data.ThumbJoints[dataHand.Data.ThumbJoints.Length - 2].Pose;
+			Quaternion thumbInverse = thumbPose.rotation * Quaternion.Inverse(thumbMedialPose.rotation);
+			Vector3 thumbEuler = thumbInverse.eulerAngles;
+
+			thumbCurl = GetThumbCurl(thumbEuler.x); //GetFingerCurl(GetFingerAngle(palmThumbRef, thumbForward, palmDirection)); // old method
+			//Debug.Log("Thumb " + ((hand == Handedness.Left) ? "L" : "R") + " curl: " + thumbEuler.x);
+
 			indexCurl = GetFingerCurl(GetFingerAngle(palmDirection, indexForward, palmThumbRef));
 			middleCurl = GetFingerCurl(GetFingerAngle(palmDirection, middleForward, palmThumbRef));
 			ringCurl = GetFingerCurl(GetFingerAngle(palmDirection, ringForward, palmThumbRef));
