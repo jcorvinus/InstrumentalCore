@@ -198,7 +198,7 @@ namespace Instrumental.Interaction
 			Vector3 palmDirection = palmPose.rotation * Vector3.up;
 			Vector3 palmThumbRef = palmPose.rotation * Vector3.right;
 
-			Vector2 thumbForward = thumbPose.rotation * Vector3.forward;
+			Vector3 thumbForward = thumbPose.rotation * Vector3.forward;
 			Vector3 indexForward = indexPose.rotation * Vector3.forward;
 			Vector3 middleForward = middlePose.rotation * Vector3.forward;
 			Vector3 ringForward = ringPose.rotation * Vector3.forward;
