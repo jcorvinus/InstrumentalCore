@@ -61,10 +61,19 @@ namespace Instrumental.Interaction
         [Range(0.05f, 0.3f)]
         float hoverDistance = 0.125f;
 
+        // negative values are near-grasp,
+        // positive values are grasp.
+        // actual distance, not normalized. Use this if you need to make sure your signifier scales to a specific value
+        float graspDistance;
+
+         // todo: get rotations working
+
         public bool IsGrasped { get { return isGrasped; } }
         public bool IsHovering { get { return isHovering; } }
         public float HoverTValue { get { return hoverTValue; } }
         public Rigidbody RigidBody { get { return rigidBody; } }
+
+        public float GraspDistance { get { return graspDistance; } }
 
 		private void Awake()
 		{
@@ -324,7 +333,20 @@ namespace Instrumental.Interaction
                 }
                 else if (leftHoverClose) StartHover(InstrumentalHand.LeftHand);
                 else if (rightHoverClose) StartHover(InstrumentalHand.RightHand);
-            }            
+            }
+
+            CalculateGraspDistance();
+        }
+
+        private void CalculateGraspDistance()
+		{
+            float indexSurfaceDistance = float.PositiveInfinity;
+            float middleSurfaceDistance = float.PositiveInfinity;
+
+            indexSurfaceDistance = currentGraspData.IndexDistance - itemCollider.radius;
+            middleSurfaceDistance = currentGraspData.MiddleDistance - itemCollider.radius;
+
+            graspDistance = Mathf.Min(indexSurfaceDistance, middleSurfaceDistance);
         }
 
 		private void OnDrawGizmos()

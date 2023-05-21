@@ -95,6 +95,7 @@ GameObject:
   - component: {fileID: 2120835899425370432}
   - component: {fileID: 8814220343641043466}
   - component: {fileID: 5725066112586327942}
+  - component: {fileID: 8200192856077916248}
   m_Layer: 0
   m_Name: GraspBall
   m_TagString: Untagged
@@ -158,3 +159,18 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 0.025
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &8200192856077916248
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7847121902293345025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 368bbecd4de0b4a4a8e24b094ee27b40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 5079802723809740292}
+  minSquishDistance: 0.0158
+  minFloatScale: 0.901
