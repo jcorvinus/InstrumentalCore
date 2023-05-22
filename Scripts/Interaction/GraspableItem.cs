@@ -64,7 +64,7 @@ namespace Instrumental.Interaction
         // negative values are near-grasp,
         // positive values are grasp.
         // actual distance, not normalized. Use this if you need to make sure your signifier scales to a specific value
-        float graspDistance;
+        float currentGraspDistance;
 
          // todo: get rotations working
 
@@ -73,7 +73,8 @@ namespace Instrumental.Interaction
         public float HoverTValue { get { return hoverTValue; } }
         public Rigidbody RigidBody { get { return rigidBody; } }
 
-        public float GraspDistance { get { return graspDistance; } }
+        public float CurrentGraspDistance { get { return currentGraspDistance; } }
+        public float UngraspDistance { get { return ungraspDistance; } }
 
 		private void Awake()
 		{
@@ -144,12 +145,10 @@ namespace Instrumental.Interaction
             float thumbDistance = thumbDirection.magnitude;
             thumbDirection /= thumbDistance;
 
-            Vector3 graspCenter = (indexTip.position + 
-                middleTip.position + 
-                thumbTip.position) * 0.33333f;
-
             float indexPinchDistance = 0;
             float middlePinchDistance = 0;
+
+            Vector3 graspCenter = center;
 
             if (isValid)
             {
@@ -159,6 +158,12 @@ namespace Instrumental.Interaction
 
                 indexPinchDistance = indexPinch.PinchDistance;
                 middlePinchDistance = middlePinch.PinchDistance;
+
+                bool indexPinchIsCloser = (hand.GetPinchInfo(Finger.Index).PinchAmount > hand.GetPinchInfo(Finger.Middle).PinchAmount);
+                graspCenter = 
+                    indexPinchIsCloser ? hand.GetPinchInfo(Finger.Index).PinchCenter :
+                    hand.GetPinchInfo(Finger.Middle).PinchCenter; // replace this with a blended version
+                        // once you figure out how to make the blend work properly.
             }
 
             return new GraspDataVars()
@@ -340,13 +345,16 @@ namespace Instrumental.Interaction
 
         private void CalculateGraspDistance()
 		{
-            float indexSurfaceDistance = float.PositiveInfinity;
-            float middleSurfaceDistance = float.PositiveInfinity;
+            float indexDistance = float.PositiveInfinity;
+            float middleDistance = float.PositiveInfinity;
 
-            indexSurfaceDistance = currentGraspData.IndexDistance - itemCollider.radius;
-            middleSurfaceDistance = currentGraspData.MiddleDistance - itemCollider.radius;
+            indexDistance = currentGraspData.IndexDistance; //- itemCollider.radius; 
+            middleDistance = currentGraspData.MiddleDistance; //- itemCollider.radius; 
 
-            graspDistance = Mathf.Min(indexSurfaceDistance, middleSurfaceDistance);
+			//indexDistance = currentGraspData.IndexPinchDistance * 0.5f;
+			//middleDistance = currentGraspData.MiddlePinchDistance * 0.5f;
+
+			currentGraspDistance = Mathf.Min(indexDistance, middleDistance);
         }
 
 		private void OnDrawGizmos()

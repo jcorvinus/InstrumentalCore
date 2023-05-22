@@ -19,8 +19,10 @@ namespace Instrumental.Interaction.Feedback
 
         [Range(0, 0.025f)]
         [SerializeField] float minSquishDistance = 0.01f;
-        [Range(0.5f, 1f)]
+        [Range(0f, 1f)]
         [SerializeField] float minFloatScale = 0.45f;
+
+        [SerializeField] AnimationCurve squishBlend = AnimationCurve.Linear(0, 0, 1, 1);
 
 		private void Awake()
 		{
@@ -39,12 +41,22 @@ namespace Instrumental.Interaction.Feedback
 
         void SetScaleFactor(float scaleFactor)
 		{
-            scaleFactor = Mathf.Clamp(scaleFactor, minFloatScale,
-                1);
+            // Calculate how far scaleFactor is between 1 and 0.5
+            float t = Mathf.InverseLerp(1f, 0.5f, scaleFactor);
 
-            float xScale = 1f - (1f - scaleFactor) * 2f;
-            float yScale = 1f - (1f - scaleFactor) * 2f;
-            float zScale = 1f / (xScale * yScale);
+            // Smoothstep the scale values to the limit defined by minFloatScale
+            float xScale = Mathf.SmoothStep(minFloatScale, 1f, scaleFactor);
+            float yScale = Mathf.SmoothStep(minFloatScale, 1f, scaleFactor);
+
+            // Calculate zScale for volume preservation
+            float zScaleVol = Mathf.Pow(1f / (Mathf.Pow(xScale, 2)), 1f / 3f);
+
+            // Smoothstep zScale equal to scaleFactor
+            float zScaleUniform = Mathf.SmoothStep(minFloatScale, 1f, scaleFactor);
+
+            // Interpolate between the two zScale values using smoothstep
+            float zScale = Mathf.Lerp(zScaleVol, zScaleUniform, squishBlend.Evaluate(t)); //Mathf.SmoothStep(0f, 1f, t)
+
             Vector3 scale = new Vector3(xScale, yScale, zScale);
 
             target.transform.localScale = Vector3.Scale(scale, startScale);
@@ -55,8 +67,8 @@ namespace Instrumental.Interaction.Feedback
         {
             if(item.IsGrasped)
 			{
-                float scale = 1 - Mathf.InverseLerp(minSquishDistance, squashStartDistance,
-                    Mathf.Abs(item.GraspDistance)); // grasp distance will be negative when in
+                float scale = Mathf.InverseLerp(minSquishDistance, squashStartDistance,
+                    Mathf.Abs(item.CurrentGraspDistance)); // grasp distance will be negative when in
                         // grasping mode, positive when in near grasp mode
 
                 SetScaleFactor(scale);
