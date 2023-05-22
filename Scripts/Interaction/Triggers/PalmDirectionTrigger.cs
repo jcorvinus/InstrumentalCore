@@ -56,7 +56,8 @@ namespace Instrumental.Interaction.Triggers
 			switch (directionToCheck)
 			{
 				case DirectionToCheck.UserUp:
-                    return Vector3.up; // todo: replace this with a smoothly rotating tracked plane
+                    return (handedness == Handedness.Left) ? InstrumentalBody.Instance.LeftPalmComfyUp :
+                        InstrumentalBody.Instance.RightPalmComfyUp; // todo: replace this with a smoothly rotating tracked plane
 				case DirectionToCheck.HeadForward:
                     return head.forward;
                 case DirectionToCheck.DirectionToHead:

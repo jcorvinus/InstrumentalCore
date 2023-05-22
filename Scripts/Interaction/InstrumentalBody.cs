@@ -31,6 +31,11 @@ namespace Instrumental.Interaction
         private Vector3 forwardDirection;
         private Quaternion noRollHeadRotation;
 
+        [Range(0, 45)]
+        [SerializeField] float palmComfyUpOffset = 21;
+        Vector3 leftPalmComfyUp = Vector3.up;
+        Vector3 rightPalmComfyUp = Vector3.up;
+
         [SerializeField] HandAvatar handAvatar = HandAvatar.Glove;
         [SerializeField] KeyCode avatarSwitchKey = KeyCode.F1;
 
@@ -38,6 +43,10 @@ namespace Instrumental.Interaction
 
         public Vector3 LeftShoulder { get { return leftShoulder; } }
         public Vector3 RightShoulder { get { return rightShoulder; } }
+
+        public Vector3 LeftPalmComfyUp { get { return leftPalmComfyUp; } }
+
+        public Vector3 RightPalmComfyUp { get { return rightPalmComfyUp; } }
 
         public HandAvatar Avatar { get { return handAvatar; } }
 
@@ -101,6 +110,13 @@ namespace Instrumental.Interaction
 
             leftShoulder = neckPosition + ((torsoRotation * Vector3.left) * neckHeadOffset);
             rightShoulder = neckPosition + ((torsoRotation * Vector3.right) * neckHeadOffset);
+
+            // get our comfy palm up directions
+            leftPalmComfyUp = Quaternion.AngleAxis(-palmComfyUpOffset, Vector3.forward) * Vector3.up;
+            rightPalmComfyUp = Quaternion.AngleAxis(palmComfyUpOffset, Vector3.forward) * Vector3.up;
+
+            leftPalmComfyUp = torsoRotation * leftPalmComfyUp;
+            rightPalmComfyUp = torsoRotation * rightPalmComfyUp;
         }
 
         // Update is called once per frame
@@ -108,8 +124,6 @@ namespace Instrumental.Interaction
         {
             // track virtual torso
             UpdateTorso();
-
-            // get shoulder positions
 
 
             // allow avatar switching
@@ -143,6 +157,19 @@ namespace Instrumental.Interaction
 
                 Gizmos.DrawWireSphere(leftShoulder, 0.01f);
                 Gizmos.DrawWireSphere(rightShoulder, 0.01f);
+
+                Vector3 leftUpStartPos = head.position + (Vector3.down * 0.3f);
+                leftUpStartPos += (torsoRotation * Vector3.left) * 0.2f;
+                Vector3 leftUpEndPos = leftUpStartPos + (leftPalmComfyUp * 0.1f);
+
+                Vector3 rightUpStartPos = head.position + (Vector3.down * 0.3f);
+                rightUpStartPos += (torsoRotation * Vector3.right) * 0.2f;
+                Vector3 rightUpEndPos = rightUpStartPos + (rightPalmComfyUp * 0.1f);
+
+                Gizmos.color = Color.blue;
+                Gizmos.DrawLine(leftUpStartPos, leftUpEndPos);
+                Gizmos.color = Color.red;
+                Gizmos.DrawLine(rightUpStartPos, rightUpEndPos);
             }
         }
 	}
