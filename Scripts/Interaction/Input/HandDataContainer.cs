@@ -301,7 +301,8 @@ namespace Instrumental.Interaction.Input
 
 						Quaternion combinedRotation = combined.GetRotation();
 
-						Vector3 palmOffset = (Vector3.right * palmRightOffset) +
+						float palmDirOffset = (isLeft) ? palmRightOffset : -palmRightOffset;
+						Vector3 palmOffset = (Vector3.right * palmDirOffset) +
 							(Vector3.up * -palmForwardOffset) + (Vector3.forward * palmUpOffset);
 						palmOffset = combinedRotation * palmOffset;
 						Data.PalmPose = new Pose(combined.GetPosition() + palmOffset,
