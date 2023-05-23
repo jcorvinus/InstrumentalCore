@@ -115,8 +115,8 @@ namespace Instrumental.Interaction
             leftPalmComfyUp = Quaternion.AngleAxis(-palmComfyUpOffset, Vector3.forward) * Vector3.up;
             rightPalmComfyUp = Quaternion.AngleAxis(palmComfyUpOffset, Vector3.forward) * Vector3.up;
 
-            leftPalmComfyUp = torsoRotation * leftPalmComfyUp;
-            rightPalmComfyUp = torsoRotation * rightPalmComfyUp;
+            leftPalmComfyUp = flattenedNeckRotation * leftPalmComfyUp;
+            rightPalmComfyUp = flattenedNeckRotation * rightPalmComfyUp;
         }
 
         // Update is called once per frame
