@@ -70,11 +70,11 @@ namespace Instrumental.Interaction.Triggers
 		bool ValuePasses(bool input, ExtensionState extensionState)
 		{
 			bool passes = false;
-			if (indexExtension == ExtensionState.Extended)
+			if (extensionState == ExtensionState.Extended)
 			{
 				passes = input;
 			}
-			else if (indexExtension == ExtensionState.Unextended)
+			else if (extensionState == ExtensionState.Unextended)
 			{
 				passes = !input;
 			}
