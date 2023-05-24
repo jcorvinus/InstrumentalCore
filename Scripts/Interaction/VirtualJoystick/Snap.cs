@@ -65,6 +65,11 @@ namespace Instrumental.Interaction.VirtualJoystick
 		void Start()
         {
             StopDeployment();
+            joystick.OnMoved += () =>
+            {
+                StopDeployment();
+                StartDeployment();
+            };
         }
 
         public void StartDeployment()

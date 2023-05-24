@@ -6,6 +6,8 @@ namespace Instrumental.Interaction.VirtualJoystick
 { 
     public class Joystick : MonoBehaviour
     {
+        public System.Action OnMoved;
+
         LeftMasterJoystick joystickMasterControl;
         [SerializeField] GraspableItem bulb;
         [SerializeField] MeshRenderer outerCylinder;
@@ -51,6 +53,7 @@ namespace Instrumental.Interaction.VirtualJoystick
 		private void Bulb_OnUngrasped(GraspableItem sender, InstrumentalHand hand)
 		{
             transform.position = bulb.transform.position;
+            if (OnMoved != null) OnMoved();
         }
 
 		private void OnEnable()
