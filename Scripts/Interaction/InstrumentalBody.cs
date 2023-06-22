@@ -126,10 +126,10 @@ namespace Instrumental.Interaction
 
             // get our palm diagonal directions
             leftPalmDiagonal = Quaternion.AngleAxis(-palmDiagonalOffset, Vector3.forward) * Vector3.up;
-            rightPalmComfyUp = Quaternion.AngleAxis(palmDiagonalOffset, Vector3.forward) * Vector3.up;
+            rightPalmDiagonal = Quaternion.AngleAxis(palmDiagonalOffset, Vector3.forward) * Vector3.up;
 
-            leftPalmComfyUp = flattenedNeckRotation * leftPalmDiagonal;
-            rightPalmComfyUp = flattenedNeckRotation * rightPalmComfyUp;
+            leftPalmDiagonal = flattenedNeckRotation * leftPalmDiagonal;
+            rightPalmDiagonal = flattenedNeckRotation * rightPalmComfyUp;
         }
 
         // Update is called once per frame
