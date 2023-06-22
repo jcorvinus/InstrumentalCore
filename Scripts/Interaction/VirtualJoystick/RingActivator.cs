@@ -108,18 +108,20 @@ namespace Instrumental.Interaction.VirtualJoystick
 
                 outerRing.transform.position = transform.TransformPoint(Vector3.Lerp(Vector3.zero, outerRingPoint, outerTValue));
                 outerRing.transform.localScale = Vector3.Lerp(Vector3.zero, Vector3.one * scale, scaleCurve.Evaluate(outerTValue));
+                outerRing.transform.rotation = innerRing.transform.rotation;
 
-                innerRing.transform.position = transform.position + Vector3.Lerp(Vector3.zero, innerRingPoint, innerTValue);
+                innerRing.transform.localPosition = Vector3.Lerp(Vector3.zero, innerRingPoint, innerTValue);
                 innerRing.transform.localScale = Vector3.Lerp(Vector3.zero, Vector3.one * scale, scaleCurve.Evaluate(outerTValue));
                 outerTarget.transform.SetPositionAndRotation(innerRing.transform.position, innerRing.transform.rotation);
             }
             else
 			{
                 innerRing.transform.localPosition = innerRingPoint;
-                outerTarget.transform.position = transform.position + outerRingPoint;
+                outerTarget.transform.position = transform.TransformPoint(outerRingPoint);
                 outerRing.transform.position = Vector3.SmoothDamp(outerRing.transform.position, 
                     outerTarget.transform.position, 
                     ref innerRingVelocity, dampAmount);
+                outerRing.transform.rotation = innerRing.transform.rotation;
 
                 // get our is in region
                 Vector3 outerTransformedToInnerSpace = innerRing.transform.InverseTransformPoint(outerRing.transform.position);
@@ -145,7 +147,7 @@ namespace Instrumental.Interaction.VirtualJoystick
                     if(newClickState.InPlaneDistance < radius &&
                         currentState.InPlaneDistance < radius)
 					{
-                        Activate();
+                        Activate(); // undo this later when we're good with the behavior
 					}
 				}
 
@@ -174,11 +176,13 @@ namespace Instrumental.Interaction.VirtualJoystick
 
         private void OnDrawGizmos()
 		{
-            Vector3 outerRingPoint = transform.position + (Vector3.up * (verticalOffset + outerRingOffset));
-            Vector3 innerRingPoint = transform.position + (Vector3.up * verticalOffset);
+            Vector3 outerRingPoint = (Vector3.up * (verticalOffset + outerRingOffset));
+            Vector3 innerRingPoint = (Vector3.up * verticalOffset);
 
-            DebugExtension.DrawCircle(outerRingPoint, radius);
-            DebugExtension.DrawCircle(innerRingPoint, radius);
+            Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
+            DebugExtension.DrawCircle(outerRingPoint, radius * scale);
+            DebugExtension.DrawCircle(innerRingPoint, radius * scale);
+            Gizmos.matrix = Matrix4x4.identity;
         }
 	}
 }

@@ -33,8 +33,11 @@ namespace Instrumental.Interaction
 
         [Range(0, 45)]
         [SerializeField] float palmComfyUpOffset = 21;
+        const float palmDiagonalOffset = 45f;
         Vector3 leftPalmComfyUp = Vector3.up;
         Vector3 rightPalmComfyUp = Vector3.up;
+        Vector3 leftPalmDiagonal = Vector3.up;
+        Vector3 rightPalmDiagonal = Vector3.up;
 
         [SerializeField] HandAvatar handAvatar = HandAvatar.Glove;
         [SerializeField] KeyCode avatarSwitchKey = KeyCode.F1;
@@ -47,6 +50,9 @@ namespace Instrumental.Interaction
         public Vector3 LeftPalmComfyUp { get { return leftPalmComfyUp; } }
 
         public Vector3 RightPalmComfyUp { get { return rightPalmComfyUp; } }
+
+        public Vector3 LeftPalmDiagonal { get { return leftPalmDiagonal; } }
+        public Vector3 RightPalmDiagonal { get { return rightPalmDiagonal; } }
 
         public HandAvatar Avatar { get { return handAvatar; } }
 
@@ -116,6 +122,13 @@ namespace Instrumental.Interaction
             rightPalmComfyUp = Quaternion.AngleAxis(palmComfyUpOffset, Vector3.forward) * Vector3.up;
 
             leftPalmComfyUp = flattenedNeckRotation * leftPalmComfyUp;
+            rightPalmComfyUp = flattenedNeckRotation * rightPalmComfyUp;
+
+            // get our palm diagonal directions
+            leftPalmDiagonal = Quaternion.AngleAxis(-palmDiagonalOffset, Vector3.forward) * Vector3.up;
+            rightPalmComfyUp = Quaternion.AngleAxis(palmDiagonalOffset, Vector3.forward) * Vector3.up;
+
+            leftPalmComfyUp = flattenedNeckRotation * leftPalmDiagonal;
             rightPalmComfyUp = flattenedNeckRotation * rightPalmComfyUp;
         }
 

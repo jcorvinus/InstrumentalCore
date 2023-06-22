@@ -11,6 +11,7 @@ namespace Instrumental.Interaction.Triggers
 		public enum DirectionToCheck
         {
             UserUp,
+            UserDiagonal, // 45 degrees towards midline
             HeadForward,
             DirectionToHead
         }
@@ -57,8 +58,11 @@ namespace Instrumental.Interaction.Triggers
 			{
 				case DirectionToCheck.UserUp:
                     return (handedness == Handedness.Left) ? InstrumentalBody.Instance.LeftPalmComfyUp :
-                        InstrumentalBody.Instance.RightPalmComfyUp; // todo: replace this with a smoothly rotating tracked plane
-				case DirectionToCheck.HeadForward:
+                        InstrumentalBody.Instance.RightPalmComfyUp;
+                case DirectionToCheck.UserDiagonal:
+                    return (handedness == Handedness.Left) ? InstrumentalBody.Instance.LeftPalmDiagonal :
+                        InstrumentalBody.Instance.RightPalmDiagonal;
+                case DirectionToCheck.HeadForward:
                     return head.forward;
                 case DirectionToCheck.DirectionToHead:
                     Vector3 palmPosition = hand.GetAnchorPose(AnchorPoint.Palm).position;

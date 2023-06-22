@@ -76,6 +76,11 @@ namespace Instrumental.Interaction.VirtualJoystick
             {
                 Pose anchorPose = hand.GetAnchorPose(AnchorPoint.Palm);
                 ringActivator.transform.position = anchorPose.position;
+                Vector3 forward, up;
+                forward = anchorPose.rotation * Vector3.up;
+                up = anchorPose.rotation * Vector3.forward;
+
+                ringActivator.transform.rotation = Quaternion.LookRotation(forward, up);
 
                 ringActivator.enabled = logicTrigger.IsActive && 
                     !joystick.gameObject.activeInHierarchy;

@@ -274,8 +274,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   handedness: 1
   directionToCheck: 0
-  entryAngle: 37.5
-  exitAngle: 47.5
+  entryAngle: 20.1
+  exitAngle: 33.4
   feedbackActivationAngleOuter: 80
   DrawLength: 0.2
 --- !u!114 &3520004264820536982
@@ -496,7 +496,12 @@ PrefabInstance:
     - target: {fileID: 1508786188466796580, guid: c8458da08c018f54bae1c25698a3cc5a,
         type: 3}
       propertyPath: scale
-      value: 0.73
+      value: 0.495
+      objectReference: {fileID: 0}
+    - target: {fileID: 1508786188466796580, guid: c8458da08c018f54bae1c25698a3cc5a,
+        type: 3}
+      propertyPath: verticalOffset
+      value: 0.045
       objectReference: {fileID: 0}
     - target: {fileID: 5899498360962766449, guid: c8458da08c018f54bae1c25698a3cc5a,
         type: 3}
