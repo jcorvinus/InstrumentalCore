@@ -273,7 +273,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   handedness: 1
-  directionToCheck: 0
+  directionToCheck: 1
   entryAngle: 20.1
   exitAngle: 33.4
   feedbackActivationAngleOuter: 80
