@@ -8,11 +8,25 @@ using Instrumental.Interaction.Constraints;
 namespace Instrumental.Interaction
 {
     /// <summary>
-    /// Add this script to an item to make it graspable.
-    /// Todo: we will need to add support for having more than one
-    /// hand interact with a graspable at once (both hovering, contacting, and grasping)
+    /// Determines which posing system a graspable item will use
+    /// It might be a good idea to eventually turn this into an
+    /// abstract class system, so we can code arbitrary ones
     /// </summary>
-    public class GraspableItem : MonoBehaviour
+	public enum GraspPoseType
+	{ 
+        None=0,
+        StrictPoseMatch=1,
+        OffsetPoseMatch=2
+        //WeightDrag // used for heavy objects that have a sense of heft
+        //SnapPoint // used for objects with 'handle' like affordances
+    }
+
+	/// <summary>
+	/// Add this script to an item to make it graspable.
+	/// Todo: we will need to add support for having more than one
+	/// hand interact with a graspable at once (both hovering, contacting, and grasping)
+	/// </summary>
+	public class GraspableItem : MonoBehaviour
     {
         // These influence the state of all grasp-related functions,
         // so calculate them once per update, and use them in various
@@ -52,6 +66,7 @@ namespace Instrumental.Interaction
         float hoverTValue;
         Handedness graspingHand; // we'll want to change this if we
                                  // ever decide to add two handed grasping.
+        bool gravityStateOnGrasp;
 
         GraspDataVars currentGraspData;
         AudioSource graspSource;
@@ -66,7 +81,11 @@ namespace Instrumental.Interaction
         // actual distance, not normalized. Use this if you need to make sure your signifier scales to a specific value
         float currentGraspDistance;
 
-         // todo: get rotations working
+        [SerializeField] GraspPoseType poseType = GraspPoseType.OffsetPoseMatch;
+        // pose offset values
+        // these are the local-to-hand offsets of the item when the grasp begins
+        Vector3 graspPositionOffset;
+        Quaternion graspRotationOffset;
 
         public bool IsGrasped { get { return isGrasped; } }
         public bool IsHovering { get { return isHovering; } }
@@ -217,6 +236,7 @@ namespace Instrumental.Interaction
         void Ungrasp(InstrumentalHand hand)
 		{
             isGrasped = false;
+            rigidBody.useGravity = gravityStateOnGrasp;
 
             if(OnUngrasped != null)
 			{
@@ -228,21 +248,73 @@ namespace Instrumental.Interaction
 		{
             isGrasped = true;
             graspSource.Play();
+            gravityStateOnGrasp = rigidBody.useGravity;
+            rigidBody.useGravity = false;
 
-            if(OnGrasped != null)
+            GetGraspStartingOffset(hand);
+
+            if (OnGrasped != null)
 			{
                 OnGrasped(this, hand);
 			}
 		}
+
+        void GetGraspStartingOffset(InstrumentalHand hand)
+		{
+            GraspDataVars graspData = CalulcateGraspVars(hand);
+
+            // todo: when we add more specific grasp poses,
+            // create a code flow branch here to allow for that.
+            graspPositionOffset = transform.InverseTransformPoint(graspData.GraspCenter);
+            Quaternion handRotation = hand.GetAnchorPose(AnchorPoint.Palm).rotation;
+            Vector3 handRotationLocalUp = handRotation * Vector3.up;
+            Vector3 handRotationLocalForward = handRotation * Vector3.forward;
+            handRotationLocalUp = transform.InverseTransformDirection(handRotationLocalUp);
+            handRotationLocalForward = transform.InverseTransformDirection(handRotationLocalForward);
+
+            if(poseType == GraspPoseType.StrictPoseMatch)
+			{
+                graspPositionOffset = Vector3.zero;
+            }
+
+            Quaternion handRotationLocal = Quaternion.LookRotation(handRotationLocalForward, handRotationLocalUp);
+            graspRotationOffset = Quaternion.Inverse(handRotationLocal);
+        }
+
+        void DoGraspMovement()
+		{
+            // this is dumb - I should probably just include the InstrumentalHand right in the
+            // grasping data vars
+            InstrumentalHand hand = null;
+            if (graspingHand == Handedness.Left) hand = InstrumentalHand.LeftHand;
+            else if (graspingHand == Handedness.Right) hand = InstrumentalHand.RightHand;
+            else hand = null;
+
+            if (hand != null && poseType != GraspPoseType.None)
+            {
+                Pose currentGraspPose = new Pose(currentGraspData.GraspCenter,
+                    hand.GetAnchorPose(AnchorPoint.Palm).rotation);
+
+                Vector3 worldSpaceOffsetPose = transform.TransformPoint(graspPositionOffset);
+                Vector3 offset = currentGraspPose.position - worldSpaceOffsetPose;
+                Pose destinationPose = new Pose(transform.position + offset,
+                    currentGraspPose.rotation * graspRotationOffset);
+
+                if (constraint) destinationPose = constraint.DoConstraint(destinationPose);
+
+                // depending on isKinematic,
+                // change this?
+                rigidBody.position = destinationPose.position;
+                rigidBody.rotation = destinationPose.rotation;
+            }
+        }
 
 		private void FixedUpdate()
 		{
             // move according to grasp position
             if (isGrasped)
             {
-                Pose currentPose = new Pose(currentGraspData.GraspCenter, transform.rotation);
-                if (constraint) currentPose = constraint.DoConstraint(currentPose);
-                rigidBody.position = currentPose.position;
+                DoGraspMovement();
 			}
 		}
 
