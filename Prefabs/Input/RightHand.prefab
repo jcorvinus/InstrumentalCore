@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3194171812926954228}
   - component: {fileID: 5936511968759538195}
   - component: {fileID: 7665417268855270952}
+  - component: {fileID: -7913379494462910833}
   m_Layer: 0
   m_Name: RightHand
   m_TagString: Untagged
@@ -214,6 +215,8 @@ MonoBehaviour:
     PalmPose:
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
+    IsTracking: 0
+    TrackedForTime: 0
   isLeft: 0
   skeleton:
     actionPath: /actions/default/in/SkeletonRightHand
@@ -227,6 +230,19 @@ MonoBehaviour:
   drawBoneBasis: 0
   drawPalmPose: 0
   jointRadius: 0.08
+--- !u!114 &-7913379494462910833
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8310594477887294983}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39d8aee9b3c72e348a2284165616c596, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sampleWindow: 10
 --- !u!1001 &1132620726426666678
 PrefabInstance:
   m_ObjectHideFlags: 0

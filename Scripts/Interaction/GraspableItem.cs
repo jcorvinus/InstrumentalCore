@@ -87,6 +87,9 @@ namespace Instrumental.Interaction
         Vector3 graspPositionOffset;
         Quaternion graspRotationOffset;
 
+        [Range(1, 100)]
+        [SerializeField] float velocityPower = 9.3f;
+
         public bool IsGrasped { get { return isGrasped; } }
         public bool IsHovering { get { return isHovering; } }
         public float HoverTValue { get { return hoverTValue; } }
@@ -237,6 +240,8 @@ namespace Instrumental.Interaction
 		{
             isGrasped = false;
             rigidBody.useGravity = gravityStateOnGrasp;
+            rigidBody.velocity = hand.Velocity * velocityPower;
+            rigidBody.angularVelocity = hand.AngularVelocity * velocityPower;
 
             if(OnUngrasped != null)
 			{

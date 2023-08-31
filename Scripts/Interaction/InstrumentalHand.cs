@@ -128,10 +128,7 @@ namespace Instrumental.Interaction
 		const float curlCutoff = 0.3f;
 		const float thumbCurlCutoff = 0.31f;
 
-		// tracking
-		bool isTracking = true;
-
-		public bool IsTracking { get { return isTracking; } }
+		public bool IsTracking { get { return dataHand.Data.IsTracking; } }
 
 		private static InstrumentalHand leftHand;
 		private static InstrumentalHand rightHand;
@@ -139,6 +136,9 @@ namespace Instrumental.Interaction
 		public static InstrumentalHand LeftHand { get { return leftHand; } }
 		public static InstrumentalHand RightHand { get { return rightHand; } }
 		public InstrumentalBody Body { get { return body; } }
+
+		public Vector3 Velocity { get { return dataHand.Data.Velocity; } }
+		public Vector3 AngularVelocity { get { return dataHand.Data.AngularVelocity; } }
 
 		private void Awake()
 		{
@@ -171,6 +171,41 @@ namespace Instrumental.Interaction
 			middlePose = GetAnchorPose(AnchorPoint.MiddleTip);
 			ringPose = GetAnchorPose(AnchorPoint.RingTip);
 			pinkyPose = GetAnchorPose(AnchorPoint.PinkyTip);
+		}
+
+		public Pose GetAnchorPose(AnchorPoint anchorPoint)
+		{
+			switch (anchorPoint)
+			{
+				case AnchorPoint.None:
+					return Pose.identity;
+
+				case AnchorPoint.Palm:
+					return dataHand.Data.PalmPose;
+
+				case AnchorPoint.IndexTip:
+					return new Pose(dataHand.Data.IndexTip,
+						dataHand.Data.IndexJoints[3].Pose.rotation);
+
+				case AnchorPoint.MiddleTip:
+					return new Pose(dataHand.Data.MiddleTip,
+						dataHand.Data.MiddleJoints[3].Pose.rotation);
+
+				case AnchorPoint.ThumbTip:
+					return new Pose(dataHand.Data.ThumbTip,
+						dataHand.Data.ThumbJoints[3].Pose.rotation);
+
+				case AnchorPoint.RingTip:
+					return new Pose(dataHand.Data.RingTip,
+						dataHand.Data.RingJoints[3].Pose.rotation);
+
+				case AnchorPoint.PinkyTip:
+					return new Pose(dataHand.Data.PinkyTip,
+						dataHand.Data.PinkyJoints[3].Pose.rotation);
+
+				default:
+					return new Pose(Vector3.zero, Quaternion.identity);
+			}
 		}
 
 		float GetFingerAngle(Vector3 baseDirection,
@@ -316,40 +351,6 @@ namespace Instrumental.Interaction
 			};
 		}
 
-		public Pose GetAnchorPose(AnchorPoint anchorPoint)
-		{
-			switch (anchorPoint)
-			{
-				case AnchorPoint.None:
-					return Pose.identity;
-
-				case AnchorPoint.Palm:
-					return dataHand.Data.PalmPose;
-
-				case AnchorPoint.IndexTip:
-					return new Pose(dataHand.Data.IndexTip,
-						dataHand.Data.IndexJoints[3].Pose.rotation);
-
-				case AnchorPoint.MiddleTip:
-					return new Pose(dataHand.Data.MiddleTip,
-						dataHand.Data.MiddleJoints[3].Pose.rotation);
-
-				case AnchorPoint.ThumbTip:
-					return new Pose(dataHand.Data.ThumbTip,
-						dataHand.Data.ThumbJoints[3].Pose.rotation);
-
-				case AnchorPoint.RingTip:
-					return new Pose(dataHand.Data.RingTip,
-						dataHand.Data.RingJoints[3].Pose.rotation);
-
-				case AnchorPoint.PinkyTip:
-					return new Pose(dataHand.Data.PinkyTip,
-						dataHand.Data.PinkyJoints[3].Pose.rotation);
-
-				default:
-					return new Pose(Vector3.zero, Quaternion.identity);
-			}
-		}
 
 		void DrawBasis(Pose pose)
 		{

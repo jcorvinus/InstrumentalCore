@@ -24,6 +24,10 @@ namespace Instrumental.Interaction.Input
 		[Range(0, 0.1f)]
 		[SerializeField] float jointRadius = 0.08f;
 
+		Vector3 previousTrackedPosition;
+		Quaternion previousTrackedRotation;
+		VelocityEstimation velocityEstimation;
+
 		// steamVR palm offsets
 		const float palmForwardOffset = 0.0153f;
 		const float palmUpOffset = 0.06f;
@@ -37,6 +41,8 @@ namespace Instrumental.Interaction.Input
 			SteamVR.Initialize();
 			skeleton.SetRangeOfMotion(EVRSkeletalMotionRange.WithoutController);
 			skeleton.SetSkeletalTransformSpace(EVRSkeletalTransformSpace.Model);
+
+			velocityEstimation = GetComponent<VelocityEstimation>();
 		}
 
 		// Start is called before the first frame update
@@ -60,6 +66,29 @@ namespace Instrumental.Interaction.Input
 				}
 
 				ConvertData(skeleton.bonePositions, skeleton.boneRotations, skeleton.poseIsValid);
+
+				// send tracked pose updates to the velocity estimator
+				if (Data.IsTracking)
+				{
+					if (!velocityEstimation.IsEstimating) velocityEstimation.StartEstimation();
+					else
+					{
+						velocityEstimation.SubmitSample(Data.PalmPose.position, previousTrackedPosition,
+							Data.PalmPose.rotation, previousTrackedRotation);
+					}
+
+					Data.Velocity = velocityEstimation.Velocity;
+					Data.AngularVelocity = velocityEstimation.AngularVelocity;
+				}
+				else
+				{
+					if (velocityEstimation.IsEstimating) velocityEstimation.StopEstimation();
+					Data.Velocity = Vector3.zero;
+					Data.AngularVelocity = Vector3.zero;
+				}
+
+				previousTrackedPosition = Data.PalmPose.position;
+				previousTrackedRotation = Data.PalmPose.rotation;
 			}
 		}
 
