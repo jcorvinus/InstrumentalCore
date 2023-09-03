@@ -59,9 +59,11 @@ namespace Instrumental.Interaction
 
         SphereCollider itemCollider;
         Rigidbody rigidBody;
+        Vector3 previousCenterOfMass;
         GraspConstraint constraint;
 
         bool isGrasped;
+        bool graspStartedThisFrame = false;
         bool isHovering;
         float hoverTValue;
         Handedness graspingHand; // we'll want to change this if we
@@ -89,6 +91,10 @@ namespace Instrumental.Interaction
 
         [Range(1, 100)]
         [SerializeField] float velocityPower = 9.3f;
+        const float maxMovementSpeed = 6f;
+        AnimationCurve distanceMotionCurve = new AnimationCurve(new Keyframe(0, 1, 0, 0),
+            new Keyframe(0.02f, 0.3f, 0, 0));
+        [SerializeField] bool applyThrowBoost;
 
         public bool IsGrasped { get { return isGrasped; } }
         public bool IsHovering { get { return isHovering; } }
@@ -240,8 +246,12 @@ namespace Instrumental.Interaction
 		{
             isGrasped = false;
             rigidBody.useGravity = gravityStateOnGrasp;
-            rigidBody.velocity = hand.Velocity * velocityPower;
-            rigidBody.angularVelocity = hand.AngularVelocity * velocityPower;
+
+            if (applyThrowBoost)
+            {
+                rigidBody.velocity = hand.Velocity * velocityPower;
+                rigidBody.angularVelocity = hand.AngularVelocity * velocityPower;
+            }
 
             if(OnUngrasped != null)
 			{
@@ -255,8 +265,11 @@ namespace Instrumental.Interaction
             graspSource.Play();
             gravityStateOnGrasp = rigidBody.useGravity;
             rigidBody.useGravity = false;
+            previousCenterOfMass = rigidBody.centerOfMass;
 
             GetGraspStartingOffset(hand);
+
+            graspStartedThisFrame = true;
 
             if (OnGrasped != null)
 			{
@@ -286,6 +299,39 @@ namespace Instrumental.Interaction
             graspRotationOffset = Quaternion.Inverse(handRotationLocal);
         }
 
+        Vector3 CalculateSingleShotVelocity(Vector3 position, Vector3 previousPosition,
+            float deltaTime)
+        {
+            float velocityFactor = 1.0f / deltaTime;
+            return velocityFactor * (position - previousPosition);
+        }
+
+        Vector3 CalculateSingleShotAngularVelocity(Quaternion rotation, Quaternion previousRotation,
+            float deltaTime)
+		{
+            Quaternion deltaRotation = rotation * Quaternion.Inverse(previousRotation);
+
+            Vector3 deltaAxis;
+            float deltaAngle;
+
+            deltaRotation.ToAngleAxis(out deltaAngle, out deltaAxis);
+
+            if (float.IsInfinity(deltaAxis.x))
+            {
+                deltaAxis = Vector3.zero;
+                deltaAngle = 0;
+            }
+
+            if (deltaAngle > 180)
+            {
+                deltaAngle -= 360.0f;
+            }
+
+            Vector3 angularVelocity = deltaAxis * deltaAngle * Mathf.Deg2Rad / deltaTime;
+
+            return angularVelocity;
+        }
+
         void DoGraspMovement()
 		{
             // this is dumb - I should probably just include the InstrumentalHand right in the
@@ -307,10 +353,47 @@ namespace Instrumental.Interaction
 
                 if (constraint) destinationPose = constraint.DoConstraint(destinationPose);
 
-                // depending on isKinematic,
-                // change this?
-                rigidBody.position = destinationPose.position;
-                rigidBody.rotation = destinationPose.rotation;
+                // use strict placement if kinematic,
+                // use physics movement if non-kinematic
+                if (rigidBody.isKinematic)
+                {
+                    rigidBody.MovePosition(destinationPose.position);
+                    rigidBody.MoveRotation(destinationPose.rotation);
+                }
+                else
+				{
+                    // calculate our center of mass, target vleocity, angular velocity, etc
+                    //Vector3 solvedCenterOfMass = destinationPose.rotation * rigidBody.centerOfMass + destinationPose.position;
+                    //Vector3 currentCenterOfMass = rigidBody.rotation * rigidBody.centerOfMass + rigidBody.position;
+
+                    Vector3 targetVelocity = CalculateSingleShotVelocity(destinationPose.position, 
+                         rigidBody.position, Time.fixedDeltaTime);
+                    Vector3 targetAngularVelocity = CalculateSingleShotAngularVelocity(destinationPose.rotation, 
+                        rigidBody.rotation, Time.fixedDeltaTime);
+
+                    float targetSpeedSquared = targetVelocity.sqrMagnitude;
+                    if(targetSpeedSquared > maxMovementSpeed)
+					{
+                        float percent = maxMovementSpeed / Mathf.Sqrt(targetSpeedSquared);
+                        targetVelocity *= percent;
+                        targetAngularVelocity *= percent;
+					}
+
+                    float strength = 1;
+                    if(!graspStartedThisFrame)
+					{
+                        float remainingDistance = Vector3.Distance(rigidBody.position, destinationPose.position);
+                        strength = distanceMotionCurve.Evaluate(remainingDistance);
+					}
+
+                    Vector3 lerpedVelocity = Vector3.Lerp(rigidBody.velocity, targetVelocity, strength);
+                    Vector3 lerpedAngularVelocity = Vector3.Lerp(rigidBody.angularVelocity, targetAngularVelocity, strength);
+
+                    rigidBody.velocity = lerpedVelocity;
+                    rigidBody.angularVelocity = lerpedAngularVelocity;
+
+                    //previousCenterOfMass = solvedCenterOfMass;
+				}
             }
         }
 
@@ -321,6 +404,8 @@ namespace Instrumental.Interaction
             {
                 DoGraspMovement();
 			}
+
+            graspStartedThisFrame = false;
 		}
 
 		void StartHover(InstrumentalHand hand)

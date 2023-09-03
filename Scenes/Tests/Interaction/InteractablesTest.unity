@@ -129,6 +129,37 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 2315127151947817473}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &409921403
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 409921404}
+  m_Layer: 0
+  m_Name: AngularTestB
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &409921404
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 409921403}
+  m_LocalRotation: {x: -0.35582268, y: 0.36165833, z: 0.0027207488, w: 0.8617344}
+  m_LocalPosition: {x: 0.122, y: 1.218, z: 0.3887469}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: -37.968, y: 52.016, z: -18.694}
 --- !u!1 &551779032
 GameObject:
   m_ObjectHideFlags: 0
@@ -398,6 +429,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   poseType: 2
   velocityPower: 9.3
+  applyThrowBoost: 1
 --- !u!4 &1285171564
 Transform:
   m_ObjectHideFlags: 0
@@ -414,6 +446,53 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1294458890
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1294458892}
+  - component: {fileID: 1294458891}
+  m_Layer: 0
+  m_Name: AngularTestA
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1294458891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1294458890}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e24a093881b3b704cb38b78ec5d47467, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rotationA: {fileID: 1294458892}
+  rotationB: {fileID: 409921404}
+  doCalculation: 0
+--- !u!4 &1294458892
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1294458890}
+  m_LocalRotation: {x: -0, y: -0, z: 0.38038358, w: 0.92482877}
+  m_LocalPosition: {x: -0.35330296, y: 1.224, z: 0.3887469}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 44.715}
 --- !u!1 &1414970188
 GameObject:
   m_ObjectHideFlags: 0
@@ -629,6 +708,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   poseType: 2
   velocityPower: 1
+  applyThrowBoost: 0
 --- !u!4 &1742953791
 Transform:
   m_ObjectHideFlags: 0
