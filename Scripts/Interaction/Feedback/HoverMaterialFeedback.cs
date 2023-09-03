@@ -12,13 +12,13 @@ namespace Instrumental.Interaction.Feedback
         [SerializeField] Color hoverColor = Color.cyan;
         [SerializeField] Color graspColor = Color.green;
 
-        GraspableItem item;
+        InteractiveItem item;
 
         MeshRenderer meshRenderer;
 
 		private void Awake()
 		{
-            item = GetComponent<GraspableItem>();
+            item = GetComponent<InteractiveItem>();
             meshRenderer = GetComponentInChildren<MeshRenderer>();
         }
 

@@ -24,7 +24,7 @@ namespace Instrumental.Interaction.VirtualJoystick
 
         Vector3[] linePoints;
 
-        [SerializeField] GraspableItem handle;
+        [SerializeField] InteractiveItem handle;
         SphereCollider handleCollider;
         [Range(0, 1)]
         [SerializeField] float graspDistance = 0.21f;

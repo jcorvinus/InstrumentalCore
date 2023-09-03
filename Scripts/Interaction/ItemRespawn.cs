@@ -6,7 +6,7 @@ namespace Instrumental.Interaction
 {
     public class ItemRespawn : MonoBehaviour
     {
-        [SerializeField] GraspableItem item;
+        [SerializeField] InteractiveItem item;
         Vector3 startingPosition;
         Quaternion startingRotation;
 

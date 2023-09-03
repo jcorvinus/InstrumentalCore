@@ -9,7 +9,7 @@ namespace Instrumental.Interaction.VirtualJoystick
         public System.Action OnMoved;
 
         LeftMasterJoystick joystickMasterControl;
-        [SerializeField] GraspableItem bulb;
+        [SerializeField] InteractiveItem bulb;
         [SerializeField] MeshRenderer outerCylinder;
         [SerializeField] LineRenderer lineRenderer;
 
@@ -50,7 +50,7 @@ namespace Instrumental.Interaction.VirtualJoystick
             headTransform = InstrumentalBody.Instance.Head;
         }
 
-		private void Bulb_OnUngrasped(GraspableItem sender, InstrumentalHand hand)
+		private void Bulb_OnUngrasped(InteractiveItem sender, InstrumentalHand hand)
 		{
             transform.position = bulb.transform.position;
             if (OnMoved != null) OnMoved();

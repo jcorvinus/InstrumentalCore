@@ -22,11 +22,11 @@ namespace Instrumental.Interaction
     }
 
 	/// <summary>
-	/// Add this script to an item to make it graspable.
+	/// Add this script to an item to make it interactive.
 	/// Todo: we will need to add support for having more than one
-	/// hand interact with a graspable at once (both hovering, contacting, and grasping)
+	/// hand interact with a graspable at once (hovering, contacting, and grasping)
 	/// </summary>
-	public class GraspableItem : MonoBehaviour
+	public class InteractiveItem : MonoBehaviour
     {
         // These influence the state of all grasp-related functions,
         // so calculate them once per update, and use them in various
@@ -53,7 +53,7 @@ namespace Instrumental.Interaction
         }
 
         // events
-        public delegate void GraspEventHandler(GraspableItem sender, InstrumentalHand hand);
+        public delegate void GraspEventHandler(InteractiveItem sender, InstrumentalHand hand);
         public event GraspEventHandler OnGrasped;
         public event GraspEventHandler OnUngrasped;
 

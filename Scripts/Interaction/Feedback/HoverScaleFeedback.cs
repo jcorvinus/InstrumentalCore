@@ -10,11 +10,11 @@ namespace Instrumental.Interaction.Feedback
         [SerializeField] float minScale = 0;
         [SerializeField] float maxScale = 1;
         [SerializeField] GameObject optionalDisableOnMax;
-        GraspableItem item;
+        InteractiveItem item;
 
 		private void Awake()
 		{
-            item = GetComponent<GraspableItem>();
+            item = GetComponent<InteractiveItem>();
 		}
 
 		// Start is called before the first frame update

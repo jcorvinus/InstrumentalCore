@@ -8,7 +8,7 @@ namespace Instrumental.Interaction.Feedback
 {
     public class SquashFeedback : MonoBehaviour
     {
-        GraspableItem item;
+        InteractiveItem item;
         SphereCollider sphereCollider; // we'll use this for our squash start distance at first
                                        // might need to come up with a different way of specifying it later
                                        // for things like the pinch cone
@@ -26,7 +26,7 @@ namespace Instrumental.Interaction.Feedback
 
 		private void Awake()
 		{
-            item = GetComponent<GraspableItem>();
+            item = GetComponent<InteractiveItem>();
             sphereCollider = GetComponent<SphereCollider>();
 
             if (sphereCollider) squashStartDistance = sphereCollider.radius;

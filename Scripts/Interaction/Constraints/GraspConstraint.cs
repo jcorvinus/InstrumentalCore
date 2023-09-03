@@ -6,11 +6,11 @@ namespace Instrumental.Interaction.Constraints
 {
     public abstract class GraspConstraint : MonoBehaviour
     {
-		GraspableItem graspItem;
+		InteractiveItem graspItem;
 
 		protected void Awake()
 		{
-			graspItem = GetComponent<GraspableItem>();
+			graspItem = GetComponent<InteractiveItem>();
 			graspItem.SetConstraint(this);
 		}
 
