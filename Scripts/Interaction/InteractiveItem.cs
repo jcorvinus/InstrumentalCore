@@ -65,7 +65,9 @@ namespace Instrumental.Interaction
 
         bool isGrasped;
         bool graspStartedThisFrame = false;
-        bool isHovering;
+        float leftHoverDist=float.PositiveInfinity;
+        float rightHoverDist=float.PositiveInfinity;
+
         float hoverTValue;
         Handedness graspingHand; // we'll want to change this if we
                                  // ever decide to add two handed grasping.
@@ -98,7 +100,7 @@ namespace Instrumental.Interaction
         [SerializeField] bool applyThrowBoost;
 
         public bool IsGrasped { get { return isGrasped; } }
-        public bool IsHovering { get { return isHovering; } }
+        public bool IsHovering { get { return (leftHoverDist < hoverDistance) || (rightHoverDist < hoverDistance); } }
         public float HoverTValue { get { return hoverTValue; } }
         public Rigidbody RigidBody { get { return rigidBody; } }
 
@@ -423,17 +425,17 @@ namespace Instrumental.Interaction
 
 		void StartHover(InstrumentalHand hand)
 		{
-            isHovering = true;
-            graspingHand = hand.Hand;
+            /*isHovering = true;
+            graspingHand = hand.Hand;*/
         }
 
         void StopHover(InstrumentalHand hand)
 		{
-            isHovering = false;
-            graspingHand = Handedness.None;
+            /*isHovering = false;
+            graspingHand = Handedness.None;*/
 		}
 
-        float HoverDistSqr(InstrumentalHand hand)
+        float HoverDist(InstrumentalHand hand)
 		{
             Vector3 hoverPoint = hand.GraspPinch.PinchCenter;
 
@@ -443,8 +445,8 @@ namespace Instrumental.Interaction
 
             if(ClosestPointOnItem(hoverClosestPoint, out hoverClosestPoint, out isInside))
 			{
-                float hoverDistSqr = (hoverClosestPoint - hoverPoint).sqrMagnitude;
-                return (isInside) ? 0 : hoverDistSqr;
+                float hoverDist = (hoverClosestPoint - hoverPoint).magnitude;
+                return (isInside) ? 0 : hoverDist;
             }
             else
 			{
@@ -495,76 +497,105 @@ namespace Instrumental.Interaction
             }
         }
 
+        void DoHover()
+		{
+            bool previousLeftHover = leftHoverDist < hoverDistance;
+            bool previousRightHover = rightHoverDist < hoverDistance;
+
+            leftHoverDist = InstrumentalHand.LeftHand.IsTracking ?
+                HoverDist(InstrumentalHand.LeftHand) : float.PositiveInfinity;
+
+            rightHoverDist = InstrumentalHand.RightHand.IsTracking ?
+                HoverDist(InstrumentalHand.RightHand) : float.PositiveInfinity;
+
+			bool leftHover = (leftHoverDist < hoverDistance);
+			bool rightHover = (rightHoverDist < hoverDistance);
+
+            if(leftHover != previousLeftHover)
+			{
+                if (leftHover) StartHover(InstrumentalHand.LeftHand);
+                else StopHover(InstrumentalHand.LeftHand);
+			}
+
+            if(rightHover != previousRightHover)
+			{
+                if (rightHover) StartHover(InstrumentalHand.RightHand);
+                else StopHover(InstrumentalHand.RightHand);
+			}
+
+            float minHoverDist = Mathf.Min(leftHoverDist, rightHoverDist);
+            hoverTValue = 1 - Mathf.InverseLerp(0, hoverDistance, minHoverDist);
+        }
+
         // Update is called once per frame
         void Update()
         {
-            InstrumentalHand hand = null;
-            if (graspingHand == Handedness.Left) hand = InstrumentalHand.LeftHand;
-            else if (graspingHand == Handedness.Right) hand = InstrumentalHand.RightHand;
-            else hand = null;
+            DoHover();
 
-            currentGraspData = CalulcateGraspVars(hand);
+            // old update kinda sorta used to go here
+		}
 
-            // check to see if we are in a state already
-            // and if so, should we exit
-            if (isGrasped)
-			{
-                // check to see if we should ungrasp
-                bool stillGrasping = !CheckHandUngrasp(hand, currentGraspData);
-                if (!stillGrasping) Ungrasp(hand);
-			}
-            else if (isHovering)
-			{
-                // check to see if we should grasp
-                bool shouldGrasp = CheckHandGrasp(hand, currentGraspData);
+        void OldUpdate()
+		{
+            //         InstrumentalHand hand = null;
+            //         if (graspingHand == Handedness.Left) hand = InstrumentalHand.LeftHand;
+            //         else if (graspingHand == Handedness.Right) hand = InstrumentalHand.RightHand;
+            //         else hand = null;
 
-                if (shouldGrasp)
-                {
-                    Grasp(hand);
-                }
-                else
-                {
-                    // check to see if we should distance un-hover
-                    Vector3 hoverClosestPoint = (currentGraspData.GraspCenter -
-                        currentGraspData.ItemCenter);
-                    float hoverDistanceToCenter = hoverClosestPoint.magnitude;
-                    Vector3 hoverDirection = (hoverClosestPoint / hoverDistanceToCenter);
-                    hoverClosestPoint = currentGraspData.ItemCenter +
-                        (hoverDirection * (itemCollider.radius * transform.lossyScale.x));
+            //         currentGraspData = CalulcateGraspVars(hand);
 
-                    float distance = Vector3.Distance(currentGraspData.GraspCenter, hoverClosestPoint);
-                    hoverTValue = 1 - Mathf.InverseLerp(0, hoverDistance, distance);
+            //         // check to see if we are in a state already
+            //         // and if so, should we exit
+            //         if (isGrasped)
+            //{
+            //             // check to see if we should ungrasp
+            //             bool stillGrasping = !CheckHandUngrasp(hand, currentGraspData);
+            //             if (!stillGrasping) Ungrasp(hand);
+            //}
+            //         else if (isHovering)
+            //{
+            //             // check to see if we should grasp
+            //             bool shouldGrasp = CheckHandGrasp(hand, currentGraspData);
 
-					// if hover distance is lower than radius, then hover clamp hover distance to 0
-					// aside from that, inverse lerp
-					if (distance > hoverDistance)
-					{
-						StopHover(hand);
-					}
-				}
-            }
-            else // we should look at either hand to figure out if hovering should start.
-			{
-                float leftHoverDistSqr = InstrumentalHand.LeftHand.IsTracking ?
-                    HoverDistSqr(InstrumentalHand.LeftHand) : float.PositiveInfinity;
-                float rightHoverDistSqr = InstrumentalHand.RightHand.IsTracking ?
-                    HoverDistSqr(InstrumentalHand.RightHand) : 0;
+            //             if (shouldGrasp)
+            //             {
+            //                 Grasp(hand);
+            //             }
+            //             else
+            //             {
+            //                 float distance = HoverDist(hand);
+            //                 hoverTValue = 1 - Mathf.InverseLerp(0, hoverDistance, distance);
 
-                bool leftHoverClose = (leftHoverDistSqr < hoverDistance);
-                bool rightHoverClose = (rightHoverDistSqr < hoverDistance);
+            //		// if hover distance is lower than radius, then hover clamp hover distance to 0
+            //		// aside from that, inverse lerp
+            //		if (distance > hoverDistance)
+            //		{
+            //			StopHover(hand);
+            //		}
+            //	}
+            //         }
+            //         else // we should look at either hand to figure out if hovering should start.
+            //{
+            //             float leftHoverDist = InstrumentalHand.LeftHand.IsTracking ?
+            //                 HoverDist(InstrumentalHand.LeftHand) : float.PositiveInfinity;
+            //             float rightHoverDist = InstrumentalHand.RightHand.IsTracking ?
+            //                 HoverDist(InstrumentalHand.RightHand) : float.PositiveInfinity;
 
-                if (leftHoverClose && rightHoverClose)
-                {
-                    InstrumentalHand hoverHand = (leftHoverDistSqr < rightHoverDistSqr) ?
-                        InstrumentalHand.LeftHand : InstrumentalHand.RightHand;
+            //             bool leftHoverClose = (leftHoverDist < hoverDistance);
+            //             bool rightHoverClose = (rightHoverDist < hoverDistance);
 
-                    StartHover(hoverHand);
-                }
-                else if (leftHoverClose) StartHover(InstrumentalHand.LeftHand);
-                else if (rightHoverClose) StartHover(InstrumentalHand.RightHand);
-            }
+            //             if (leftHoverClose && rightHoverClose)
+            //             {
+            //                 InstrumentalHand hoverHand = (leftHoverDist < rightHoverDist) ?
+            //                     InstrumentalHand.LeftHand : InstrumentalHand.RightHand;
 
-            CalculateGraspDistance();
+            //                 StartHover(hoverHand);
+            //             }
+            //             else if (leftHoverClose) StartHover(InstrumentalHand.LeftHand);
+            //             else if (rightHoverClose) StartHover(InstrumentalHand.RightHand);
+            //         }
+
+            //         CalculateGraspDistance();
         }
 
         private void CalculateGraspDistance()
