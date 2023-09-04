@@ -58,6 +58,7 @@ namespace Instrumental.Interaction
         public event GraspEventHandler OnUngrasped;
 
         SphereCollider itemCollider;
+        Collider[] itemColliders;
         Rigidbody rigidBody;
         Vector3 previousCenterOfMass;
         GraspConstraint constraint;
@@ -116,6 +117,8 @@ namespace Instrumental.Interaction
 
             graspSource = GetComponent<AudioSource>();
             if (!graspSource) AddAudioSource();
+
+            RefreshColliders();
 		}
 
         public void SetConstraint(GraspConstraint constraint)
@@ -134,6 +137,16 @@ namespace Instrumental.Interaction
 		{
             graspSource = gameObject.AddComponent<AudioSource>();
             graspSource.playOnAwake = false;
+        }
+
+        public void RefreshColliders()
+		{
+            // todo: if we ever want to support nested interactive items,
+            // change this to a traversal walk that collects as it goes but stops
+            // when it finds a child interactiveItem.
+            // child interactive items will require design thought, so make sure to do that
+            // before settling on a decision.
+            itemColliders = GetComponentsInChildren<Collider>(true);
         }
 
 		// Start is called before the first frame update
@@ -425,16 +438,65 @@ namespace Instrumental.Interaction
             Vector3 hoverPoint = hand.GraspPinch.PinchCenter;
 
             // check to see if we should distance hover
-            Vector3 hoverClosestPoint = (hoverPoint -
-                currentGraspData.ItemCenter);
-            float hoverSqrDistanceToCenter = hoverClosestPoint.sqrMagnitude;
-            float hoverDistSqr = hoverSqrDistanceToCenter - (itemCollider.radius * itemCollider.radius);
+            Vector3 hoverClosestPoint = hoverPoint;
+            bool isInside = false;
 
-            return hoverDistSqr;
+            if(ClosestPointOnItem(hoverClosestPoint, out hoverClosestPoint, out isInside))
+			{
+                float hoverDistSqr = (hoverClosestPoint - hoverPoint).sqrMagnitude;
+                return (isInside) ? 0 : hoverDistSqr;
+            }
+            else
+			{
+                return float.PositiveInfinity;
+			}
         }
 
-		// Update is called once per frame
-		void Update()
+        public bool ClosestPointOnItem(Vector3 position, out Vector3 closestPoint,
+            out bool isPointInside)
+        {
+            float closestDistance = float.PositiveInfinity;
+            closestPoint = position;
+
+            if (!rigidBody || itemColliders == null ||
+                itemColliders.Length == 0)
+            {
+                isPointInside = false;
+                return false;
+            }
+            else
+            {
+                bool foundValidCollider = false;
+
+                for (int i = 0; i < itemColliders.Length; i++)
+                {
+                    Collider testCollider = itemColliders[i];
+                    Vector3 closestPointOnCollider = testCollider.ClosestPoint(closestPoint);
+
+                    isPointInside = (closestPointOnCollider == position);
+
+                    if (isPointInside)
+                    {
+                        return true;
+                    }
+
+                    float squareDistance = (position - closestPointOnCollider).sqrMagnitude;
+
+                    if (closestDistance > squareDistance)
+                    {
+                        closestPoint = closestPointOnCollider;
+                    }
+
+                    foundValidCollider = true;
+                }
+
+                isPointInside = false;
+                return foundValidCollider;
+            }
+        }
+
+        // Update is called once per frame
+        void Update()
         {
             InstrumentalHand hand = null;
             if (graspingHand == Handedness.Left) hand = InstrumentalHand.LeftHand;
