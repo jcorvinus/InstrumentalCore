@@ -427,9 +427,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a24e7d2d087accc4baefa54147d59da0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  allowTwoHandedGrasp: 0
   poseType: 2
   velocityPower: 9.3
   applyThrowBoost: 1
+  tipRadius: 0.01
 --- !u!4 &1285171564
 Transform:
   m_ObjectHideFlags: 0
@@ -706,9 +708,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a24e7d2d087accc4baefa54147d59da0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  allowTwoHandedGrasp: 0
   poseType: 2
   velocityPower: 1
   applyThrowBoost: 0
+  tipRadius: 0.01
 --- !u!4 &1742953791
 Transform:
   m_ObjectHideFlags: 0
@@ -1035,7 +1039,7 @@ PrefabInstance:
     - target: {fileID: 2315127150805337353, guid: 9fde6386fcf85d146a21ffeb0bb45d80,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -1.107
+      value: -0.932
       objectReference: {fileID: 0}
     - target: {fileID: 2315127150805337353, guid: 9fde6386fcf85d146a21ffeb0bb45d80,
         type: 3}

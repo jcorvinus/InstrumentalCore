@@ -7,6 +7,35 @@ using Instrumental.Interaction.Constraints;
 
 namespace Instrumental.Interaction
 {
+    public struct BoundsVertices
+    {
+        public Vector3 v1, v2, v3, v4, v5, v6, v7, v8;
+        public Vector3 GetVertex(int index)
+        {
+            switch (index)
+            {
+                case (0):
+                    return v1;
+                case (1):
+                    return v2;
+                case (2):
+                    return v3;
+                case (3):
+                    return v4;
+                case (4):
+                    return v5;
+                case (5):
+                    return v6;
+                case (6):
+                    return v7;
+                case (7):
+                    return v8;
+                default:
+                    return Vector3.zero;
+            }
+        }
+    }
+
     /// <summary>
     /// Determines which posing system a graspable item will use
     /// It might be a good idea to eventually turn this into an
@@ -33,23 +62,44 @@ namespace Instrumental.Interaction
         // states
         public struct GraspDataVars
         {
-            public bool IsValid;
-            //public Vector3 IndexTip;
-            //public Vector3 MiddleTip;
-            //public Vector3 ThumbTip;
-            public Vector3 ItemCenter;
-            public Vector3 GraspCenter;
+            public InstrumentalHand Hand;
+            public bool IsGrasping;
+            public Pose ThumbTip;
+            public bool ThumbOverlap;
+            public Pose IndexTip;
+            public bool IndexOverlap;
+			public Pose MiddleTip;
+            public bool MiddleOverlap;
+            public Pose RingTip;
+            public bool RingOverlap;
+            public Pose PinkyTip; // todo: get the tip angular velocities in here
+            public bool PinkyOverlap;
+			public Vector3 GraspCenter;
 
-            public Vector3 IndexDirection;
-            public float IndexDistance;
-            public float IndexPinchDistance; // this is the index-thumbtip distance
+            public Collider[] ThumbColliderResults;
+            public Collider[] IndexColliderResults;
+            public Collider[] MiddleColliderResults;
+            public Collider[] RingColliderResults;
+            public Collider[] PinkyColliderResults;
 
-            public Vector3 MiddleDirection;
-            public float MiddleDistance;
-            public float MiddlePinchDistance; // this is the middle-thumbtip distance
-
-            public Vector3 ThumbDirection;
-            public float ThumbDistance;
+            public bool GetOverlap(int fingerIndex)
+			{
+				switch (fingerIndex)
+				{
+                    case (0):
+                        return ThumbOverlap;
+                    case (1):
+                        return IndexOverlap;
+                    case (2):
+                        return MiddleOverlap;
+                    case (3):
+                        return RingOverlap;
+                    case (4):
+                        return PinkyOverlap;
+					default:
+                        return false;
+				}
+			}
         }
 
         // events
@@ -57,29 +107,32 @@ namespace Instrumental.Interaction
         public event GraspEventHandler OnGrasped;
         public event GraspEventHandler OnUngrasped;
 
-        SphereCollider itemCollider;
+        float itemRadius;
+        Bounds itemBounds;
         Collider[] itemColliders;
         Rigidbody rigidBody;
         Vector3 previousCenterOfMass;
         GraspConstraint constraint;
 
-        bool isGrasped;
-        bool graspStartedThisFrame = false;
-        float leftHoverDist=float.PositiveInfinity;
+		#region Hover Vars
+		float leftHoverDist =float.PositiveInfinity;
         float rightHoverDist=float.PositiveInfinity;
 
         float hoverTValue;
-        Handedness graspingHand; // we'll want to change this if we
-                                 // ever decide to add two handed grasping.
+        [Range(0.05f, 0.3f)]
+        float hoverDistance = 0.125f;
+		#endregion
+
+		#region Grasp Vars
+		[SerializeField] bool allowTwoHandedGrasp = false;
+        bool isGrasped;
+        bool graspStartedThisFrame = false;
         bool gravityStateOnGrasp;
 
-        GraspDataVars currentGraspData;
+        List<GraspDataVars> graspableHands;
         AudioSource graspSource;
 
         const float ungraspDistance = 0.003636f;
-
-        [Range(0.05f, 0.3f)]
-        float hoverDistance = 0.125f;
 
         // negative values are near-grasp,
         // positive values are grasp.
@@ -98,8 +151,15 @@ namespace Instrumental.Interaction
         AnimationCurve distanceMotionCurve = new AnimationCurve(new Keyframe(0, 1, 0, 0),
             new Keyframe(0.02f, 0.3f, 0, 0));
         [SerializeField] bool applyThrowBoost;
+        #endregion
 
-        public bool IsGrasped { get { return isGrasped; } }
+        #region Debug Vars
+        [Range(0.01f, 0.07f)]
+        [SerializeField] float tipRadius=0.01f;
+        MeshRenderer[] tipGrabSpheres;
+		#endregion
+
+		public bool IsGrasped { get { return isGrasped; } }
         public bool IsHovering { get { return (leftHoverDist < hoverDistance) || (rightHoverDist < hoverDistance); } }
         public float HoverTValue { get { return hoverTValue; } }
         public Rigidbody RigidBody { get { return rigidBody; } }
@@ -109,7 +169,6 @@ namespace Instrumental.Interaction
 
 		private void Awake()
 		{
-            itemCollider = GetComponent<SphereCollider>();
             rigidBody = GetComponent<Rigidbody>();
 
             if (!rigidBody)
@@ -121,7 +180,63 @@ namespace Instrumental.Interaction
             if (!graspSource) AddAudioSource();
 
             RefreshColliders();
+
+            // init hands
+            graspableHands = new List<GraspDataVars>();
 		}
+
+        // Start is called before the first frame update
+        void Start()
+        {
+            graspSource.clip = GlobalSpace.Instance.UICommon.GrabClip;
+
+            GraspDataVars leftHandGraspData = new GraspDataVars()
+            {
+                GraspCenter = Vector3.zero,
+                Hand = InstrumentalHand.LeftHand,
+                IsGrasping = false,
+                IndexTip = new Pose(),
+                MiddleTip = new Pose(),
+                PinkyTip = new Pose(),
+                RingTip = new Pose(),
+                ThumbTip = new Pose(),
+                ThumbColliderResults = new Collider[5],
+                IndexColliderResults = new Collider[5],
+                MiddleColliderResults = new Collider[5],
+                RingColliderResults = new Collider[5],
+                PinkyColliderResults = new Collider[5]
+            };
+            GraspDataVars rightHandGraspData = new GraspDataVars()
+            {
+                GraspCenter = Vector3.zero,
+                Hand = InstrumentalHand.RightHand,
+                IsGrasping = false,
+                IndexTip = new Pose(),
+                MiddleTip = new Pose(),
+                PinkyTip = new Pose(),
+                RingTip = new Pose(),
+                ThumbTip = new Pose(),
+                ThumbColliderResults = new Collider[5],
+                IndexColliderResults = new Collider[5],
+                MiddleColliderResults = new Collider[5],
+                RingColliderResults = new Collider[5],
+                PinkyColliderResults = new Collider[5]
+            };
+            graspableHands.Add(leftHandGraspData);
+            graspableHands.Add(rightHandGraspData);
+
+            tipGrabSpheres = new MeshRenderer[10];
+            for (int i = 0; i < tipGrabSpheres.Length; i++)
+            {
+                GameObject tipObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                SphereCollider tipCollider = tipObject.GetComponent<SphereCollider>();
+                tipCollider.isTrigger = true;
+                tipCollider.enabled = false;
+                MeshRenderer tipRenderer = tipObject.GetComponent<MeshRenderer>();
+                tipRenderer.transform.localScale = Vector3.one * tipRadius;
+                tipGrabSpheres[i] = tipRenderer;
+            }
+        }
 
         public void SetConstraint(GraspConstraint constraint)
 		{
@@ -141,125 +256,361 @@ namespace Instrumental.Interaction
             graspSource.playOnAwake = false;
         }
 
-        public void RefreshColliders()
+		#region Collider Handling
+		public void RefreshColliders()
 		{
+            // todo: it may be wise to automatically put interactive items on their own layer
+            // so that tests to find them can be less computationally expensive in complicated physics environments.
+
             // todo: if we ever want to support nested interactive items,
             // change this to a traversal walk that collects as it goes but stops
             // when it finds a child interactiveItem.
             // child interactive items will require design thought, so make sure to do that
             // before settling on a decision.
             itemColliders = GetComponentsInChildren<Collider>(true);
+
+            // get our bounds and radius here
+            CalculateRadius(itemColliders);
         }
 
-		// Start is called before the first frame update
-		void Start()
-		{
-            graspSource.clip = GlobalSpace.Instance.UICommon.GrabClip;
-        }
+        public bool ClosestPointOnItem(Vector3 position, out Vector3 closestPoint,
+            out bool isPointInside)
+        {
+            float closestDistance = float.PositiveInfinity;
+            closestPoint = position;
 
-        GraspDataVars CalulcateGraspVars(InstrumentalHand hand)
-		{
-            bool isValid = hand;
-
-            Pose indexTip, middleTip, thumbTip;
-            if (isValid)
+            if (!rigidBody || itemColliders == null ||
+                itemColliders.Length == 0)
             {
-                indexTip = hand.GetAnchorPose(AnchorPoint.IndexTip);
-                middleTip = hand.GetAnchorPose(AnchorPoint.MiddleTip);
-                thumbTip = hand.GetAnchorPose(AnchorPoint.ThumbTip);
+                isPointInside = false;
+                return false;
             }
             else
-			{
-                indexTip = new Pose();
-                middleTip = new Pose();
-                thumbTip = new Pose();
-			}
-
-            Vector3 center = transform.TransformPoint(itemCollider.center);
-            Vector3 indexDirection = (indexTip.position - center);
-            float indexDistance = indexDirection.magnitude;
-            indexDirection /= indexDistance;
-
-            Vector3 middleDirection = (middleTip.position - center);
-            float middleDistance = middleDirection.magnitude;
-            middleDirection /= middleDistance;
-
-            Vector3 thumbDirection = (thumbTip.position - center);
-            float thumbDistance = thumbDirection.magnitude;
-            thumbDirection /= thumbDistance;
-
-            float indexPinchDistance = 0;
-            float middlePinchDistance = 0;
-
-            Vector3 graspCenter = center;
-
-            if (isValid)
             {
-                PinchInfo indexPinch, middlePinch;
-                indexPinch = hand.GetPinchInfo(Finger.Index);
-                middlePinch = hand.GetPinchInfo(Finger.Middle);
+                bool foundValidCollider = false;
 
-                indexPinchDistance = indexPinch.PinchDistance;
-                middlePinchDistance = middlePinch.PinchDistance;
+                for (int i = 0; i < itemColliders.Length; i++)
+                {
+                    Collider testCollider = itemColliders[i];
+                    Vector3 closestPointOnCollider = testCollider.ClosestPoint(closestPoint);
 
-                bool indexPinchIsCloser = (hand.GetPinchInfo(Finger.Index).PinchAmount > hand.GetPinchInfo(Finger.Middle).PinchAmount);
-                graspCenter = 
-                    indexPinchIsCloser ? hand.GetPinchInfo(Finger.Index).PinchCenter :
-                    hand.GetPinchInfo(Finger.Middle).PinchCenter; // replace this with a blended version
-                        // once you figure out how to make the blend work properly.
+                    isPointInside = (closestPointOnCollider == position);
+
+                    if (isPointInside)
+                    {
+                        return true;
+                    }
+
+                    float squareDistance = (position - closestPointOnCollider).sqrMagnitude;
+
+                    if (closestDistance > squareDistance)
+                    {
+                        closestPoint = closestPointOnCollider;
+                    }
+
+                    foundValidCollider = true;
+                }
+
+                isPointInside = false;
+                return foundValidCollider;
+            }
+        }
+
+        void StackWalk(Transform currentTransform, ref List<Transform> stack, Rigidbody rootBody)
+        {
+            if (currentTransform == null)
+            {
+                Debug.Log("Stackwalk hit scene root, this is bad");
+            }
+            else if (currentTransform.gameObject.GetInstanceID() != rootBody.gameObject.GetInstanceID())
+            {
+                stack.Add(currentTransform);
+                Debug.Log("Added " + currentTransform.name + " to stack, now has " + stack.Count);
+                StackWalk(currentTransform.parent, ref stack, rigidBody);
+            }
+            else
+            {
+                Debug.Log("Finished stack at " + currentTransform.name + ", now has " + stack.Count);
+            }
+        }
+
+        Bounds GetColliderLocalBounds(Collider _collider)
+        {
+            Vector3 center = Vector3.zero;
+            Vector3 size = Vector3.zero;
+
+            if (_collider is BoxCollider)
+            {
+                BoxCollider boxCollider = (BoxCollider)_collider;
+                center = boxCollider.center;
+                size = boxCollider.size;
+            }
+            else if (_collider is SphereCollider)
+            {
+                SphereCollider sphereCollider = (SphereCollider)_collider;
+                center = sphereCollider.center;
+                size = Vector3.one * sphereCollider.radius * 2;
+            }
+            else if (_collider is CapsuleCollider)
+            {
+                CapsuleCollider capsuleCollider = (CapsuleCollider)_collider;
+                center = capsuleCollider.center;
+
+                switch (capsuleCollider.direction)
+                {
+                    case (0): // x
+                        size = new Vector3(capsuleCollider.height, capsuleCollider.radius * 2, capsuleCollider.radius * 2);
+                        break;
+                    case (1): // y
+                        size = new Vector3(capsuleCollider.radius * 2, capsuleCollider.height, capsuleCollider.radius * 2);
+                        break;
+                    case (2): // z
+                        size = new Vector3(capsuleCollider.radius * 2, capsuleCollider.radius * 2, capsuleCollider.height);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            else if (_collider is MeshCollider)
+            {
+                MeshCollider meshCollider = (MeshCollider)_collider;
+                center = meshCollider.sharedMesh.bounds.center;
+                size = meshCollider.sharedMesh.bounds.size;
             }
 
-            return new GraspDataVars()
-            {
-                IsValid = isValid,
-                ItemCenter = center,
+            return new Bounds(center, size);
+        }
 
-                IndexDistance = indexDistance,
-                IndexPinchDistance = indexPinchDistance,
-                MiddleDistance = middleDistance,
-                MiddlePinchDistance = middlePinchDistance,
-                ThumbDistance = thumbDistance,
-                GraspCenter = graspCenter
-                //IndexDirection = indexDirection, // get rid of these 
-                //IndexTip = indexTip.position, // if they wind up not being necessary.
-                //MiddleDirection = middleDireciton,
-                //MiddleTip = middleTip.position,
-                //ThumbTip = thumbTip.position,
-                //ThumbDirection = thumbDirection
+        BoundsVertices GetVerticesForCollider(Collider _collider)
+        {
+            // we might not need this anymore, look into optimizing it out
+            Bounds bounds = GetColliderLocalBounds(_collider);
+
+            // transform our vertices stack walked upwards to the root
+            List<Transform> transformStack = new List<Transform>();
+
+            StackWalk(_collider.transform, ref transformStack, rigidBody);
+
+            // in a bounds configuration:
+            // v1 is down front left, v2 is down front right, v3 is down back left, v4 is down back right
+            Vector3 v1 = bounds.center, v2 = bounds.center, v3 = bounds.center, v4 = bounds.center,
+                // v5 is up front left, v6 is up front right, v7 is up back left, v8 is up back right
+                v5 = bounds.center, v6 = bounds.center, v7 = bounds.center, v8 = bounds.center;
+
+            if (_collider is SphereCollider)
+            {
+                SphereCollider sphereCollider = (SphereCollider)_collider;
+                v1 = sphereCollider.center + (Vector3.up * sphereCollider.radius);
+                v2 = sphereCollider.center + (Vector3.down * sphereCollider.radius);
+                v3 = sphereCollider.center + (Vector3.forward * sphereCollider.radius);
+                v4 = sphereCollider.center + (Vector3.back * sphereCollider.radius);
+                v5 = sphereCollider.center + (Vector3.left * sphereCollider.radius);
+                v6 = sphereCollider.center + (Vector3.right * sphereCollider.radius);
+                v7 = sphereCollider.center;
+                v8 = sphereCollider.center;
+            }
+            else if (_collider is CapsuleCollider)
+            {
+                CapsuleCollider capsuleCollider = (CapsuleCollider)_collider;
+
+                Vector3 direction = Vector3.zero;
+                Vector3 radiusDirA = Vector3.zero, radiusDirB = Vector3.zero;
+                switch (capsuleCollider.direction)
+                {
+                    case (0):
+                        direction = Vector3.right;
+                        radiusDirA = Vector3.forward;
+                        radiusDirB = Vector3.up;
+                        break;
+
+                    case (1):
+                        direction = Vector3.up;
+                        radiusDirA = Vector3.right;
+                        radiusDirB = Vector3.forward;
+                        break;
+
+                    case (2):
+                        direction = Vector3.right;
+                        radiusDirA = Vector3.forward;
+                        radiusDirB = Vector3.up;
+                        break;
+
+                    default:
+                        break;
+                }
+
+                v1 = capsuleCollider.center + (direction * capsuleCollider.height * 0.5f);
+                v2 = capsuleCollider.center - (direction * capsuleCollider.height * 0.5f);
+                v3 = capsuleCollider.center + (radiusDirA * capsuleCollider.radius);
+                v4 = capsuleCollider.center - (radiusDirA * capsuleCollider.radius);
+                v5 = capsuleCollider.center + (radiusDirB * capsuleCollider.radius);
+                v6 = capsuleCollider.center - (radiusDirB * capsuleCollider.radius);
+                v7 = capsuleCollider.center;
+                v8 = capsuleCollider.center;
+            }
+            else
+            {
+                // if mesh collider
+                // todo: in the future what we can do is calculate this by making a cage around the mesh, then
+                // fitting those points to the closest point on mesh.
+                // we can then store this for a given collider so that we never have to re-calculate this 
+                // fitted sparse collection of points for a given mesh collider.
+                v1 = bounds.center + (Vector3.down * bounds.size.y * 0.5f) + (Vector3.forward * bounds.size.z * 0.5f) + (Vector3.left * bounds.size.x * 0.5f);
+                v2 = bounds.center + (Vector3.down * bounds.size.y * 0.5f) + (Vector3.forward * bounds.size.z * 0.5f) + (Vector3.right * bounds.size.x * 0.5f);
+                v3 = bounds.center + (Vector3.down * bounds.size.y * 0.5f) + (Vector3.back * bounds.size.z * 0.5f) + (Vector3.left * bounds.size.x * 0.5f);
+                v4 = bounds.center + (Vector3.down * bounds.size.y * 0.5f) + (Vector3.back * bounds.size.z * 0.5f) + (Vector3.right * bounds.size.x * 0.5f);
+
+                v5 = bounds.center + (Vector3.up * bounds.size.y * 0.5f) + (Vector3.forward * bounds.size.z * 0.5f) + (Vector3.left * bounds.size.x * 0.5f);
+                v6 = bounds.center + (Vector3.up * bounds.size.y * 0.5f) + (Vector3.forward * bounds.size.z * 0.5f) + (Vector3.right * bounds.size.x * 0.5f);
+                v7 = bounds.center + (Vector3.up * bounds.size.y * 0.5f) + (Vector3.back * bounds.size.z * 0.5f) + (Vector3.left * bounds.size.x * 0.5f);
+                v8 = bounds.center + (Vector3.up * bounds.size.y * 0.5f) + (Vector3.back * bounds.size.z * 0.5f) + (Vector3.right * bounds.size.x * 0.5f);
+            }
+
+            for (int i = 0; i < transformStack.Count; i++)
+            {
+                Transform currentTransform = transformStack[i];
+                Matrix4x4 trs = Matrix4x4.TRS(currentTransform.localPosition, currentTransform.localRotation, currentTransform.localScale);
+                v1 = trs.MultiplyPoint3x4(v1);
+                v2 = trs.MultiplyPoint3x4(v2);
+                v3 = trs.MultiplyPoint3x4(v3);
+                v4 = trs.MultiplyPoint3x4(v4);
+                v5 = trs.MultiplyPoint3x4(v5);
+                v6 = trs.MultiplyPoint3x4(v6);
+                v7 = trs.MultiplyPoint3x4(v7);
+                v8 = trs.MultiplyPoint3x4(v8);
+            }
+
+            return new BoundsVertices()
+            {
+                v1 = v1,
+                v2 = v2,
+                v3 = v3,
+                v4 = v4,
+                v5 = v5,
+                v6 = v6,
+                v7 = v7,
+                v8 = v8
             };
+        }
+
+        void CalculateRadius(Collider[] colliders)
+        {
+            Vector3 furthestPoint = rigidBody.centerOfMass;
+            float furthestSqrDist = 0;
+
+            for (int i = 0; i < colliders.Length; i++)
+            {
+                Collider currentCollider = colliders[i];
+                BoundsVertices boundsVertices = GetVerticesForCollider(currentCollider);
+
+                for (int v = 0; v < 8; v++)
+                {
+                    Vector3 vertex = boundsVertices.GetVertex(v);
+                    Vector3 offset = vertex - rigidBody.centerOfMass;
+                    float sqrMag = offset.sqrMagnitude;
+
+                    if (sqrMag > furthestSqrDist)
+                    {
+                        furthestPoint = vertex;
+                        furthestSqrDist = sqrMag;
+                    }
+                }
+            }
+
+            itemRadius = (furthestSqrDist > 0) ? Mathf.Sqrt(furthestSqrDist) : 0;
+        }
+
+        bool HasItemCollider(int hits, Collider[] testColliders)
+        {
+            for (int i = 0; i < hits; i++)
+            {
+                for (int c = 0; c < itemColliders.Length; c++)
+                {
+                    if (testColliders[i].GetInstanceID() == itemColliders[c].GetInstanceID())
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        #endregion
+
+		#region Grasping
+		void CalculateGraspVars(ref GraspDataVars handDataVars)		
+        {
+            InstrumentalHand hand = handDataVars.Hand;
+
+            if (hand.IsTracking)
+            {
+                handDataVars.IndexTip = hand.GetAnchorPose(AnchorPoint.IndexTip);
+                handDataVars.MiddleTip = hand.GetAnchorPose(AnchorPoint.MiddleTip);
+                handDataVars.ThumbTip = hand.GetAnchorPose(AnchorPoint.ThumbTip);
+                handDataVars.RingTip = hand.GetAnchorPose(AnchorPoint.RingTip);
+                handDataVars.PinkyTip = hand.GetAnchorPose(AnchorPoint.PinkyTip);
+
+                bool indexPinchIsCloser = (hand.GetPinchInfo(Finger.Index).PinchAmount > hand.GetPinchInfo(Finger.Middle).PinchAmount);
+                handDataVars.GraspCenter =
+                    indexPinchIsCloser ? hand.GetPinchInfo(Finger.Index).PinchCenter :
+                    hand.GetPinchInfo(Finger.Middle).PinchCenter; // replace this with a blended version
+                                                                  // once you figure out how to make the blend work properly.
+                int numThumbHits = Physics.OverlapSphereNonAlloc(handDataVars.ThumbTip.position, tipRadius, handDataVars.ThumbColliderResults);
+                handDataVars.ThumbOverlap = HasItemCollider(numThumbHits, handDataVars.ThumbColliderResults);
+
+                int numIndexHits = Physics.OverlapSphereNonAlloc(handDataVars.IndexTip.position, tipRadius, handDataVars.IndexColliderResults);
+                handDataVars.IndexOverlap = HasItemCollider(numIndexHits, handDataVars.IndexColliderResults);
+
+                int numMiddleHits = Physics.OverlapSphereNonAlloc(handDataVars.MiddleTip.position, tipRadius, handDataVars.MiddleColliderResults);
+                handDataVars.MiddleOverlap = HasItemCollider(numMiddleHits, handDataVars.MiddleColliderResults);
+
+                int numRingHits = Physics.OverlapSphereNonAlloc(handDataVars.RingTip.position, tipRadius, handDataVars.RingColliderResults);
+                handDataVars.RingOverlap = HasItemCollider(numRingHits, handDataVars.RingColliderResults);
+
+                int numPinkyHits = Physics.OverlapSphereNonAlloc(handDataVars.PinkyTip.position, tipRadius, handDataVars.PinkyColliderResults);
+                handDataVars.PinkyOverlap = HasItemCollider(numPinkyHits, handDataVars.PinkyColliderResults);
+            }
 		}
 
-		bool CheckHandGrasp(InstrumentalHand hand, GraspDataVars graspVars)
+		bool CheckHandGrasp(GraspDataVars graspVars)
 		{
+            InstrumentalHand hand = graspVars.Hand;
 			if (hand == null) return false;
 			if (!hand.IsTracking) return false; // may want to replace untracked ungrasp
-												// with untracked suspend at some point in the future. Possibly
-												// with predicted motion
+                                                // with untracked suspend at some point in the future. Possibly
+                                                // with predicted motion
 
-			bool thumbDistancePasses = graspVars.ThumbDistance < itemCollider.radius;
-			bool indexDistancePasses = graspVars.IndexDistance < itemCollider.radius;
-			bool middleDistancePasses = graspVars.MiddleDistance < itemCollider.radius;
-
-			return thumbDistancePasses && (indexDistancePasses || middleDistancePasses);
+            return CheckPinchGrip(graspVars);
 		}
 
-        bool CheckHandUngrasp(InstrumentalHand hand, GraspDataVars graspVars)
+        bool CheckPinchGrip(GraspDataVars graspVars)
 		{
+            bool thumbTestPasses = graspVars.ThumbOverlap;
+            bool indexTestPasses = graspVars.IndexOverlap;
+            bool middleTestPasses = graspVars.MiddleOverlap;
+            bool ringTestPasses = graspVars.RingOverlap;
+            bool pinkyTestPasses = graspVars.PinkyOverlap; // 'pinch grip' and 'palm grip' bools?
+
+            return thumbTestPasses && (indexTestPasses || middleTestPasses || ringTestPasses || pinkyTestPasses);
+        }
+
+        bool CheckHandUngrasp(GraspDataVars graspVars)
+        {
+            InstrumentalHand hand = graspVars.Hand;
             if (hand == null) return true;
             if (!hand.IsTracking) return false; // we can suspend like this, kinda.
 
-            float minPinchDistance = Mathf.Min(graspVars.IndexPinchDistance,
-                graspVars.MiddlePinchDistance);
-
-            return (minPinchDistance > ungraspRadius);
+            return !CheckPinchGrip(graspVars);
 		}
 
-        float ungraspRadius { get { return (itemCollider.radius * 2) + ungraspDistance; } }
+        float ungraspRadius { get { return (itemRadius) + ungraspDistance; } }
 
 
-        void Ungrasp(InstrumentalHand hand)
+        // todo: change this to work with the new 2 handed system
+        void Ungrasp(GraspDataVars graspData)
 		{
             isGrasped = false;
+            InstrumentalHand hand = graspData.Hand;
             rigidBody.useGravity = gravityStateOnGrasp;
 
             if (applyThrowBoost)
@@ -274,7 +625,8 @@ namespace Instrumental.Interaction
 			}
 		}
 
-        void Grasp(InstrumentalHand hand)
+        // todo: change this to work with the new 2 handed system
+        void Grasp(GraspDataVars graspData)
 		{
             isGrasped = true;
             graspSource.Play();
@@ -282,24 +634,22 @@ namespace Instrumental.Interaction
             rigidBody.useGravity = false;
             previousCenterOfMass = rigidBody.centerOfMass;
 
-            GetGraspStartingOffset(hand);
+            GetGraspStartingOffset(graspData);
 
             graspStartedThisFrame = true;
 
             if (OnGrasped != null)
 			{
-                OnGrasped(this, hand);
+                OnGrasped(this, graspData.Hand);
 			}
 		}
 
-        void GetGraspStartingOffset(InstrumentalHand hand)
+        void GetGraspStartingOffset(GraspDataVars graspData)
 		{
-            GraspDataVars graspData = CalulcateGraspVars(hand);
-
             // todo: when we add more specific grasp poses,
             // create a code flow branch here to allow for that.
             graspPositionOffset = transform.InverseTransformPoint(graspData.GraspCenter);
-            Quaternion handRotation = hand.GetAnchorPose(AnchorPoint.Palm).rotation;
+            Quaternion handRotation = graspData.Hand.GetAnchorPose(AnchorPoint.Palm).rotation;
             Vector3 handRotationLocalUp = handRotation * Vector3.up;
             Vector3 handRotationLocalForward = handRotation * Vector3.forward;
             handRotationLocalUp = transform.InverseTransformDirection(handRotationLocalUp);
@@ -347,14 +697,26 @@ namespace Instrumental.Interaction
             return angularVelocity;
         }
 
+        GraspDataVars GetGraspingVars()
+		{
+            for(int i=0; i < graspableHands.Count; i++)
+			{
+                GraspDataVars candidate = graspableHands[i];
+                if (candidate.IsGrasping) return candidate;
+			}
+
+            return new GraspDataVars();
+		}
+
         void DoGraspMovement()
 		{
             // this is dumb - I should probably just include the InstrumentalHand right in the
             // grasping data vars
-            InstrumentalHand hand = null;
-            if (graspingHand == Handedness.Left) hand = InstrumentalHand.LeftHand;
-            else if (graspingHand == Handedness.Right) hand = InstrumentalHand.RightHand;
-            else hand = null;
+
+            // we'll only do a single hand grasp for now until we can get to making the solver.
+            GraspDataVars currentGraspData = GetGraspingVars();
+
+            InstrumentalHand hand = currentGraspData.Hand;
 
             if (hand != null && poseType != GraspPoseType.None)
             {
@@ -412,8 +774,77 @@ namespace Instrumental.Interaction
             }
         }
 
-		private void FixedUpdate()
+        void UpdateGrasp()
+        {
+            for(int handIndex=0; handIndex < graspableHands.Count; handIndex++)
+			{
+                GraspDataVars graspData = graspableHands[handIndex];
+                CalculateGraspVars(ref graspData);
+                graspableHands[handIndex] = graspData;
+            }
+
+            if(!isGrasped)
+			{
+                bool leftShouldGrasp = CheckHandGrasp(graspableHands[0]);
+                bool rightShouldGrasp = CheckHandGrasp(graspableHands[1]);
+
+                if(leftShouldGrasp) // eeeeeeeeh this needs to be changed
+				{
+                    GraspDataVars leftGraspData = graspableHands[0];
+                    Grasp(leftGraspData);
+					leftGraspData.IsGrasping = true; // ugh this is such a hack
+                    graspableHands[0] = leftGraspData;
+				}
+                else if(rightShouldGrasp)
+				{
+                    GraspDataVars rightGraspData = graspableHands[1];
+                    Grasp(rightGraspData);
+                    rightGraspData.IsGrasping = true; // ugh this is such a hack
+                    graspableHands[1] = rightGraspData;
+                }
+			}
+            else
+			{
+                bool leftShouldUngrasp = CheckHandUngrasp(graspableHands[0]);
+                bool rightShouldUngrasp = CheckHandUngrasp(graspableHands[1]);
+
+                GraspDataVars leftGraspData = graspableHands[0];
+                GraspDataVars rightGraspData = graspableHands[1];
+
+                if(leftGraspData.IsGrasping && leftShouldUngrasp)
+                {
+                    Ungrasp(leftGraspData);
+                    leftGraspData.IsGrasping = false;
+                    graspableHands[0] = leftGraspData;
+                }
+                else if (rightGraspData.IsGrasping && rightShouldUngrasp)
+                {
+                    Ungrasp(rightGraspData);
+                    rightGraspData.IsGrasping = false;
+                    graspableHands[1] = rightGraspData;
+                }
+			}
+        }
+
+        private void CalculateGraspDistance()
+        {
+            float indexDistance = float.PositiveInfinity;
+            float middleDistance = float.PositiveInfinity;
+
+            //indexDistance = currentGraspData.IndexDistance; //- itemCollider.radius; 
+            //middleDistance = currentGraspData.MiddleDistance; //- itemCollider.radius; 
+
+            //indexDistance = currentGraspData.IndexPinchDistance * 0.5f;
+            //middleDistance = currentGraspData.MiddlePinchDistance * 0.5f;
+
+            currentGraspDistance = 0;//Mathf.Min(indexDistance, middleDistance);
+        }
+        #endregion
+
+        private void FixedUpdate()
 		{
+            UpdateGrasp();
+
             // move according to grasp position
             if (isGrasped)
             {
@@ -454,50 +885,7 @@ namespace Instrumental.Interaction
 			}
         }
 
-        public bool ClosestPointOnItem(Vector3 position, out Vector3 closestPoint,
-            out bool isPointInside)
-        {
-            float closestDistance = float.PositiveInfinity;
-            closestPoint = position;
-
-            if (!rigidBody || itemColliders == null ||
-                itemColliders.Length == 0)
-            {
-                isPointInside = false;
-                return false;
-            }
-            else
-            {
-                bool foundValidCollider = false;
-
-                for (int i = 0; i < itemColliders.Length; i++)
-                {
-                    Collider testCollider = itemColliders[i];
-                    Vector3 closestPointOnCollider = testCollider.ClosestPoint(closestPoint);
-
-                    isPointInside = (closestPointOnCollider == position);
-
-                    if (isPointInside)
-                    {
-                        return true;
-                    }
-
-                    float squareDistance = (position - closestPointOnCollider).sqrMagnitude;
-
-                    if (closestDistance > squareDistance)
-                    {
-                        closestPoint = closestPointOnCollider;
-                    }
-
-                    foundValidCollider = true;
-                }
-
-                isPointInside = false;
-                return foundValidCollider;
-            }
-        }
-
-        void DoHover()
+        void UpdateHover()
 		{
             bool previousLeftHover = leftHoverDist < hoverDistance;
             bool previousRightHover = rightHoverDist < hoverDistance;
@@ -530,96 +918,57 @@ namespace Instrumental.Interaction
         // Update is called once per frame
         void Update()
         {
-            DoHover();
+            UpdateHover();
 
-            // old update kinda sorta used to go here
+            if (graspableHands.Count > 0)
+            {
+                GraspDataVars hand0 = graspableHands[0];
+                for (int i = 0; i < 5; i++)
+                {
+                    Pose pose = hand0.Hand.GetAnchorPose((AnchorPoint)i + 2);
+                    tipGrabSpheres[i].transform.position = pose.position;
+                    tipGrabSpheres[i].transform.localScale = Vector3.one * tipRadius;
+
+                    tipGrabSpheres[i].gameObject.SetActive(hand0.Hand.IsTracking);
+
+                    // material color depending on sphere overlap
+                    bool tipOverlap = hand0.GetOverlap(i);
+                    tipGrabSpheres[i].material.color = (tipOverlap) ? Color.green : Color.white;
+                }
+            }
+
+            if (graspableHands.Count > 1)
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    GraspDataVars hand1 = graspableHands[1];
+                    int offset = 5;
+                    Pose pose = hand1.Hand.GetAnchorPose((AnchorPoint)i + 2);
+                    tipGrabSpheres[i + offset].transform.position = pose.position;
+                    tipGrabSpheres[i + offset].transform.localScale = Vector3.one * tipRadius;
+
+                    tipGrabSpheres[i + offset].gameObject.SetActive(hand1.Hand.IsTracking);
+
+                    // material color depending on sphere overlap
+                    bool tipOverlap = hand1.GetOverlap(i);
+                    tipGrabSpheres[i + offset].material.color = (tipOverlap) ? Color.green : Color.white;
+                }
+            }
 		}
-
-        void OldUpdate()
-		{
-            //         InstrumentalHand hand = null;
-            //         if (graspingHand == Handedness.Left) hand = InstrumentalHand.LeftHand;
-            //         else if (graspingHand == Handedness.Right) hand = InstrumentalHand.RightHand;
-            //         else hand = null;
-
-            //         currentGraspData = CalulcateGraspVars(hand);
-
-            //         // check to see if we are in a state already
-            //         // and if so, should we exit
-            //         if (isGrasped)
-            //{
-            //             // check to see if we should ungrasp
-            //             bool stillGrasping = !CheckHandUngrasp(hand, currentGraspData);
-            //             if (!stillGrasping) Ungrasp(hand);
-            //}
-            //         else if (isHovering)
-            //{
-            //             // check to see if we should grasp
-            //             bool shouldGrasp = CheckHandGrasp(hand, currentGraspData);
-
-            //             if (shouldGrasp)
-            //             {
-            //                 Grasp(hand);
-            //             }
-            //             else
-            //             {
-            //                 float distance = HoverDist(hand);
-            //                 hoverTValue = 1 - Mathf.InverseLerp(0, hoverDistance, distance);
-
-            //		// if hover distance is lower than radius, then hover clamp hover distance to 0
-            //		// aside from that, inverse lerp
-            //		if (distance > hoverDistance)
-            //		{
-            //			StopHover(hand);
-            //		}
-            //	}
-            //         }
-            //         else // we should look at either hand to figure out if hovering should start.
-            //{
-            //             float leftHoverDist = InstrumentalHand.LeftHand.IsTracking ?
-            //                 HoverDist(InstrumentalHand.LeftHand) : float.PositiveInfinity;
-            //             float rightHoverDist = InstrumentalHand.RightHand.IsTracking ?
-            //                 HoverDist(InstrumentalHand.RightHand) : float.PositiveInfinity;
-
-            //             bool leftHoverClose = (leftHoverDist < hoverDistance);
-            //             bool rightHoverClose = (rightHoverDist < hoverDistance);
-
-            //             if (leftHoverClose && rightHoverClose)
-            //             {
-            //                 InstrumentalHand hoverHand = (leftHoverDist < rightHoverDist) ?
-            //                     InstrumentalHand.LeftHand : InstrumentalHand.RightHand;
-
-            //                 StartHover(hoverHand);
-            //             }
-            //             else if (leftHoverClose) StartHover(InstrumentalHand.LeftHand);
-            //             else if (rightHoverClose) StartHover(InstrumentalHand.RightHand);
-            //         }
-
-            //         CalculateGraspDistance();
-        }
-
-        private void CalculateGraspDistance()
-		{
-            float indexDistance = float.PositiveInfinity;
-            float middleDistance = float.PositiveInfinity;
-
-            indexDistance = currentGraspData.IndexDistance; //- itemCollider.radius; 
-            middleDistance = currentGraspData.MiddleDistance; //- itemCollider.radius; 
-
-			//indexDistance = currentGraspData.IndexPinchDistance * 0.5f;
-			//middleDistance = currentGraspData.MiddlePinchDistance * 0.5f;
-
-			currentGraspDistance = Mathf.Min(indexDistance, middleDistance);
-        }
-
 		private void OnDrawGizmos()
 		{
-            Gizmos.DrawWireSphere(transform.position, hoverDistance);
-            if (itemCollider)
-            {
+            if(rigidBody)
+			{
                 Gizmos.color = Color.blue;
-                Gizmos.DrawWireSphere(transform.position, ungraspRadius);
-            }
+                Gizmos.DrawWireSphere(transform.position, ungraspRadius); // this is an old visualization from when we were only doing sphere colliders
+
+                Gizmos.color = Color.white;
+                Gizmos.DrawWireSphere(transform.TransformPoint(rigidBody.centerOfMass),
+                    itemRadius);
+                Gizmos.color = Color.yellow;
+                Gizmos.DrawWireSphere(transform.TransformPoint(rigidBody.centerOfMass),
+                    itemRadius + hoverDistance);
+			}
         }
 	}
 }
