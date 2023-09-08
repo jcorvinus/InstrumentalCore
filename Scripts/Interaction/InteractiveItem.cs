@@ -105,7 +105,7 @@ namespace Instrumental.Interaction
         }
 
         // events
-        public delegate void GraspEventHandler(InteractiveItem sender, InstrumentalHand hand);
+        public delegate void GraspEventHandler(InteractiveItem sender);
         public event GraspEventHandler OnGrasped;
         public event GraspEventHandler OnUngrasped;
 
@@ -631,27 +631,45 @@ namespace Instrumental.Interaction
         float ungraspRadius { get { return (itemRadius) + ungraspDistance; } }
 
 
-        // todo: change this to work with the new 2 handed system
-        void Ungrasp(GraspDataVars graspData)
+        void PerHandUngrasp(ref GraspDataVars graspData)
+		{
+            InstrumentalHand hand = graspData.Hand;
+            graspData.IsGrasping = false;
+
+            int currentGraspCount = NumberOfGraspingHands();
+
+            if (currentGraspCount == 0) Ungrasp(hand.Velocity, hand.AngularVelocity);
+        }
+
+        void Ungrasp(Vector3 velocity, Vector3 angularVelocity)
 		{
             isGrasped = false;
-            InstrumentalHand hand = graspData.Hand;
+
             rigidBody.useGravity = gravityStateOnGrasp;
 
             if (applyThrowBoost)
             {
-                rigidBody.velocity = hand.Velocity * velocityPower;
-                rigidBody.angularVelocity = hand.AngularVelocity * velocityPower;
+                rigidBody.velocity = velocity * velocityPower;
+                rigidBody.angularVelocity = angularVelocity * velocityPower;
             }
 
             if(OnUngrasped != null)
 			{
-                OnUngrasped(this, hand);
+                OnUngrasped(this);
 			}
 		}
 
-        // todo: change this to work with the new 2 handed system
-        void Grasp(ref GraspDataVars graspData)
+        void PerHandGrasp(ref GraspDataVars graspData)
+		{
+            int currentGraspCount = NumberOfGraspingHands();
+
+            GetGraspStartingOffset(ref graspData);
+            graspData.IsGrasping = true;
+
+            if (currentGraspCount == 0) StartGrasp();
+        }
+
+        void StartGrasp()
 		{
             isGrasped = true;
             graspSource.Play();
@@ -659,13 +677,11 @@ namespace Instrumental.Interaction
             rigidBody.useGravity = false;
             previousCenterOfMass = rigidBody.centerOfMass;
 
-            GetGraspStartingOffset(ref graspData);
-
             graspStartedThisFrame = true;
 
             if (OnGrasped != null)
 			{
-                OnGrasped(this, graspData.Hand);
+                OnGrasped(this);
 			}
 		}
 
@@ -819,16 +835,12 @@ namespace Instrumental.Interaction
                 if(leftShouldGrasp) // eeeeeeeeh this needs to be changed
 				{
                     GraspDataVars leftGraspData = graspableHands[0];
-                    Grasp(ref leftGraspData);
-					leftGraspData.IsGrasping = true; // ugh this is such a hack
-                    //graspableHands[0] = leftGraspData;
+                    PerHandGrasp(ref leftGraspData);
 				}
                 else if(rightShouldGrasp)
 				{
                     GraspDataVars rightGraspData = graspableHands[1];
-                    Grasp(ref rightGraspData);
-                    rightGraspData.IsGrasping = true; // ugh this is such a hack
-                    //graspableHands[1] = rightGraspData;
+                    PerHandGrasp(ref rightGraspData);
                 }
 			}
             else
@@ -841,15 +853,11 @@ namespace Instrumental.Interaction
 
                 if(leftGraspData.IsGrasping && leftShouldUngrasp)
                 {
-                    Ungrasp(leftGraspData);
-                    leftGraspData.IsGrasping = false;
-                    graspableHands[0] = leftGraspData;
+                    PerHandUngrasp(ref leftGraspData);
                 }
                 else if (rightGraspData.IsGrasping && rightShouldUngrasp)
                 {
-                    Ungrasp(rightGraspData);
-                    rightGraspData.IsGrasping = false;
-                    graspableHands[1] = rightGraspData;
+                    PerHandUngrasp(ref rightGraspData);
                 }
 			}
         }
@@ -867,6 +875,16 @@ namespace Instrumental.Interaction
 
             currentGraspDistance = 0;//Mathf.Min(indexDistance, middleDistance);
         }
+
+        private int NumberOfGraspingHands()
+		{
+            int graspCount = 0;
+            for(int i=0; i < graspableHands.Count; i++)
+			{
+                if (graspableHands[i].IsGrasping) graspCount++;
+			}
+            return graspCount;
+		}
         #endregion
 
         private void FixedUpdate()

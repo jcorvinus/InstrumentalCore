@@ -50,7 +50,7 @@ namespace Instrumental.Interaction.VirtualJoystick
             headTransform = InstrumentalBody.Instance.Head;
         }
 
-		private void Bulb_OnUngrasped(InteractiveItem sender, InstrumentalHand hand)
+		private void Bulb_OnUngrasped(InteractiveItem sender)
 		{
             transform.position = bulb.transform.position;
             if (OnMoved != null) OnMoved();
