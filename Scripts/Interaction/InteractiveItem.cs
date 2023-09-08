@@ -60,7 +60,7 @@ namespace Instrumental.Interaction
         // These influence the state of all grasp-related functions,
         // so calculate them once per update, and use them in various
         // states
-        public struct GraspDataVars
+        public class GraspDataVars
         {
             public InstrumentalHand Hand;
             public bool IsGrasping;
@@ -75,6 +75,8 @@ namespace Instrumental.Interaction
             public Pose PinkyTip; // todo: get the tip angular velocities in here
             public bool PinkyOverlap;
 			public Vector3 GraspCenter;
+            public Vector3 GraspPositionOffset;
+            public Quaternion GraspRotationOffset;
 
             public Collider[] ThumbColliderResults;
             public Collider[] IndexColliderResults;
@@ -140,10 +142,6 @@ namespace Instrumental.Interaction
         float currentGraspDistance;
 
         [SerializeField] GraspPoseType poseType = GraspPoseType.OffsetPoseMatch;
-        // pose offset values
-        // these are the local-to-hand offsets of the item when the grasp begins
-        Vector3 graspPositionOffset;
-        Quaternion graspRotationOffset;
 
         [Range(1, 100)]
         [SerializeField] float velocityPower = 9.3f;
@@ -157,7 +155,10 @@ namespace Instrumental.Interaction
         [Range(0.01f, 0.07f)]
         [SerializeField] float tipRadius=0.01f;
         MeshRenderer[] tipGrabSpheres;
-		#endregion
+        #endregion
+
+        private Vector3 respawnPosition;
+        private Quaternion respawnRotation;
 
 		public bool IsGrasped { get { return isGrasped; } }
         public bool IsHovering { get { return (leftHoverDist < hoverDistance) || (rightHoverDist < hoverDistance); } }
@@ -236,7 +237,31 @@ namespace Instrumental.Interaction
                 tipRenderer.transform.localScale = Vector3.one * tipRadius;
                 tipGrabSpheres[i] = tipRenderer;
             }
+
+            SetRespawnLocation();
         }
+
+        public void SetRespawnLocation(Vector3 position, Quaternion rotation)
+		{
+            respawnPosition = position;
+            respawnRotation = rotation;
+		}
+
+        public void SetRespawnLocation()
+		{
+            Vector3 position = rigidBody.position;
+            Quaternion rotation = rigidBody.rotation;
+
+            SetRespawnLocation(position, rotation);
+        }
+
+        public void Respawn()
+		{
+            rigidBody.position = respawnPosition;
+            rigidBody.rotation = respawnRotation;
+            rigidBody.velocity = Vector3.zero;
+            rigidBody.angularVelocity = Vector3.zero;
+		}
 
         public void SetConstraint(GraspConstraint constraint)
 		{
@@ -626,7 +651,7 @@ namespace Instrumental.Interaction
 		}
 
         // todo: change this to work with the new 2 handed system
-        void Grasp(GraspDataVars graspData)
+        void Grasp(ref GraspDataVars graspData)
 		{
             isGrasped = true;
             graspSource.Play();
@@ -634,7 +659,7 @@ namespace Instrumental.Interaction
             rigidBody.useGravity = false;
             previousCenterOfMass = rigidBody.centerOfMass;
 
-            GetGraspStartingOffset(graspData);
+            GetGraspStartingOffset(ref graspData);
 
             graspStartedThisFrame = true;
 
@@ -644,11 +669,11 @@ namespace Instrumental.Interaction
 			}
 		}
 
-        void GetGraspStartingOffset(GraspDataVars graspData)
+        void GetGraspStartingOffset(ref GraspDataVars graspData)
 		{
             // todo: when we add more specific grasp poses,
             // create a code flow branch here to allow for that.
-            graspPositionOffset = transform.InverseTransformPoint(graspData.GraspCenter);
+            Vector3 graspPositionOffset = transform.InverseTransformPoint(graspData.GraspCenter);
             Quaternion handRotation = graspData.Hand.GetAnchorPose(AnchorPoint.Palm).rotation;
             Vector3 handRotationLocalUp = handRotation * Vector3.up;
             Vector3 handRotationLocalForward = handRotation * Vector3.forward;
@@ -661,7 +686,10 @@ namespace Instrumental.Interaction
             }
 
             Quaternion handRotationLocal = Quaternion.LookRotation(handRotationLocalForward, handRotationLocalUp);
-            graspRotationOffset = Quaternion.Inverse(handRotationLocal);
+            Quaternion graspRotationOffset = Quaternion.Inverse(handRotationLocal);
+
+            graspData.GraspPositionOffset = graspPositionOffset;
+            graspData.GraspRotationOffset = graspRotationOffset;
         }
 
         Vector3 CalculateSingleShotVelocity(Vector3 position, Vector3 previousPosition,
@@ -723,10 +751,10 @@ namespace Instrumental.Interaction
                 Pose currentGraspPose = new Pose(currentGraspData.GraspCenter,
                     hand.GetAnchorPose(AnchorPoint.Palm).rotation);
 
-                Vector3 worldSpaceOffsetPose = transform.TransformPoint(graspPositionOffset);
+                Vector3 worldSpaceOffsetPose = transform.TransformPoint(currentGraspData.GraspPositionOffset);
                 Vector3 offset = currentGraspPose.position - worldSpaceOffsetPose;
                 Pose destinationPose = new Pose(transform.position + offset,
-                    currentGraspPose.rotation * graspRotationOffset);
+                    currentGraspPose.rotation * currentGraspData.GraspRotationOffset);
 
                 if (constraint) destinationPose = constraint.DoConstraint(destinationPose);
 
@@ -791,16 +819,16 @@ namespace Instrumental.Interaction
                 if(leftShouldGrasp) // eeeeeeeeh this needs to be changed
 				{
                     GraspDataVars leftGraspData = graspableHands[0];
-                    Grasp(leftGraspData);
+                    Grasp(ref leftGraspData);
 					leftGraspData.IsGrasping = true; // ugh this is such a hack
-                    graspableHands[0] = leftGraspData;
+                    //graspableHands[0] = leftGraspData;
 				}
                 else if(rightShouldGrasp)
 				{
                     GraspDataVars rightGraspData = graspableHands[1];
-                    Grasp(rightGraspData);
+                    Grasp(ref rightGraspData);
                     rightGraspData.IsGrasping = true; // ugh this is such a hack
-                    graspableHands[1] = rightGraspData;
+                    //graspableHands[1] = rightGraspData;
                 }
 			}
             else
