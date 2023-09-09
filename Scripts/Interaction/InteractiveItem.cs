@@ -4,6 +4,7 @@ using UnityEngine;
 
 using Instrumental.Space;
 using Instrumental.Interaction.Constraints;
+using Instrumental.Interaction.Solvers;
 
 namespace Instrumental.Interaction
 {
@@ -77,6 +78,7 @@ namespace Instrumental.Interaction
 			public Vector3 GraspCenter;
             public Vector3 GraspPositionOffset;
             public Quaternion GraspRotationOffset;
+            public Vector3 GraspStartPosition;
 
             public Collider[] ThumbColliderResults;
             public Collider[] IndexColliderResults;
@@ -132,7 +134,10 @@ namespace Instrumental.Interaction
         bool gravityStateOnGrasp;
 
         List<GraspDataVars> graspableHands;
+        List<Vector3> graspStartPoints;
+        List<Vector3> graspCurrentPoints;
         AudioSource graspSource;
+        KabschSolver poseSolver;
 
         const float ungraspDistance = 0.003636f;
 
@@ -184,6 +189,10 @@ namespace Instrumental.Interaction
 
             // init hands
             graspableHands = new List<GraspDataVars>();
+            graspStartPoints = new List<Vector3>(2);
+            graspCurrentPoints = new List<Vector3>(2);
+
+            poseSolver = new KabschSolver();
 		}
 
         // Start is called before the first frame update
@@ -706,6 +715,9 @@ namespace Instrumental.Interaction
 
             graspData.GraspPositionOffset = graspPositionOffset;
             graspData.GraspRotationOffset = graspRotationOffset;
+
+            // storing the original grasp position for our solver
+            graspData.GraspStartPosition = graspData.GraspCenter;
         }
 
         Vector3 CalculateSingleShotVelocity(Vector3 position, Vector3 previousPosition,
@@ -754,9 +766,6 @@ namespace Instrumental.Interaction
 
         void DoGraspMovement()
 		{
-            // this is dumb - I should probably just include the InstrumentalHand right in the
-            // grasping data vars
-
             // we'll only do a single hand grasp for now until we can get to making the solver.
             GraspDataVars currentGraspData = GetGraspingVars();
 
@@ -783,7 +792,7 @@ namespace Instrumental.Interaction
                 }
                 else
 				{
-                    // calculate our center of mass, target vleocity, angular velocity, etc
+                    // calculate our center of mass, target velocity, angular velocity, etc
                     //Vector3 solvedCenterOfMass = destinationPose.rotation * rigidBody.centerOfMass + destinationPose.position;
                     //Vector3 currentCenterOfMass = rigidBody.rotation * rigidBody.centerOfMass + rigidBody.position;
 
@@ -824,42 +833,21 @@ namespace Instrumental.Interaction
 			{
                 GraspDataVars graspData = graspableHands[handIndex];
                 CalculateGraspVars(ref graspData);
-                graspableHands[handIndex] = graspData;
-            }
+                graspableHands[handIndex] = graspData; // this might not be necessary.
 
-            if(!isGrasped)
-			{
-                bool leftShouldGrasp = CheckHandGrasp(graspableHands[0]);
-                bool rightShouldGrasp = CheckHandGrasp(graspableHands[1]);
+                bool isCurrentlyGrasping = graspData.IsGrasping;
 
-                if(leftShouldGrasp) // eeeeeeeeh this needs to be changed
+                if(isCurrentlyGrasping)
 				{
-                    GraspDataVars leftGraspData = graspableHands[0];
-                    PerHandGrasp(ref leftGraspData);
+                    bool shouldUngrasp = (CheckHandUngrasp(graspData));
+                    if (shouldUngrasp) PerHandUngrasp(ref graspData);
 				}
-                else if(rightShouldGrasp)
+                else
 				{
-                    GraspDataVars rightGraspData = graspableHands[1];
-                    PerHandGrasp(ref rightGraspData);
-                }
-			}
-            else
-			{
-                bool leftShouldUngrasp = CheckHandUngrasp(graspableHands[0]);
-                bool rightShouldUngrasp = CheckHandUngrasp(graspableHands[1]);
-
-                GraspDataVars leftGraspData = graspableHands[0];
-                GraspDataVars rightGraspData = graspableHands[1];
-
-                if(leftGraspData.IsGrasping && leftShouldUngrasp)
-                {
-                    PerHandUngrasp(ref leftGraspData);
-                }
-                else if (rightGraspData.IsGrasping && rightShouldUngrasp)
-                {
-                    PerHandUngrasp(ref rightGraspData);
-                }
-			}
+                    bool shouldGrasp = CheckHandGrasp(graspData);
+                    if (shouldGrasp) PerHandGrasp(ref graspData);
+				}
+            }
         }
 
         private void CalculateGraspDistance()
