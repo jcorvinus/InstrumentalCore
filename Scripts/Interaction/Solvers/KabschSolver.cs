@@ -10,14 +10,14 @@ namespace Instrumental.Interaction.Solvers
         Vector3[] DataCovariance = new Vector3[3];
         Quaternion OptimalRotation = Quaternion.identity;
         public float scaleRatio = 1f;
-        public Matrix4x4 SolveKabsch(Vector3[] inPoints, Vector4[] refPoints, bool solveRotation = true, bool solveScale = false)
+        public Matrix4x4 SolveKabsch(List<Vector3> inPoints, List<Vector4> refPoints, bool solveRotation = true, bool solveScale = false)
         {
-            if (inPoints.Length != refPoints.Length) { return Matrix4x4.identity; }
+            if (inPoints.Count != refPoints.Count) { return Matrix4x4.identity; }
 
             //Calculate the centroid offset and construct the centroid-shifted point matrices
             Vector3 inCentroid = Vector3.zero; Vector3 refCentroid = Vector3.zero;
             float inTotal = 0f, refTotal = 0f;
-            for (int i = 0; i < inPoints.Length; i++)
+            for (int i = 0; i < inPoints.Count; i++)
             {
                 inCentroid += new Vector3(inPoints[i].x, inPoints[i].y, inPoints[i].z) * refPoints[i].w;
                 inTotal += refPoints[i].w;
@@ -31,7 +31,7 @@ namespace Instrumental.Interaction.Solvers
             if (solveScale)
             {
                 float inScale = 0f, refScale = 0f;
-                for (int i = 0; i < inPoints.Length; i++)
+                for (int i = 0; i < inPoints.Count; i++)
                 {
                     inScale += (new Vector3(inPoints[i].x, inPoints[i].y, inPoints[i].z) - inCentroid).magnitude;
                     refScale += (new Vector3(refPoints[i].x, refPoints[i].y, refPoints[i].z) - refCentroid).magnitude;
@@ -77,7 +77,7 @@ namespace Instrumental.Interaction.Solvers
         }
 
         //Calculate Covariance Matrices --------------------------------------------------
-        public static Vector3[] TransposeMultSubtract(Vector3[] vec1, Vector4[] vec2, Vector3 vec1Centroid, Vector3 vec2Centroid, Vector3[] covariance)
+        public static Vector3[] TransposeMultSubtract(List<Vector3> vec1, List<Vector4> vec2, Vector3 vec1Centroid, Vector3 vec2Centroid, Vector3[] covariance)
         {
             UnityEngine.Profiling.Profiler.BeginSample("Calculate Covariance Matrix");
             for (int i = 0; i < 3; i++)
@@ -85,7 +85,7 @@ namespace Instrumental.Interaction.Solvers
                 covariance[i] = Vector3.zero;
             }
 
-            for (int k = 0; k < vec1.Length; k++)
+            for (int k = 0; k < vec1.Count; k++)
             {//k is the column in this matrix
                 Vector3 left = (vec1[k] - vec1Centroid) * vec2[k].w;
                 Vector3 right = (new Vector3(vec2[k].x, vec2[k].y, vec2[k].z) - vec2Centroid) * Mathf.Abs(vec2[k].w);

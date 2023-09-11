@@ -104,10 +104,12 @@ namespace Instrumental.Interaction
                         return false;
 				}
 			}
-        }
+		}
 
-        // events
-        public delegate void GraspEventHandler(InteractiveItem sender);
+
+
+		// events
+		public delegate void GraspEventHandler(InteractiveItem sender);
         public event GraspEventHandler OnGrasped;
         public event GraspEventHandler OnUngrasped;
 
@@ -128,14 +130,17 @@ namespace Instrumental.Interaction
 		#endregion
 
 		#region Grasp Vars
-		[SerializeField] bool allowTwoHandedGrasp = false;
+		bool allowTwoHandedGrasp = true; // make this customizable later
+        const bool useKabschSolve = false;
         bool isGrasped;
         bool graspStartedThisFrame = false;
         bool gravityStateOnGrasp;
 
         List<GraspDataVars> graspableHands;
         List<Vector3> graspStartPoints;
-        List<Vector3> graspCurrentPoints;
+        List<Vector4> graspCurrentPoints;
+        List<Vector3> offsetStartPoints; // these are used so we can subtract the body position from
+                                    // grasp start points before solving
         AudioSource graspSource;
         KabschSolver poseSolver;
 
@@ -189,8 +194,9 @@ namespace Instrumental.Interaction
 
             // init hands
             graspableHands = new List<GraspDataVars>();
-            graspStartPoints = new List<Vector3>(2);
-            graspCurrentPoints = new List<Vector3>(2);
+            graspStartPoints = new List<Vector3>(10);
+            graspCurrentPoints = new List<Vector4>(10);
+            offsetStartPoints = new List<Vector3>(10);
 
             poseSolver = new KabschSolver();
 		}
@@ -764,22 +770,81 @@ namespace Instrumental.Interaction
             return new GraspDataVars();
 		}
 
+        Pose GetSolvedPose()
+        {
+            Pose destinationPose = Pose.identity;
+            int graspCount = 0;
+
+            for (int i = 0; i < graspableHands.Count; i++)
+            {
+                GraspDataVars currentGraspData = graspableHands[i];
+
+                if (currentGraspData.IsGrasping)
+                {
+                    InstrumentalHand hand = currentGraspData.Hand;
+                    Pose currentGraspPose = new Pose(currentGraspData.GraspCenter,
+                        hand.GetAnchorPose(AnchorPoint.Palm).rotation);
+
+                    Vector3 worldSpaceOffsetPose = transform.TransformPoint(currentGraspData.GraspPositionOffset);
+                    Vector3 offset = currentGraspPose.position - worldSpaceOffsetPose;
+                    Vector3 position = transform.position + offset; // maybe change transform.position to body.position?
+                    destinationPose = new Pose(position + destinationPose.position,
+                        destinationPose.rotation * (currentGraspPose.rotation * currentGraspData.GraspRotationOffset));
+
+                    graspCount++;
+                }
+            }
+
+            if(graspCount == 0)
+			{
+                destinationPose = new Pose(rigidBody.position, rigidBody.rotation); // this should never happen but whatever
+			}
+
+            return destinationPose;
+		}
+
+        Pose GetKabschSolvedPose()
+		{
+            Vector3 bodyPosition = rigidBody.position;
+            Quaternion bodyRotation = rigidBody.rotation;
+
+            offsetStartPoints.Clear();
+            for (int i = 0; i < graspStartPoints.Count; i++)
+            {
+                offsetStartPoints.Add(graspStartPoints[i] - bodyPosition);
+            }
+
+            for (int i = 0; i < graspCurrentPoints.Count; i++)
+            {
+                Vector3 currentPoint = new Vector3(graspCurrentPoints[i].x,
+                    graspCurrentPoints[i].y, graspCurrentPoints[i].z);
+                Vector3 adjustedPoint = currentPoint - bodyPosition;
+                graspCurrentPoints[i] = new Vector4(currentPoint.x, currentPoint.y, currentPoint.z, 1);
+            }
+
+            // I think we're having this shoot us off in the distance because we're not keeping track of our
+            // original and current manipulator positions, and not handling the offset between current manipulator
+            // points and the body position
+            Matrix4x4 solvedMatrix = poseSolver.SolveKabsch(offsetStartPoints, graspCurrentPoints);
+
+            return new Pose(bodyPosition + solvedMatrix.GetVector3(),
+                    solvedMatrix.GetRotation() * bodyRotation);
+		}
+
         void DoGraspMovement()
 		{
-            // we'll only do a single hand grasp for now until we can get to making the solver.
-            GraspDataVars currentGraspData = GetGraspingVars();
-
-            InstrumentalHand hand = currentGraspData.Hand;
-
-            if (hand != null && poseType != GraspPoseType.None)
+            if (poseType != GraspPoseType.None)
             {
-                Pose currentGraspPose = new Pose(currentGraspData.GraspCenter,
-                    hand.GetAnchorPose(AnchorPoint.Palm).rotation);
+                Pose destinationPose = Pose.identity;
 
-                Vector3 worldSpaceOffsetPose = transform.TransformPoint(currentGraspData.GraspPositionOffset);
-                Vector3 offset = currentGraspPose.position - worldSpaceOffsetPose;
-                Pose destinationPose = new Pose(transform.position + offset,
-                    currentGraspPose.rotation * currentGraspData.GraspRotationOffset);
+                if(useKabschSolve)
+				{
+                    destinationPose = GetKabschSolvedPose();
+				}
+                else
+				{
+                    destinationPose = GetSolvedPose();
+				}
 
                 if (constraint) destinationPose = constraint.DoConstraint(destinationPose);
 
@@ -829,6 +894,9 @@ namespace Instrumental.Interaction
 
         void UpdateGrasp()
         {
+            graspStartPoints.Clear();
+            graspCurrentPoints.Clear();
+
             for(int handIndex=0; handIndex < graspableHands.Count; handIndex++)
 			{
                 GraspDataVars graspData = graspableHands[handIndex];
@@ -846,6 +914,14 @@ namespace Instrumental.Interaction
 				{
                     bool shouldGrasp = CheckHandGrasp(graspData);
                     if (shouldGrasp) PerHandGrasp(ref graspData);
+				}
+
+                if(graspData.IsGrasping) // don't reuse currentlygrasping because shouldgrasp may have made grasping true
+                    // without updating iscurrentlygrasping
+				{
+                    // add our grasp points to the solver's point list
+                    graspStartPoints.Add(graspData.GraspStartPosition);
+                    graspCurrentPoints.Add(new Vector4(graspData.GraspCenter.x, graspData.GraspCenter.y, graspData.GraspCenter.z, 1));
 				}
             }
         }
