@@ -67,15 +67,40 @@ namespace Instrumental.Interaction
             public bool IsGrasping;
             public Pose ThumbTip;
             public bool ThumbOverlap;
+            public bool ThumbStartedGrasping; // true if this finger has contributed to the current grasp action
+            public float ThumbCurlOnGrasp;
+            public float ThumbCurlCurrent; // refactor for these is to calculate fixed timestep velocities
+            public float ThumbCurlPrevious; // directly in instrumental hand
+
             public Pose IndexTip;
             public bool IndexOverlap;
-			public Pose MiddleTip;
+            public float IndexCurlOnGrasp;
+            public bool IndexStartedGrasping; // true if this finger has contributed to the current grasp action, even after grasp start
+            public float IndexCurlCurrent;
+            public float IndexCurlPrevious;
+
+            public Pose MiddleTip;
             public bool MiddleOverlap;
+            public float MiddleCurlOnGrasp;
+            public bool MiddleStartedGrasping; // true if this finger has contributed to the current grasp action, even after grasp start
+            public float MiddleCurlCurrent;
+            public float MiddleCurlPrevious;
+
             public Pose RingTip;
             public bool RingOverlap;
-            public Pose PinkyTip; // todo: get the tip angular velocities in here
+            public float RingCurlOnGrasp;
+            public bool RingStartedGrasping; // true if this finger has contributed to the current grasp action, even after grasp start
+            public float RingCurlCurrent;
+            public float RingCurlPrevious;
+
+            public Pose PinkyTip;
             public bool PinkyOverlap;
-			public Vector3 GraspCenter;
+            public float PinkyCurlOnGrasp;
+            public bool PinkyStartedGrasp; // true if this finger has contributed to the current grasp action, even after grasp start
+            public float PinkyCurlCurrent;
+            public float PinkyCurlPrevious;
+
+            public Vector3 GraspCenter;
             public Vector3 GraspPositionOffset;
             public Quaternion GraspRotationOffset;
             public Vector3 GraspStartPosition;
@@ -177,6 +202,8 @@ namespace Instrumental.Interaction
 
         public float CurrentGraspDistance { get { return currentGraspDistance; } }
         public float UngraspDistance { get { return ungraspDistance; } }
+
+        public List<GraspDataVars> GraspableHands { get { return graspableHands; } }
 
 		private void Awake()
 		{
@@ -597,18 +624,28 @@ namespace Instrumental.Interaction
                                                                   // once you figure out how to make the blend work properly.
                 int numThumbHits = Physics.OverlapSphereNonAlloc(handDataVars.ThumbTip.position, tipRadius, handDataVars.ThumbColliderResults);
                 handDataVars.ThumbOverlap = HasItemCollider(numThumbHits, handDataVars.ThumbColliderResults);
+                handDataVars.ThumbCurlPrevious = handDataVars.ThumbCurlCurrent;
+                handDataVars.ThumbCurlCurrent = hand.ThumbCurl;
 
                 int numIndexHits = Physics.OverlapSphereNonAlloc(handDataVars.IndexTip.position, tipRadius, handDataVars.IndexColliderResults);
                 handDataVars.IndexOverlap = HasItemCollider(numIndexHits, handDataVars.IndexColliderResults);
+                handDataVars.IndexCurlPrevious = handDataVars.IndexCurlCurrent;
+                handDataVars.IndexCurlCurrent = hand.IndexCurl;
 
                 int numMiddleHits = Physics.OverlapSphereNonAlloc(handDataVars.MiddleTip.position, tipRadius, handDataVars.MiddleColliderResults);
                 handDataVars.MiddleOverlap = HasItemCollider(numMiddleHits, handDataVars.MiddleColliderResults);
+                handDataVars.MiddleCurlPrevious = handDataVars.MiddleCurlCurrent;
+                handDataVars.MiddleCurlCurrent = hand.MiddleCurl;
 
                 int numRingHits = Physics.OverlapSphereNonAlloc(handDataVars.RingTip.position, tipRadius, handDataVars.RingColliderResults);
                 handDataVars.RingOverlap = HasItemCollider(numRingHits, handDataVars.RingColliderResults);
+                handDataVars.RingCurlPrevious = handDataVars.RingCurlCurrent;
+                handDataVars.RingCurlCurrent = hand.RingCurl;
 
                 int numPinkyHits = Physics.OverlapSphereNonAlloc(handDataVars.PinkyTip.position, tipRadius, handDataVars.PinkyColliderResults);
                 handDataVars.PinkyOverlap = HasItemCollider(numPinkyHits, handDataVars.PinkyColliderResults);
+                handDataVars.PinkyCurlPrevious = handDataVars.PinkyCurlCurrent;
+                handDataVars.PinkyCurlCurrent = hand.PinkyCurl;
             }
 		}
 
@@ -640,8 +677,16 @@ namespace Instrumental.Interaction
             if (hand == null) return true;
             if (!hand.IsTracking) return false; // we can suspend like this, kinda.
 
-            return !CheckPinchGrip(graspVars);
-		}
+            bool thumbTestPasses = !hand.ThumbIsExtended;
+            bool indexTestPasses = !hand.IndexIsExtended;
+            bool middleTestPasses = !hand.MiddleIsExtended;
+            bool ringTestPasses = !hand.RingIsExtended;
+            bool pinkyTestPasses = !hand.PinkyIsExtended;
+
+            bool isExtendedBasedGrasp = thumbTestPasses && (indexTestPasses || middleTestPasses || ringTestPasses || pinkyTestPasses);
+
+            return !isExtendedBasedGrasp;
+        }
 
         float ungraspRadius { get { return (itemRadius) + ungraspDistance; } }
 
@@ -650,6 +695,16 @@ namespace Instrumental.Interaction
 		{
             InstrumentalHand hand = graspData.Hand;
             graspData.IsGrasping = false;
+            graspData.ThumbStartedGrasping = false;
+            graspData.IndexStartedGrasping = false;
+            graspData.MiddleStartedGrasping = false;
+            graspData.RingStartedGrasping = false;
+            graspData.PinkyStartedGrasp = false;
+            graspData.ThumbCurlOnGrasp = 0;
+            graspData.IndexCurlOnGrasp = 0;
+            graspData.MiddleCurlOnGrasp = 0;
+            graspData.RingCurlOnGrasp = 0;
+            graspData.PinkyCurlOnGrasp = 0;
 
             int currentGraspCount = NumberOfGraspingHands();
 
@@ -680,6 +735,25 @@ namespace Instrumental.Interaction
 
             GetGraspStartingOffset(ref graspData);
             graspData.IsGrasping = true;
+
+            // todo: come up with a way to check these during grasp time and not just
+            // on start. Remember to keep them one way tho - don't re-check on a finger
+            // that has already hit 'started grasping == true'
+            // store our first checks for iscontributing and start curl values
+            graspData.ThumbStartedGrasping = graspData.ThumbOverlap;
+            if(graspData.ThumbStartedGrasping) graspData.ThumbCurlOnGrasp = graspData.Hand.ThumbCurl;
+
+            graspData.IndexStartedGrasping = graspData.IndexOverlap;
+            if(graspData.IndexStartedGrasping) graspData.IndexCurlOnGrasp = graspData.Hand.IndexCurl;
+
+            graspData.MiddleStartedGrasping = graspData.MiddleOverlap;
+            if(graspData.MiddleStartedGrasping) graspData.MiddleCurlOnGrasp = graspData.Hand.MiddleCurl;
+
+            graspData.RingStartedGrasping = graspData.RingOverlap;
+            if(graspData.RingStartedGrasping) graspData.RingCurlOnGrasp = graspData.Hand.RingCurl;
+
+            graspData.PinkyStartedGrasp = graspData.PinkyOverlap;
+            if(graspData.PinkyStartedGrasp) graspData.PinkyCurlOnGrasp = graspData.Hand.PinkyCurl;
 
             if (currentGraspCount == 0) StartGrasp();
         }
@@ -758,17 +832,6 @@ namespace Instrumental.Interaction
 
             return angularVelocity;
         }
-
-        GraspDataVars GetGraspingVars()
-		{
-            for(int i=0; i < graspableHands.Count; i++)
-			{
-                GraspDataVars candidate = graspableHands[i];
-                if (candidate.IsGrasping) return candidate;
-			}
-
-            return new GraspDataVars();
-		}
 
         Pose GetSolvedPose()
         {
