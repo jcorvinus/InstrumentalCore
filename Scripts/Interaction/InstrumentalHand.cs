@@ -126,7 +126,7 @@ namespace Instrumental.Interaction
 		#endregion
 
 		const float curlCutoff = 0.3f;
-		const float thumbCurlCutoff = 0.31f;
+		const float thumbCurlCutoff = 0.71f;
 
 		public bool IsTracking { get { return dataHand.Data.IsTracking; } }
 
@@ -251,8 +251,12 @@ namespace Instrumental.Interaction
 			Quaternion thumbInverse = thumbPose.rotation * Quaternion.Inverse(thumbMedialPose.rotation);
 			Vector3 thumbEuler = thumbInverse.eulerAngles;
 
-			thumbCurl = GetThumbCurl(thumbEuler.x); //GetFingerCurl(GetFingerAngle(palmThumbRef, thumbForward, palmDirection)); // old method
-			//Debug.Log("Thumb " + ((hand == Handedness.Left) ? "L" : "R") + " curl: " + thumbEuler.x);
+			thumbCurl = Vector3.Dot(thumbForward, palmThumbRef);
+			if (hand == Handedness.Right) thumbCurl *= -1;
+			thumbCurl = 1 - Mathf.InverseLerp(-0.8f, 0.8f, thumbCurl);
+
+			//GetThumbCurl(thumbEuler.x); //GetFingerCurl(GetFingerAngle(palmThumbRef, thumbForward, palmDirection)); // old method
+			Debug.Log("Thumb " + ((hand == Handedness.Left) ? "L" : "R") + " curl: " + thumbCurl /*thumbEuler.x*/);
 
 			indexCurl = GetFingerCurl(GetFingerAngle(palmDirection, indexForward, palmThumbRef));
 			middleCurl = GetFingerCurl(GetFingerAngle(palmDirection, middleForward, palmThumbRef));
