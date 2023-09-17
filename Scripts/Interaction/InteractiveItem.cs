@@ -184,6 +184,9 @@ namespace Instrumental.Interaction
         AnimationCurve distanceMotionCurve = new AnimationCurve(new Keyframe(0, 1, 0, 0),
             new Keyframe(0.02f, 0.3f, 0, 0));
         [SerializeField] bool applyThrowBoost;
+
+        [Range(5, 45f)]
+        [SerializeField] float ungraspCurlVelocity = 25f;
         #endregion
 
         #region Debug Vars
@@ -677,15 +680,59 @@ namespace Instrumental.Interaction
             if (hand == null) return true;
             if (!hand.IsTracking) return false; // we can suspend like this, kinda.
 
-            bool thumbTestPasses = !hand.ThumbIsExtended;
-            bool indexTestPasses = !hand.IndexIsExtended;
-            bool middleTestPasses = !hand.MiddleIsExtended;
-            bool ringTestPasses = !hand.RingIsExtended;
-            bool pinkyTestPasses = !hand.PinkyIsExtended;
+            float thumbCurlVel = graspVars.ThumbCurlCurrent - graspVars.ThumbCurlPrevious;
+            float indexCurlVel = graspVars.IndexCurlCurrent - graspVars.IndexCurlPrevious;
+            float middleCurlVel = graspVars.MiddleCurlCurrent - graspVars.MiddleCurlCurrent;
+            float ringCurlVel = graspVars.RingCurlCurrent - graspVars.RingCurlPrevious;
+            float pinkyCurlVel = graspVars.PinkyCurlCurrent - graspVars.PinkyCurlPrevious;
 
-            bool isExtendedBasedGrasp = thumbTestPasses && (indexTestPasses || middleTestPasses || ringTestPasses || pinkyTestPasses);
+            bool thumbReleaseVelocity = (thumbCurlVel < -ungraspCurlVelocity); // factor in grasp started?
+            bool indexReleaseVelocity = indexCurlVel < -ungraspCurlVelocity;
+            bool middleReleaseVelocity = middleCurlVel < -ungraspCurlVelocity;
+            bool ringReleaseVelocity = ringCurlVel < -ungraspCurlVelocity;
+            bool pinkyReleaseVelocity = pinkyCurlVel < -ungraspCurlVelocity;
 
-            return !isExtendedBasedGrasp;
+            bool thumbReleaseCurl = (graspVars.ThumbCurlCurrent < graspVars.ThumbCurlOnGrasp);
+            bool indexReleaseCurl = (graspVars.IndexCurlCurrent < graspVars.IndexCurlOnGrasp);
+            bool middleReleaseCurl = (graspVars.MiddleCurlCurrent < graspVars.MiddleCurlOnGrasp);
+            bool ringReleaseCurl = (graspVars.RingCurlCurrent < graspVars.RingCurlOnGrasp);
+            bool pinkyReleaseCurl = (graspVars.PinkyCurlCurrent < graspVars.PinkyCurlOnGrasp);
+
+            // thinking about finger release bools here that mix ReleaseVelocity and ReleaseCurl, however
+            // we still need a way of mixing them in with both 'GraspStarted' and the 'pin' state of each finger
+            // against a pinning candidate (right now only thumbs are pin points, but in the future, the palm
+            // will be too)
+
+            bool release = false;
+
+            bool thumbRelease = thumbReleaseVelocity || thumbReleaseCurl;
+            bool indexRelease = indexReleaseVelocity || indexReleaseCurl;
+            bool middleRelease = middleReleaseVelocity || middleReleaseCurl;
+            bool ringRelease = ringReleaseVelocity || ringReleaseCurl;
+            bool pinkyRelease = pinkyReleaseVelocity || pinkyReleaseCurl;
+
+            int numberOfFingersReleased = 0;
+            int numberOfFingersStarted = 0;
+
+            if (graspVars.IndexStartedGrasping && indexRelease) numberOfFingersReleased++;
+            if (graspVars.MiddleStartedGrasping && middleRelease) numberOfFingersReleased++;
+            if (graspVars.RingStartedGrasping && ringRelease) numberOfFingersReleased++;
+            if (graspVars.PinkyStartedGrasp && pinkyRelease) numberOfFingersReleased++;
+
+            if (graspVars.IndexStartedGrasping) numberOfFingersStarted++;
+            if (graspVars.MiddleStartedGrasping) numberOfFingersStarted++;
+            if (graspVars.RingStartedGrasping) numberOfFingersStarted++;
+            if (graspVars.PinkyStartedGrasp) numberOfFingersStarted++;
+
+            release = thumbRelease || numberOfFingersReleased == numberOfFingersStarted;
+
+            // I wonder if it might be wise to track this as a 'should stay grasped' and then just parity flip it at the end.
+            // knowing what counts as grasping might have fewer conditional checks or an easier way to be sure what's going on
+            // than trying to track release states.
+
+            //bool isExtendedBasedGrasp = thumbTestPasses && (indexTestPasses || middleTestPasses || ringTestPasses || pinkyTestPasses);
+
+            return release;
         }
 
         float ungraspRadius { get { return (itemRadius) + ungraspDistance; } }
