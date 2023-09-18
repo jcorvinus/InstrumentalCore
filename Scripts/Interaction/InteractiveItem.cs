@@ -199,6 +199,8 @@ namespace Instrumental.Interaction
         MeshRenderer[] tipGrabSpheres;
         MeshRenderer[] constellationStartSpheres;
         MeshRenderer[] constellationRuntimeSpheres;
+
+        [SerializeField] bool showConstellationGraspPoints = false;
         #endregion
 
         private Vector3 respawnPosition;
@@ -300,6 +302,7 @@ namespace Instrumental.Interaction
                 MeshRenderer jointRenderer = jointSphere.GetComponent<MeshRenderer>();
                 constellationStartSpheres[i] = jointRenderer;
                 jointRenderer.material.color = Color.cyan;
+                jointRenderer.gameObject.SetActive(false);
 			}
 
             constellationRuntimeSpheres = new MeshRenderer[10];
@@ -313,6 +316,7 @@ namespace Instrumental.Interaction
                 MeshRenderer jointRenderer = jointSphere.GetComponent<MeshRenderer>();
                 constellationRuntimeSpheres[i] = jointRenderer;
                 jointRenderer.material.color = Color.yellow;
+                jointRenderer.gameObject.SetActive(false);
             }
 
             SetRespawnLocation();
@@ -863,10 +867,10 @@ namespace Instrumental.Interaction
             for(int i=0; i < handConstellation.Length; i++)
             { 
                 constellationStartSpheres[i + startOffset].transform.position = handConstellation[i];
-                constellationStartSpheres[i + startOffset].gameObject.SetActive(true);
+                constellationStartSpheres[i + startOffset].gameObject.SetActive(showConstellationGraspPoints);
 
                 constellationRuntimeSpheres[i + startOffset].transform.position = handConstellation[i];
-                constellationRuntimeSpheres[i + startOffset].gameObject.SetActive(true);
+                constellationRuntimeSpheres[i + startOffset].gameObject.SetActive(showConstellationGraspPoints);
             }
 
             if (currentGraspCount == 0) StartGrasp();
@@ -947,10 +951,19 @@ namespace Instrumental.Interaction
             return angularVelocity;
         }
 
+
+        /// <summary>
+        /// Look into using average rotation from:
+        /// https://forum.unity.com/threads/average-quaternions.86898/
+        /// </summary>
+        /// <returns></returns>
         Pose GetSolvedPose()
         {
-            Pose destinationPose = Pose.identity;
             int graspCount = 0;
+
+            Vector3 averagePosition = Vector3.zero;
+            Vector3 forwardSum = Vector3.zero;
+            Vector3 upSum = Vector3.zero;
 
             for (int i = 0; i < graspableHands.Count; i++)
             {
@@ -965,14 +978,25 @@ namespace Instrumental.Interaction
                     Vector3 worldSpaceOffsetPose = transform.TransformPoint(currentGraspData.GraspPositionOffset);
                     Vector3 offset = currentGraspPose.position - worldSpaceOffsetPose;
                     Vector3 position = transform.position + offset; // maybe change transform.position to body.position?
-                    destinationPose = new Pose(position + destinationPose.position,
-                        destinationPose.rotation * (currentGraspPose.rotation * currentGraspData.GraspRotationOffset));
+                    /*destinationPose = new Pose(position + destinationPose.position,
+                        destinationPose.rotation * (currentGraspPose.rotation * currentGraspData.GraspRotationOffset));*/
+
+                    averagePosition += position;
+
+                    Quaternion rotation = (currentGraspPose.rotation * currentGraspData.GraspRotationOffset);
+
+                    forwardSum += rotation * Vector3.forward;
+                    upSum += rotation * Vector3.up;
 
                     graspCount++;
                 }
             }
 
-            destinationPose.position /= graspCount;
+            averagePosition /= graspCount;
+            forwardSum /= graspCount;
+            upSum /= graspCount;
+
+            Pose destinationPose = new Pose(averagePosition, Quaternion.LookRotation(forwardSum, upSum));
 
             if(graspCount == 0)
 			{
