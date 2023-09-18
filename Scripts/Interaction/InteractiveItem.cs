@@ -104,6 +104,8 @@ namespace Instrumental.Interaction
             public Vector3 GraspPositionOffset;
             public Quaternion GraspRotationOffset;
             public Vector3 GraspStartPosition;
+            public Vector3[] GraspStartConstellation;
+            public float RegraspTimer; // turn this into an ungrasp filter instead of a regrasp filter
 
             public Collider[] ThumbColliderResults;
             public Collider[] IndexColliderResults;
@@ -176,6 +178,8 @@ namespace Instrumental.Interaction
         // actual distance, not normalized. Use this if you need to make sure your signifier scales to a specific value
         float currentGraspDistance;
 
+        const float regraspDuration = 0.125f;
+
         [SerializeField] GraspPoseType poseType = GraspPoseType.OffsetPoseMatch;
 
         [Range(1, 100)]
@@ -193,6 +197,8 @@ namespace Instrumental.Interaction
         [Range(0.01f, 0.07f)]
         [SerializeField] float tipRadius=0.01f;
         MeshRenderer[] tipGrabSpheres;
+        MeshRenderer[] constellationStartSpheres;
+        MeshRenderer[] constellationRuntimeSpheres;
         #endregion
 
         private Vector3 respawnPosition;
@@ -281,6 +287,32 @@ namespace Instrumental.Interaction
                 MeshRenderer tipRenderer = tipObject.GetComponent<MeshRenderer>();
                 tipRenderer.transform.localScale = Vector3.one * tipRadius;
                 tipGrabSpheres[i] = tipRenderer;
+            }
+
+            constellationStartSpheres = new MeshRenderer[10];
+            for(int i=0; i < constellationStartSpheres.Length; i++)
+			{
+                GameObject jointSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                SphereCollider jointCollider = jointSphere.GetComponent<SphereCollider>();
+                jointCollider.enabled = false;
+                jointCollider.isTrigger = true;
+                jointSphere.transform.localScale = Vector3.one * tipRadius;
+                MeshRenderer jointRenderer = jointSphere.GetComponent<MeshRenderer>();
+                constellationStartSpheres[i] = jointRenderer;
+                jointRenderer.material.color = Color.cyan;
+			}
+
+            constellationRuntimeSpheres = new MeshRenderer[10];
+            for (int i = 0; i < constellationRuntimeSpheres.Length; i++)
+            {
+                GameObject jointSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                SphereCollider jointCollider = jointSphere.GetComponent<SphereCollider>();
+                jointCollider.enabled = false;
+                jointCollider.isTrigger = true;
+                jointSphere.transform.localScale = Vector3.one * tipRadius;
+                MeshRenderer jointRenderer = jointSphere.GetComponent<MeshRenderer>();
+                constellationRuntimeSpheres[i] = jointRenderer;
+                jointRenderer.material.color = Color.yellow;
             }
 
             SetRespawnLocation();
@@ -698,11 +730,6 @@ namespace Instrumental.Interaction
             bool ringReleaseCurl = (graspVars.RingCurlCurrent < graspVars.RingCurlOnGrasp);
             bool pinkyReleaseCurl = (graspVars.PinkyCurlCurrent < graspVars.PinkyCurlOnGrasp);
 
-            // thinking about finger release bools here that mix ReleaseVelocity and ReleaseCurl, however
-            // we still need a way of mixing them in with both 'GraspStarted' and the 'pin' state of each finger
-            // against a pinning candidate (right now only thumbs are pin points, but in the future, the palm
-            // will be too)
-
             bool release = false;
 
             bool thumbRelease = thumbReleaseVelocity || thumbReleaseCurl;
@@ -726,12 +753,6 @@ namespace Instrumental.Interaction
 
             release = thumbRelease || numberOfFingersReleased == numberOfFingersStarted;
 
-            // I wonder if it might be wise to track this as a 'should stay grasped' and then just parity flip it at the end.
-            // knowing what counts as grasping might have fewer conditional checks or an easier way to be sure what's going on
-            // than trying to track release states.
-
-            //bool isExtendedBasedGrasp = thumbTestPasses && (indexTestPasses || middleTestPasses || ringTestPasses || pinkyTestPasses);
-
             return release;
         }
 
@@ -754,6 +775,7 @@ namespace Instrumental.Interaction
             graspData.PinkyCurlOnGrasp = 0;
 
             int currentGraspCount = NumberOfGraspingHands();
+            graspData.RegraspTimer = regraspDuration;
 
             if (currentGraspCount == 0) Ungrasp(hand.Velocity, hand.AngularVelocity);
         }
@@ -801,6 +823,51 @@ namespace Instrumental.Interaction
 
             graspData.PinkyStartedGrasp = graspData.PinkyOverlap;
             if(graspData.PinkyStartedGrasp) graspData.PinkyCurlOnGrasp = graspData.Hand.PinkyCurl;
+
+            InstrumentalHand hand = graspData.Hand;
+            Input.HandData handData = hand.GetHandData();
+            Pose palmPose = hand.GetAnchorPose(AnchorPoint.Palm);
+
+            Vector3[] handConstellation = new Vector3[5]
+            {
+                handData.IndexJoints[1].Pose.position, // index knuckle
+                handData.ThumbJoints[0].Pose.position, // wrist thumb joint
+                handData.PinkyJoints[0].Pose.position, // pinky wrist joint,
+                handData.PinkyJoints[1].Pose.position,
+                palmPose.position + ((palmPose.rotation * Vector3.forward) * 0.03f)// palm normal offset
+            };
+
+            if(graspData.GraspStartConstellation == null || graspData.GraspStartConstellation.Length == 0)
+			{
+                graspData.GraspStartConstellation = handConstellation;
+			}
+            else
+			{
+                for(int i=0; i < handConstellation.Length; i++)
+				{
+                    graspData.GraspStartConstellation[i] = handConstellation[i];
+				}
+			}
+
+            int startOffset = -1;
+
+            for(int i=0; i < graspableHands.Count; i++)
+			{
+                if(graspableHands[i].Hand.GetInstanceID() == hand.GetInstanceID())
+				{
+                    startOffset = i * 4;
+                    break;
+				}
+			}
+
+            for(int i=0; i < handConstellation.Length; i++)
+            { 
+                constellationStartSpheres[i + startOffset].transform.position = handConstellation[i];
+                constellationStartSpheres[i + startOffset].gameObject.SetActive(true);
+
+                constellationRuntimeSpheres[i + startOffset].transform.position = handConstellation[i];
+                constellationRuntimeSpheres[i + startOffset].gameObject.SetActive(true);
+            }
 
             if (currentGraspCount == 0) StartGrasp();
         }
@@ -904,6 +971,8 @@ namespace Instrumental.Interaction
                     graspCount++;
                 }
             }
+
+            destinationPose.position /= graspCount;
 
             if(graspCount == 0)
 			{
@@ -1022,7 +1091,9 @@ namespace Instrumental.Interaction
 				}
                 else
 				{
-                    bool shouldGrasp = CheckHandGrasp(graspData);
+                    graspData.RegraspTimer -= Time.fixedDeltaTime;
+                    graspData.RegraspTimer = Mathf.Max(graspData.RegraspTimer, 0);
+                    bool shouldGrasp = CheckHandGrasp(graspData) && graspData.RegraspTimer == 0;
                     if (shouldGrasp) PerHandGrasp(ref graspData);
 				}
 

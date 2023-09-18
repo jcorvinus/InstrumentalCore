@@ -18,7 +18,7 @@ namespace Instrumental.Interaction
         IndexTip=3,
         MiddleTip=4,
 		RingTip=5,
-		PinkyTip= 6
+		PinkyTip=6
 	}
 
 	public enum Finger
@@ -124,6 +124,11 @@ namespace Instrumental.Interaction
 		public float PinchMaxDistance { get { return pinchMaxDistance; } }
 		public float PinchMinDistance { get { return pinchMinDistance; } }
 		#endregion
+
+		public HandData GetHandData()
+		{
+			return dataHand.Data;
+		}
 
 		const float curlCutoff = 0.3f;
 		const float thumbCurlCutoff = 0.71f;
