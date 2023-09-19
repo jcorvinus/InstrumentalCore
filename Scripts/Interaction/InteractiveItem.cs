@@ -1095,6 +1095,46 @@ namespace Instrumental.Interaction
             }
         }
 
+        void UpdateRunningGrasp(ref GraspDataVars graspData)
+		{
+            InstrumentalHand hand = graspData.Hand;
+            if (!graspData.IndexStartedGrasping)
+            {
+                if (graspData.IndexOverlap)
+                {
+                    graspData.IndexStartedGrasping = true;
+                    graspData.IndexCurlOnGrasp = hand.IndexCurl;
+                }
+            }
+
+            if (!graspData.MiddleStartedGrasping)
+            {
+                if (graspData.MiddleOverlap)
+                {
+                    graspData.MiddleStartedGrasping = true;
+                    graspData.MiddleCurlOnGrasp = hand.MiddleCurl;
+                }
+            }
+
+            if (!graspData.RingStartedGrasping)
+            {
+                if (graspData.RingOverlap)
+                {
+                    graspData.RingStartedGrasping = true;
+                    graspData.RingCurlOnGrasp = hand.RingCurl;
+                }
+            }
+
+            if (!graspData.PinkyStartedGrasp)
+            {
+                if (graspData.PinkyOverlap)
+                {
+                    graspData.MiddleStartedGrasping = true;
+                    graspData.PinkyCurlOnGrasp = hand.PinkyCurl;
+                }
+            }
+		}
+
         void UpdateGrasp()
         {
             graspStartPoints.Clear();
@@ -1112,6 +1152,10 @@ namespace Instrumental.Interaction
 				{
                     bool shouldUngrasp = (CheckHandUngrasp(graspData));
                     if (shouldUngrasp) PerHandUngrasp(ref graspData);
+                    else
+					{
+                        UpdateRunningGrasp(ref graspData);
+					}
 				}
                 else
 				{
