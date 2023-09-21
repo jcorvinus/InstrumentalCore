@@ -80,16 +80,16 @@ namespace Instrumental.Feedback
 
 		private void GetDefaultAssets()
 		{
-			defaultThrowClip = (AudioClip)AssetDatabase.LoadAssetAtPath("Assets/HandshakeVR/JuicyObjects/Sound/throw_sound.wav", typeof(AudioClip));
-			defaultImpactClip = (AudioClip)AssetDatabase.LoadAssetAtPath("Assets/HandshakeVR/JuicyObjects/Sound/soft_impact_3.wav", typeof(AudioClip));
-			defaultGrabClip = (AudioClip)AssetDatabase.LoadAssetAtPath("Assets/HandshakeVR/JuicyObjects/Sound/grab.wav", typeof(AudioClip));
-			defaultSlideClip = (AudioClip)AssetDatabase.LoadAssetAtPath("Assets/HandshakeVR/JuicyObjects/Sound/object_slide.wav", typeof(AudioClip));
-			AudioMixer mixer = (AudioMixer)AssetDatabase.LoadAssetAtPath("Assets/HandshakeVR/HandshakeMixer.mixer", typeof(AudioMixer));
+			defaultThrowClip = (AudioClip)AssetDatabase.LoadAssetAtPath("Assets/InstrumentalCore/JuicyObjects/Audio/throw_sound.wav", typeof(AudioClip));
+			defaultImpactClip = (AudioClip)AssetDatabase.LoadAssetAtPath("Assets/InstrumentalCore/JuicyObjects/Audio/soft_impact_3.wav", typeof(AudioClip));
+			defaultGrabClip = (AudioClip)AssetDatabase.LoadAssetAtPath("Assets/InstrumentalCore/JuicyObjects/Audio/grab.wav", typeof(AudioClip));
+			defaultSlideClip = (AudioClip)AssetDatabase.LoadAssetAtPath("Assets/InstrumentalCore/JuicyObjects/Audio/object_slide.wav", typeof(AudioClip));
+			AudioMixer mixer = (AudioMixer)AssetDatabase.LoadAssetAtPath("Assets/InstrumentalCore/UIStudioMixer.mixer", typeof(AudioMixer));
 			mixerGroup = mixer.FindMatchingGroups("Master")[0];
 
-			smokePrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/HandshakeVR/JuicyObjects/Prefabs/Smoke.prefab", typeof(GameObject));
-			trailMaterial = (Material)AssetDatabase.LoadAssetAtPath("Assets/HandshakeVR/JuicyObjects/Models/Materials/WindTrail.mat", typeof(Material));
-			impactMangerPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/HandshakeVR/JuicyObjects/Prefabs/ImpactManager.prefab", typeof(GameObject));
+			smokePrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/InstrumentalCore/JuicyObjects/Prefabs/Smoke.prefab", typeof(GameObject));
+			trailMaterial = (Material)AssetDatabase.LoadAssetAtPath("Assets/InstrumentalCore/Models/Materials/WindTrail.mat", typeof(Material));
+			impactMangerPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/InstrumentalCore/JuicyObjects/Prefabs/ImpactManager.prefab", typeof(GameObject));
 		}
 
 		private void OnGUI()
