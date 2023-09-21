@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Instrumental
+namespace Instrumental.Feedback
 {
     public class SlideEffect : MonoBehaviour
     {

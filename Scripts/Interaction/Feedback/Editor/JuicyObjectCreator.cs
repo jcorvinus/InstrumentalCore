@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEditor;
 
-namespace Instrumental
+namespace Instrumental.Feedback
 {
 	public class JuicyObjectCreator : EditorWindow
 	{
@@ -68,7 +68,7 @@ namespace Instrumental
 
 		#endregion
 
-		[MenuItem("Window/HandshakeVR/Interactive Object Feedback Editor")]
+		[MenuItem("Window/Instrumental/Interactive Object Feedback Editor")]
 		static void Init()
 		{
 			JuicyObjectCreator objectCreator = (JuicyObjectCreator)EditorWindow.GetWindow(typeof(JuicyObjectCreator));

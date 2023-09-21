@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Instrumental
+namespace Instrumental.Feedback
 {
     // todo: merge this in with UICommonElements at some point
     public class InteractionSound : MonoBehaviour

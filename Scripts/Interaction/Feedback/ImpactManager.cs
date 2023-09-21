@@ -4,7 +4,7 @@ using UnityEngine;
 
 using CatchCo;
 
-namespace Instrumental
+namespace Instrumental.Feedback
 {
     public class ImpactManager : MonoBehaviour
     {
