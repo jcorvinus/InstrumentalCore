@@ -179,6 +179,12 @@ namespace Instrumental.Interaction
 
         const float ungraspDistance = 0.003636f;
 
+        /// <summary>
+        /// When uncurling past grasp curl distance, use this as the extra margin.
+        /// Should prevent instant un-grasps.
+        /// </summary>
+        const float uncurlDistanceExtraMargin = 0.013f;
+
         // negative values are near-grasp,
         // positive values are grasp.
         // actual distance, not normalized. Use this if you need to make sure your signifier scales to a specific value
@@ -750,11 +756,11 @@ namespace Instrumental.Interaction
             bool ringReleaseVelocity = ringCurlVel < -ungraspCurlVelocity;
             bool pinkyReleaseVelocity = pinkyCurlVel < -ungraspCurlVelocity;
 
-            bool thumbReleaseCurl = (graspVars.ThumbCurlCurrent < graspVars.ThumbCurlOnGrasp);
-            bool indexReleaseCurl = (graspVars.IndexCurlCurrent < graspVars.IndexCurlOnGrasp);
-            bool middleReleaseCurl = (graspVars.MiddleCurlCurrent < graspVars.MiddleCurlOnGrasp);
-            bool ringReleaseCurl = (graspVars.RingCurlCurrent < graspVars.RingCurlOnGrasp);
-            bool pinkyReleaseCurl = (graspVars.PinkyCurlCurrent < graspVars.PinkyCurlOnGrasp);
+            bool thumbReleaseCurl = (graspVars.ThumbCurlCurrent < (graspVars.ThumbCurlOnGrasp - uncurlDistanceExtraMargin));
+            bool indexReleaseCurl = (graspVars.IndexCurlCurrent < (graspVars.IndexCurlOnGrasp - uncurlDistanceExtraMargin));
+            bool middleReleaseCurl = (graspVars.MiddleCurlCurrent < (graspVars.MiddleCurlOnGrasp - uncurlDistanceExtraMargin));
+            bool ringReleaseCurl = (graspVars.RingCurlCurrent < (graspVars.RingCurlOnGrasp - uncurlDistanceExtraMargin));
+            bool pinkyReleaseCurl = (graspVars.PinkyCurlCurrent < (graspVars.PinkyCurlOnGrasp - uncurlDistanceExtraMargin));
 
             bool release = false;
 
