@@ -33,11 +33,14 @@ namespace Instrumental.Interaction.Slottables
 
         // size handling
         // size of slot
-        [SerializeField] float size=0.3f;
+        [SerializeField] float size = 0.3f;
+        [Range(0, 0.3f)]
+        [SerializeField] float extraSlotRadius = 0.01f;
 		// size category (infer from slot size)
 		// does resize
 
-        public float AttachDistance { get { return size; } }
+        public float Size { get { return size; } }
+        public float AttachDistance { get { return size + extraSlotRadius; } }
 
 		// does consume
 

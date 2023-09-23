@@ -227,7 +227,7 @@ namespace Instrumental.Avatar
                     float fullRatio = fullDataLength / fullModelLength;
                     float wristRatio = Mathf.Lerp(wristToPinkyRatio, wristToMiddleRatio, wristPinkyMiddleScaleFactor);
 
-                    Debug.Log(string.Format("finger Ratio: {0}    wrist ratio: {1} ", fingerRatio, wristRatio));
+                    //Debug.Log(string.Format("finger Ratio: {0}    wrist ratio: {1} ", fingerRatio, wristRatio));
                     Vector3 wristScale = new Vector3(fingerRatio, fingerRatio, fingerRatio);
 
                     if (Mathf.Abs(wristForwardDirection.x) != 0)

@@ -150,10 +150,13 @@ namespace Instrumental.Interaction
 		#region Hover Vars
 		float leftHoverDist =float.PositiveInfinity;
         float rightHoverDist=float.PositiveInfinity;
+        Vector3 leftHoverPoint, rightHoverPoint, hoverPoint;
 
         float hoverTValue;
         [Range(0.05f, 0.3f)]
         float hoverDistance = 0.125f;
+
+        public float HoverDistance { get { return hoverDistance; } }
 		#endregion
 
 		#region Grasp Vars
@@ -212,6 +215,7 @@ namespace Instrumental.Interaction
 		public bool IsGrasped { get { return isGrasped; } }
         public bool IsHovering { get { return (leftHoverDist < hoverDistance) || (rightHoverDist < hoverDistance); } }
         public float HoverTValue { get { return hoverTValue; } }
+        public Vector3 HoverPoint { get { return hoverPoint; } }
         public Rigidbody RigidBody { get { return rigidBody; } }
 
         public float CurrentGraspDistance { get { return currentGraspDistance; } }
@@ -932,40 +936,6 @@ namespace Instrumental.Interaction
             graspData.GraspStartPosition = graspData.GraspCenter;
         }
 
-        Vector3 CalculateSingleShotVelocity(Vector3 position, Vector3 previousPosition,
-            float deltaTime)
-        {
-            float velocityFactor = 1.0f / deltaTime;
-            return velocityFactor * (position - previousPosition);
-        }
-
-        Vector3 CalculateSingleShotAngularVelocity(Quaternion rotation, Quaternion previousRotation,
-            float deltaTime)
-		{
-            Quaternion deltaRotation = rotation * Quaternion.Inverse(previousRotation);
-
-            Vector3 deltaAxis;
-            float deltaAngle;
-
-            deltaRotation.ToAngleAxis(out deltaAngle, out deltaAxis);
-
-            if (float.IsInfinity(deltaAxis.x))
-            {
-                deltaAxis = Vector3.zero;
-                deltaAngle = 0;
-            }
-
-            if (deltaAngle > 180)
-            {
-                deltaAngle -= 360.0f;
-            }
-
-            Vector3 angularVelocity = deltaAxis * deltaAngle * Mathf.Deg2Rad / deltaTime;
-
-            return angularVelocity;
-        }
-
-
         /// <summary>
         /// Look into using average rotation from:
         /// https://forum.unity.com/threads/average-quaternions.86898/
@@ -1078,9 +1048,9 @@ namespace Instrumental.Interaction
                     //Vector3 solvedCenterOfMass = destinationPose.rotation * rigidBody.centerOfMass + destinationPose.position;
                     //Vector3 currentCenterOfMass = rigidBody.rotation * rigidBody.centerOfMass + rigidBody.position;
 
-                    Vector3 targetVelocity = CalculateSingleShotVelocity(destinationPose.position, 
+                    Vector3 targetVelocity = MathSupplement.CalculateSingleShotVelocity(destinationPose.position, 
                          rigidBody.position, Time.fixedDeltaTime);
-                    Vector3 targetAngularVelocity = CalculateSingleShotAngularVelocity(destinationPose.rotation, 
+                    Vector3 targetAngularVelocity = MathSupplement.CalculateSingleShotAngularVelocity(destinationPose.rotation, 
                         rigidBody.rotation, Time.fixedDeltaTime);
 
                     float targetSpeedSquared = targetVelocity.sqrMagnitude;
@@ -1240,9 +1210,9 @@ namespace Instrumental.Interaction
             graspingHand = Handedness.None;*/
 		}
 
-        float HoverDist(InstrumentalHand hand)
+        float HoverDist(InstrumentalHand hand, out Vector3 hoverPoint)
 		{
-            Vector3 hoverPoint = hand.GraspPinch.PinchCenter;
+            hoverPoint = hand.GraspPinch.PinchCenter;
 
             // check to see if we should distance hover
             Vector3 hoverClosestPoint = hoverPoint;
@@ -1265,10 +1235,10 @@ namespace Instrumental.Interaction
             bool previousRightHover = rightHoverDist < hoverDistance;
 
             leftHoverDist = InstrumentalHand.LeftHand.IsTracking ?
-                HoverDist(InstrumentalHand.LeftHand) : float.PositiveInfinity;
+                HoverDist(InstrumentalHand.LeftHand, out leftHoverPoint) : float.PositiveInfinity;
 
             rightHoverDist = InstrumentalHand.RightHand.IsTracking ?
-                HoverDist(InstrumentalHand.RightHand) : float.PositiveInfinity;
+                HoverDist(InstrumentalHand.RightHand, out rightHoverPoint) : float.PositiveInfinity;
 
 			bool leftHover = (leftHoverDist < hoverDistance);
 			bool rightHover = (rightHoverDist < hoverDistance);
@@ -1284,6 +1254,13 @@ namespace Instrumental.Interaction
                 if (rightHover) StartHover(InstrumentalHand.RightHand);
                 else StopHover(InstrumentalHand.RightHand);
 			}
+
+            if (leftHover && rightHover)
+            {
+                hoverPoint = (leftHoverDist < rightHoverDist) ? leftHoverPoint : rightHoverPoint;
+            }
+            else if (leftHover) hoverPoint = leftHoverPoint;
+            else if (rightHover) hoverPoint = rightHoverPoint;
 
             float minHoverDist = Mathf.Min(leftHoverDist, rightHoverDist);
             hoverTValue = 1 - Mathf.InverseLerp(0, hoverDistance, minHoverDist);

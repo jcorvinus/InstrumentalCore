@@ -13,6 +13,9 @@ namespace Instrumental.Interaction.Slottables
         ItemSlot targetSlot; /// <summary>this is the slot we are currently the best fit for./// </summary>
         List<ItemSlot> nearbySlots;
         Lens<bool> slotGravityLens;
+        bool hasSettled = false;
+        float hoverTimer = 0;
+        const float hoverDuration = 0.65f;
 
         // need to figure out if a slot can own us but not be attached (usually because this object has been
         // grasped and needs to reserve the slot for re-attach
@@ -41,9 +44,15 @@ namespace Instrumental.Interaction.Slottables
             ItemSlot closestSlot = GetClosestSlot(out sqrDistance);
             float distance = Mathf.Sqrt(sqrDistance);
 
-            if(closestSlot && closestSlot.AttachDistance > distance)
+            bool didAttach = closestSlot && closestSlot.AttachDistance > distance;
+
+            Debug.Log((didAttach ? "Attach! " : "No attach ") +
+                "Slot: " + 
+                ((closestSlot) ?  closestSlot.name : "null")
+                + " distance " + distance);
+
+            if (didAttach)
 			{
-                Debug.Log("Attach! Slot: " + closestSlot.name + " distance " + distance);
                 Attach(closestSlot);
 			}
 		}
@@ -72,11 +81,15 @@ namespace Instrumental.Interaction.Slottables
 
             targetSlot.ItemNotifyAttached(this);
             ownerSlot = targetSlot;
+            hasSettled = false;
+            hoverTimer = 0;
 		}
 
         public void Detach()
 		{
             ownerSlot = null;
+            hasSettled = false;
+            hoverTimer = 0;
 		}
         
         /// <summary>
@@ -94,7 +107,7 @@ namespace Instrumental.Interaction.Slottables
 				{
                     // this technique won't work on some sizes of objects - we might want to replace with distance
                     // to the closest point on the object, but that's more computation. Figure this tradeoff later
-                    Vector3 offset = currentSlot.transform.position - interactiveItem.RigidBody.centerOfMass;
+                    Vector3 offset = currentSlot.transform.position - interactiveItem.RigidBody.position;
                     float currentSqrDistance = offset.sqrMagnitude;
 
                     if(currentSqrDistance < sqrDistance)
@@ -108,41 +121,7 @@ namespace Instrumental.Interaction.Slottables
             return closestSlot;
 		}
 
-        // these also exist in slottable item - consider refactoring so we're not duplicating code.
-        Vector3 CalculateSingleShotVelocity(Vector3 position, Vector3 previousPosition,
-            float deltaTime)
-        {
-            float velocityFactor = 1.0f / deltaTime;
-            return velocityFactor * (position - previousPosition);
-        }
-
-        Vector3 CalculateSingleShotAngularVelocity(Quaternion rotation, Quaternion previousRotation,
-            float deltaTime)
-        {
-            Quaternion deltaRotation = rotation * Quaternion.Inverse(previousRotation);
-
-            Vector3 deltaAxis;
-            float deltaAngle;
-
-            deltaRotation.ToAngleAxis(out deltaAngle, out deltaAxis);
-
-            if (float.IsInfinity(deltaAxis.x))
-            {
-                deltaAxis = Vector3.zero;
-                deltaAngle = 0;
-            }
-
-            if (deltaAngle > 180)
-            {
-                deltaAngle -= 360.0f;
-            }
-
-            Vector3 angularVelocity = deltaAxis * deltaAngle * Mathf.Deg2Rad / deltaTime;
-
-            return angularVelocity;
-        }
-
-        const float maxMovementSpeed = 6f;
+        const float maxMovementSpeed = 2f;
         AnimationCurve distanceMotionCurve = new AnimationCurve(new Keyframe(0, 1, 0, 0),
             new Keyframe(0.02f, 0.3f, 0, 0));
 
@@ -153,34 +132,57 @@ namespace Instrumental.Interaction.Slottables
             {
                 Rigidbody rigidBody = interactiveItem.RigidBody;
 
-                // has settled
-                // is hovering
-                Vector3 targetVelocity = CalculateSingleShotVelocity(ownerSlot.transform.position,
-                    rigidBody.position, Time.fixedDeltaTime);
-                Vector3 targetAngularVelocity = CalculateSingleShotAngularVelocity(ownerSlot.transform.rotation,
-                    rigidBody.rotation, Time.fixedDeltaTime);
-
-                float targetSpeedSquared = targetVelocity.sqrMagnitude;
-                if (targetSpeedSquared > maxMovementSpeed)
+                if (!hasSettled)
                 {
-                    float percent = maxMovementSpeed / Mathf.Sqrt(targetSpeedSquared);
-                    targetVelocity *= percent;
-                    targetAngularVelocity *= percent;
+                    Vector3 targetVelocity = MathSupplement.CalculateSingleShotVelocity(ownerSlot.transform.position,
+                        rigidBody.position, Time.fixedDeltaTime);
+                    Vector3 targetAngularVelocity = MathSupplement.CalculateSingleShotAngularVelocity(ownerSlot.transform.rotation,
+                        rigidBody.rotation, Time.fixedDeltaTime);
+
+                    float targetSpeedSquared = targetVelocity.sqrMagnitude;
+                    if (targetSpeedSquared > maxMovementSpeed)
+                    {
+                        float percent = maxMovementSpeed / Mathf.Sqrt(targetSpeedSquared);
+                        targetVelocity *= percent;
+                        targetAngularVelocity *= percent;
+                    }
+
+                    float remainingDistance = Vector3.Distance(rigidBody.position, ownerSlot.transform.position);
+                    float strength = distanceMotionCurve.Evaluate(remainingDistance);
+
+                    Vector3 lerpedVelocity = Vector3.Lerp(rigidBody.velocity, targetVelocity, strength);
+                    Vector3 lerpedAngularVelocity = Vector3.Lerp(rigidBody.angularVelocity, targetAngularVelocity, strength);
+
+                    rigidBody.velocity = lerpedVelocity;
+                    rigidBody.angularVelocity = lerpedAngularVelocity;
+
+                    if (remainingDistance <= Mathf.Epsilon)
+                    {
+                        hasSettled = true;
+                    }
                 }
+                else
+				{
+                    // get our hover distance and nudge towards the hand
+                    hoverTimer += (interactiveItem.IsHovering) ? Time.fixedDeltaTime : -Time.fixedDeltaTime;
+                    hoverTimer = Mathf.Clamp(hoverTimer, 0, hoverDuration);
+                    float hoverTValue = Mathf.InverseLerp(0, hoverDuration, hoverTimer);
+                    Vector3 direction = interactiveItem.HoverPoint - ownerSlot.transform.position;
 
-                float remainingDistance = Vector3.Distance(rigidBody.position, ownerSlot.transform.position);
-                float strength = distanceMotionCurve.Evaluate(remainingDistance);
+                    float distance = direction.magnitude;
+                    direction /= distance;
 
-                Vector3 lerpedVelocity = Vector3.Lerp(rigidBody.velocity, targetVelocity, strength);
-                Vector3 lerpedAngularVelocity = Vector3.Lerp(rigidBody.angularVelocity, targetAngularVelocity, strength);
+                    float targetDistance = (distance * 0.5f);
+                    float hoverDistance = (interactiveItem.HoverDistance * 0.5f);
 
-                rigidBody.velocity = lerpedVelocity;
-                rigidBody.angularVelocity = lerpedAngularVelocity;
+                    Vector3 goalPosition = ownerSlot.transform.position + (direction * ((targetDistance < hoverDistance) ? targetDistance : hoverDistance));
+                    rigidBody.position = Vector3.Lerp(ownerSlot.transform.position, goalPosition, hoverTValue);
+				}
             }
             else
             {
                 // is not attached
-                
+                // this is where we might want to check against 'thrown' and do a trajectory attach check
             }
 		}
 	}

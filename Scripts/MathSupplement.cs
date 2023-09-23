@@ -252,7 +252,40 @@ namespace Instrumental
         //        return A + AB * distance;
         //    }
         //}
-		#endregion
+        #endregion
+
+        public static Vector3 CalculateSingleShotVelocity(Vector3 position, Vector3 previousPosition,
+            float deltaTime)
+        {
+            float velocityFactor = 1.0f / deltaTime;
+            return velocityFactor * (position - previousPosition);
+        }
+
+        public static Vector3 CalculateSingleShotAngularVelocity(Quaternion rotation, Quaternion previousRotation,
+            float deltaTime)
+        {
+            Quaternion deltaRotation = rotation * Quaternion.Inverse(previousRotation);
+
+            Vector3 deltaAxis;
+            float deltaAngle;
+
+            deltaRotation.ToAngleAxis(out deltaAngle, out deltaAxis);
+
+            if (float.IsInfinity(deltaAxis.x))
+            {
+                deltaAxis = Vector3.zero;
+                deltaAngle = 0;
+            }
+
+            if (deltaAngle > 180)
+            {
+                deltaAngle -= 360.0f;
+            }
+
+            Vector3 angularVelocity = deltaAxis * deltaAngle * Mathf.Deg2Rad / deltaTime;
+
+            return angularVelocity;
+        }
 
         /// <summary>
         /// Performs a division operation (a / b),
