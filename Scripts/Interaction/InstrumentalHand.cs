@@ -261,7 +261,7 @@ namespace Instrumental.Interaction
 			thumbCurl = 1 - Mathf.InverseLerp(-0.8f, 0.8f, thumbCurl);
 
 			//GetThumbCurl(thumbEuler.x); //GetFingerCurl(GetFingerAngle(palmThumbRef, thumbForward, palmDirection)); // old method
-			Debug.Log("Thumb " + ((hand == Handedness.Left) ? "L" : "R") + " curl: " + thumbCurl /*thumbEuler.x*/);
+			//Debug.Log("Thumb " + ((hand == Handedness.Left) ? "L" : "R") + " curl: " + thumbCurl /*thumbEuler.x*/);
 
 			indexCurl = GetFingerCurl(GetFingerAngle(palmDirection, indexForward, palmThumbRef));
 			middleCurl = GetFingerCurl(GetFingerAngle(palmDirection, middleForward, palmThumbRef));

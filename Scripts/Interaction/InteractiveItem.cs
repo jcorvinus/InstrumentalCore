@@ -161,7 +161,10 @@ namespace Instrumental.Interaction
         const bool useKabschSolve = false;
         bool isGrasped;
         bool graspStartedThisFrame = false;
-        bool gravityStateOnGrasp;
+        bool defaultGravityState;
+        LensedValue<bool> gravity;
+        Lens<bool> gravityDefaultLens;
+        Lens<bool> gravityGraspLens;
 
         List<GraspDataVars> graspableHands;
         List<Vector3> graspStartPoints;
@@ -216,6 +219,8 @@ namespace Instrumental.Interaction
 
         public List<GraspDataVars> GraspableHands { get { return graspableHands; } }
 
+        public LensedValue<bool> Gravity { get { return gravity; } }
+
 		private void Awake()
 		{
             rigidBody = GetComponent<Rigidbody>();
@@ -237,7 +242,9 @@ namespace Instrumental.Interaction
             offsetStartPoints = new List<Vector3>(10);
 
             poseSolver = new KabschSolver();
-		}
+
+            gravity = new LensedValue<bool>(false);
+        }
 
         // Start is called before the first frame update
         void Start()
@@ -320,7 +327,18 @@ namespace Instrumental.Interaction
             }
 
             SetRespawnLocation();
+
+            defaultGravityState = rigidBody.useGravity;
+            gravityDefaultLens = new Lens<bool>(0, (previousValue) => defaultGravityState);
+            gravityGraspLens = new Lens<bool>(1, (previousValue) => isGrasped ? false : previousValue);
+            gravity.AddLens(gravityDefaultLens); // might be possible to just merge these two
+            gravity.AddLens(gravityGraspLens);
         }
+
+        public void SetDefaultGravity (bool gravityValue)
+		{
+            defaultGravityState = gravityValue;
+		}
 
         public void SetRespawnLocation(Vector3 position, Quaternion rotation)
 		{
@@ -788,8 +806,6 @@ namespace Instrumental.Interaction
 		{
             isGrasped = false;
 
-            rigidBody.useGravity = gravityStateOnGrasp;
-
             if (applyThrowBoost)
             {
                 rigidBody.velocity = velocity * velocityPower;
@@ -880,8 +896,6 @@ namespace Instrumental.Interaction
 		{
             isGrasped = true;
             graspSource.Play();
-            gravityStateOnGrasp = rigidBody.useGravity;
-            rigidBody.useGravity = false;
             previousCenterOfMass = rigidBody.centerOfMass;
 
             graspStartedThisFrame = true;
@@ -1202,6 +1216,7 @@ namespace Instrumental.Interaction
 
         private void FixedUpdate()
 		{
+            rigidBody.useGravity = gravity.GetValue();
             UpdateGrasp();
 
             // move according to grasp position
