@@ -51,15 +51,7 @@ namespace Instrumental.Overlay
 			int textureWidth = (int)SteamVR.instance.sceneWidth;
 			int textureHeight = (int)SteamVR.instance.sceneHeight;
 
-			float multiplier = 0.75f; // set this back to 1 once we figure out
-				// why rendering at the recommended resolution is so crunchy
-				// (this probably has something to do with the render target
-				// being stereopanorama). It looked high res on my varjo though
-				// also, we can use the hidden area mesh on this to clip pixels,
-				// so that higher resolutions shouldn't be so awful, although tbh
-				// the pixels would be clear most of the time anyways so I wonder
-				// it really is just plain old fill rate or memory bottlenecking
-				// being the problem
+			float multiplier = 1f; // adding the hidden area mesh has made rendering at 1x reasonable.
 
 			renderTexture = new RenderTexture((int)(textureWidth * multiplier), 
 				(int)(textureHeight * multiplier),

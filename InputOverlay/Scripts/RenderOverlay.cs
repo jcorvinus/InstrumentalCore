@@ -128,11 +128,11 @@ namespace Instrumental.Overlay
 				}
 
                 VRTextureBounds_t textureBounds = new VRTextureBounds_t();
-                textureBounds.uMin = (0);
-                textureBounds.vMin = (1);
-                textureBounds.uMax = (1);
-                textureBounds.vMax = (0);
-                overlay.SetOverlayTextureBounds(handle, ref textureBounds);
+				textureBounds.uMin = (0); // these are the way they are
+				textureBounds.vMin = (1); // because otherwise the image will flip
+				textureBounds.uMax = (1); // upside down and left/right
+				textureBounds.vMax = (0);
+				overlay.SetOverlayTextureBounds(handle, ref textureBounds);
 
                 HmdVector2_t vecMouseScale = new HmdVector2_t();
                 vecMouseScale.v0 = 1;
@@ -161,7 +161,7 @@ namespace Instrumental.Overlay
             float frustumWidth = frustumHeight * cameraSetup.Aspect;
 
             Gizmos.matrix = Matrix4x4.TRS(cameraSetup.transform.position +
-                (cameraSetup.transform.forward * cameraSetup.transform.localPosition.z), 
+                (cameraSetup.transform.forward * distance), // I think our local z offset here is wrong
                 cameraSetup.transform.rotation,
                 Vector3.one);
 
