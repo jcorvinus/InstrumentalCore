@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using Instrumental.Interaction;
+
 namespace Instrumental.Editing.Tools
 {
     public class ColorDropper : MonoBehaviour
@@ -25,7 +27,7 @@ namespace Instrumental.Editing.Tools
 
         [SerializeField]
         MeshRenderer colorRenderer;
-        //InteractionBehaviour interaction;
+        InteractiveItem interaction;
 
         [SerializeField]
         MeshRenderer signifierRenderer;
@@ -78,9 +80,9 @@ namespace Instrumental.Editing.Tools
             colorHash = Shader.PropertyToID("_Color");
             signifierTextureHash = Shader.PropertyToID("_MainTex");
 
-            /*interaction = GetComponent<InteractionBehaviour>();
+            interaction = GetComponent<InteractiveItem>();
 
-            PinchDetector[] allPinchers = GetComponents<PinchDetector>();
+            /*PinchDetector[] allPinchers = GetComponents<PinchDetector>();
 
             leftPinch = allPinchers.First(item => item.HandModel.Handedness == Chirality.Left);
             leftPinch.ActivateDistance = pinchActivateDist;
