@@ -21,6 +21,7 @@ namespace Instrumental.Interaction.Slottables
         // grasped and needs to reserve the slot for re-attach
 
         public bool IsAttached { get { return ownerSlot && ownerSlot.AttachedItem == this; } }
+        public InteractiveItem InteractiveItem { get { return interactiveItem; } }
 
         private void Awake()
         {
