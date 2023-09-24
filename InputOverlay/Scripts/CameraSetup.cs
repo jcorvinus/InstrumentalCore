@@ -191,7 +191,15 @@ namespace Instrumental.Overlay
 		void SetUpHiddenAreaMesh()
 		{
 			HiddenAreaMesh_t leftEyeMesh = OpenVR.System.GetHiddenAreaMesh(EVREye.Eye_Left, EHiddenAreaMeshType.k_eHiddenAreaMesh_Standard);
-			HiddenAreaMesh_t rightEyeMesh = OpenVR.System.GetHiddenAreaMesh(EVREye.Eye_Right, EHiddenAreaMeshType.k_eHiddenAreaMesh_Standard);			
+			VRTextureBounds_t leftBounds = SteamVR.instance.textureBounds[0];
+			HiddenAreaMesh_t rightEyeMesh = OpenVR.System.GetHiddenAreaMesh(EVREye.Eye_Right, EHiddenAreaMeshType.k_eHiddenAreaMesh_Standard);
+			VRTextureBounds_t rightBounds = SteamVR.instance.textureBounds[1];
+
+			Mesh leftMesh = GetMeshForVRMeshData(leftEyeMesh, leftBounds);
+			Mesh rightMesh = GetMeshForVRMeshData(rightEyeMesh, rightBounds);
+
+			leftHiddenAreaMeshFilter.mesh = leftMesh;
+			rightHiddenAreaMeshFilter.mesh = rightMesh;
 		}
 
 		[SerializeField] bool setFieldOfView;
