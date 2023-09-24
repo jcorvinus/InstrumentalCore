@@ -26,6 +26,9 @@ namespace Instrumental.Overlay
 
 		[SerializeField] SteamVR_Overlay debugOverlay;
 
+		[SerializeField] MeshFilter leftHiddenAreaMeshFilter;
+		[SerializeField] MeshFilter rightHiddenAreaMeshFilter;
+
 		public float FieldOfView { get { return fieldOfView; } }
 		public float Aspect { get { return aspect; } }
 		public float nearPlane { get { return screenCamera.nearClipPlane; } }
@@ -48,7 +51,7 @@ namespace Instrumental.Overlay
 			int textureWidth = (int)SteamVR.instance.sceneWidth;
 			int textureHeight = (int)SteamVR.instance.sceneHeight;
 
-			float multiplier = 1f; // set this back to 1 once we figure out
+			float multiplier = 0.75f; // set this back to 1 once we figure out
 				// why rendering at the recommended resolution is so crunchy
 				// (this probably has something to do with the render target
 				// being stereopanorama). It looked high res on my varjo though
@@ -96,6 +99,8 @@ namespace Instrumental.Overlay
 				HmdMatrix34_t rightEyeMatrix = hmd.GetEyeToHeadTransform(EVREye.Eye_Right);
 				rightEyeCamera.transform.localPosition = rightEyeMatrix.GetPosition();
 				rightEyeCamera.fieldOfView = fieldOfView * perCameraFovMultiplier;
+
+				SetUpHiddenAreaMesh();
 			}
 			else
 			{
@@ -108,6 +113,85 @@ namespace Instrumental.Overlay
 			{
 				OnSetupComplete.Invoke();
 			}
+		}
+
+		Mesh GetMeshForVRMeshData(HiddenAreaMesh_t src, VRTextureBounds_t bounds)
+		{
+			if (src.unTriangleCount == 0)
+				return null;
+
+			var data = new float[src.unTriangleCount * 3 * 2]; //HmdVector2_t
+			System.Runtime.InteropServices.Marshal.Copy(src.pVertexData, data, 0, data.Length);
+
+			var vertices = new Vector3[src.unTriangleCount * 3 + 12];
+			var indices = new int[src.unTriangleCount * 3 + 24];
+
+			var x0 = 2.0f * bounds.uMin - 1.0f;
+			var x1 = 2.0f * bounds.uMax - 1.0f;
+			var y0 = 2.0f * bounds.vMin - 1.0f;
+			var y1 = 2.0f * bounds.vMax - 1.0f;
+
+			for (int i = 0, j = 0; i < src.unTriangleCount * 3; i++)
+			{
+				var x = Mathf.Lerp(x0, x1, data[j++]);
+				var y = Mathf.Lerp(y0, y1, data[j++]);
+				vertices[i] = new Vector3(x, y, 0.0f);
+				indices[i] = i;
+			}
+
+			// Add border
+			var offset = (int)src.unTriangleCount * 3;
+			var iVert = offset;
+			vertices[iVert++] = new Vector3(-1, -1, 0);
+			vertices[iVert++] = new Vector3(x0, -1, 0);
+			vertices[iVert++] = new Vector3(-1, 1, 0);
+			vertices[iVert++] = new Vector3(x0, 1, 0);
+			vertices[iVert++] = new Vector3(x1, -1, 0);
+			vertices[iVert++] = new Vector3(1, -1, 0);
+			vertices[iVert++] = new Vector3(x1, 1, 0);
+			vertices[iVert++] = new Vector3(1, 1, 0);
+			vertices[iVert++] = new Vector3(x0, y0, 0);
+			vertices[iVert++] = new Vector3(x1, y0, 0);
+			vertices[iVert++] = new Vector3(x0, y1, 0);
+			vertices[iVert++] = new Vector3(x1, y1, 0);
+
+			var iTri = offset;
+			indices[iTri++] = offset + 0;
+			indices[iTri++] = offset + 1;
+			indices[iTri++] = offset + 2;
+			indices[iTri++] = offset + 2;
+			indices[iTri++] = offset + 1;
+			indices[iTri++] = offset + 3;
+			indices[iTri++] = offset + 4;
+			indices[iTri++] = offset + 5;
+			indices[iTri++] = offset + 6;
+			indices[iTri++] = offset + 6;
+			indices[iTri++] = offset + 5;
+			indices[iTri++] = offset + 7;
+			indices[iTri++] = offset + 1;
+			indices[iTri++] = offset + 4;
+			indices[iTri++] = offset + 8;
+			indices[iTri++] = offset + 8;
+			indices[iTri++] = offset + 4;
+			indices[iTri++] = offset + 9;
+			indices[iTri++] = offset + 10;
+			indices[iTri++] = offset + 11;
+			indices[iTri++] = offset + 3;
+			indices[iTri++] = offset + 3;
+			indices[iTri++] = offset + 11;
+			indices[iTri++] = offset + 6;
+
+			var mesh = new Mesh();
+			mesh.vertices = vertices;
+			mesh.triangles = indices;
+			mesh.bounds = new Bounds(Vector3.zero, new Vector3(float.MaxValue, float.MaxValue, float.MaxValue)); // Prevent frustum culling from culling this mesh
+			return mesh;
+		}
+
+		void SetUpHiddenAreaMesh()
+		{
+			HiddenAreaMesh_t leftEyeMesh = OpenVR.System.GetHiddenAreaMesh(EVREye.Eye_Left, EHiddenAreaMeshType.k_eHiddenAreaMesh_Standard);
+			HiddenAreaMesh_t rightEyeMesh = OpenVR.System.GetHiddenAreaMesh(EVREye.Eye_Right, EHiddenAreaMeshType.k_eHiddenAreaMesh_Standard);			
 		}
 
 		[SerializeField] bool setFieldOfView;
