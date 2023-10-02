@@ -6,16 +6,12 @@ namespace Instrumental.Space
 {
     public abstract class TransformSpace : MonoBehaviour
     {
-        // Start is called before the first frame update
-        void Start()
-        {
-
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
+        public abstract Vector3 TransformPoint(Vector3 localPoint);
+        public abstract Vector3 InverseTransformPoint(Vector3 worldPoint);
+        public abstract Quaternion TransformRotation(Vector3 localPosition, Quaternion localRotation);
+        public abstract Quaternion InverseTransformRotation(Vector3 position, Quaternion rotation);
+        public abstract Vector3 TransformDirection(Vector3 localPosition, Vector3 localDirection);
+        public abstract Vector3 InverseTransformDirection(Vector3 position, Vector3 direction);
+        public abstract Matrix4x4 GetTransformationMatrix(Vector3 localPosition);
     }
 }

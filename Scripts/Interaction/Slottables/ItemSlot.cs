@@ -84,7 +84,7 @@ namespace Instrumental.Interaction.Slottables
 		// Update is called once per frame
 		void Update()
         {
-            boundsPreview.enabled = !attachedItem;
+            if(boundsPreview) boundsPreview.enabled = !attachedItem;
         }
 
 		private void OnDrawGizmos()
