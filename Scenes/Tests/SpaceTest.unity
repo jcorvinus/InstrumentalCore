@@ -230,8 +230,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   space: {fileID: 535345408}
-  testSpace: 1
-  mode: 2
+  testSpace: 2
+  mode: 1
   localRefPoint: {fileID: 0}
   worldRefPoint: {fileID: 1708427128}
 --- !u!4 &1209396540
@@ -272,11 +272,11 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1708427127}
-  m_LocalRotation: {x: -0, y: -0.0027820712, z: -0, w: 0.9999961}
-  m_LocalPosition: {x: -0.575, y: 0.16247141, z: -0.004}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.658, y: 0.16247141, z: -0.269}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: -0.319, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

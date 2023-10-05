@@ -142,8 +142,30 @@ namespace Instrumental.Space
             }
             else if (testSpace == TestSpace.World) // take a warped roation and turn it into a local one
 			{
+                Quaternion inverseWarped = space.InverseTransformRotation(worldRefPoint.position, worldRefPoint.rotation);
+                Vector3 position = space.InverseTransformPoint(worldRefPoint.position);
 
-			}
+                Gizmos.matrix = Matrix4x4.TRS(position, inverseWarped, Vector3.one);
+                DrawBasis(position, inverseWarped);
+
+                // draw our other stuff
+                Vector3[] localPoints = new Vector3[4];
+                localPoints[0] = Vector3.right;
+                localPoints[1] = Vector3.Lerp(Vector3.right, Vector3.left, 0.25f);
+                localPoints[2] = Vector3.Lerp(Vector3.right, Vector3.left, 0.75f);
+                localPoints[3] = Vector3.left;
+
+                Vector3[] worldPoints = new Vector3[4];
+                worldPoints[0] = space.TransformPoint(localPoints[0]);
+                worldPoints[1] = space.TransformPoint(localPoints[1]);
+                worldPoints[2] = space.TransformPoint(localPoints[2]);
+                worldPoints[3] = space.TransformPoint(localPoints[3]);
+
+                Gizmos.matrix = Matrix4x4.identity;
+                Gizmos.DrawLine(worldPoints[0], worldPoints[1]);
+                Gizmos.DrawLine(worldPoints[1], worldPoints[2]);
+                Gizmos.DrawLine(worldPoints[2], worldPoints[3]);
+            }
 		}
 
         void DrawBasis(Vector3 position, Quaternion rotation)
