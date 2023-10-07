@@ -53,10 +53,10 @@ namespace Instrumental.Space
             localPoints[3] = Vector3.left;
 
             Vector3[] worldPoints = new Vector3[4];
-            worldPoints[0] = transform.TransformPoint(localPoints[0]);
-            worldPoints[1] = transform.TransformPoint(localPoints[1]);
-            worldPoints[2] = transform.TransformPoint(localPoints[2]);
-            worldPoints[3] = transform.TransformPoint(localPoints[3]);
+            worldPoints[0] = space.transform.TransformPoint(localPoints[0]);
+            worldPoints[1] = space.transform.TransformPoint(localPoints[1]);
+            worldPoints[2] = space.transform.TransformPoint(localPoints[2]);
+            worldPoints[3] = space.transform.TransformPoint(localPoints[3]);
 
             if (testSpace == TestSpace.Local) // taking local points and transforming them into world mode, then drawing
             {
@@ -143,9 +143,10 @@ namespace Instrumental.Space
             else if (testSpace == TestSpace.World) // take a warped roation and turn it into a local one
 			{
                 Quaternion inverseWarped = space.InverseTransformRotation(worldRefPoint.position, worldRefPoint.rotation);
-                Vector3 position = space.InverseTransformPoint(worldRefPoint.position);
+                Vector3 localPosition = space.transform.InverseTransformPoint(worldRefPoint.position);
+                    Vector3 position = space.InverseTransformPoint(localPosition);
 
-                Gizmos.matrix = Matrix4x4.TRS(position, inverseWarped, Vector3.one);
+                Gizmos.matrix = Matrix4x4.TRS(space.transform.position, space.transform.rotation, Vector3.one);
                 DrawBasis(position, inverseWarped);
 
                 // draw our other stuff
