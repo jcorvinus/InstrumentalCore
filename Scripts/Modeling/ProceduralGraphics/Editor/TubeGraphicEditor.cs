@@ -50,9 +50,9 @@ namespace Lucidigital.Modeling.ProceduralGraphics
                 DeleteLastSegment();
             }
 
-            if (GUILayout.Button("Generate Data"))
+            if (GUILayout.Button("Generate Mesh"))
             {
-                m_instance.GenerateData();
+                m_instance.GenerateMesh();
             }
 
             serializedObject.ApplyModifiedProperties();

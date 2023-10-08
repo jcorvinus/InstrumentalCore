@@ -91,7 +91,7 @@ namespace Lucidigital.Modeling.ProceduralGraphics
         {
             // todo: change this so that it emits an event when the data is changed, and 
             // other representations only update when needed.
-            GenerateData();
+            GenerateMesh();
         }
 
         #region Data Access
@@ -341,7 +341,7 @@ namespace Lucidigital.Modeling.ProceduralGraphics
         #endregion
 
         #region Mesh Generation Methods
-        public void GenerateData()
+        public void GenerateMesh()
         {
             int vertCount = vertsInSlice * splineSegmentVertCount * SegmentCount();
             if (vertices == null || vertices.Length != vertCount)
@@ -558,7 +558,7 @@ namespace Lucidigital.Modeling.ProceduralGraphics
 
             if(drawMesh)
             {
-                GenerateData();
+                GenerateMesh();
                 DrawMesh();
             }
 
