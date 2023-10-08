@@ -69,12 +69,23 @@ namespace Instrumental.Space
 
 		public override Vector3 TransformDirection(Vector3 localPosition, Vector3 localDirection)
 		{
-			return base.TransformDirection(localPosition, localDirection);
+			Vector3 anchorDelta = Vector3.zero;
+			Vector3 anchorRectPos = Vector3.zero;
+
+			anchorDelta = localPosition - anchorRectPos;
+			float angle = angleOffset + anchorDelta.x / this.radius;
+
+			Quaternion rotation = Quaternion.Euler(0, angle * Mathf.Rad2Deg, 0);
+			return rotation * localDirection;
 		}
 
 		public override Vector3 InverseTransformDirection(Vector3 position, Vector3 direction)
 		{
-			return base.InverseTransformDirection(position, direction);
+			position.z += this.radius;
+
+			float angle = Mathf.Atan2(position.x, position.z);
+
+			return Quaternion.Euler(0, -angle * Mathf.Rad2Deg, 0) * direction;
 		}
 	}
 }
