@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Lucidigital.Modeling.ProceduralGraphics
+namespace Instrumental.Modeling.ProceduralGraphics
 {
     public class TubeGraphic : MonoBehaviour
     {

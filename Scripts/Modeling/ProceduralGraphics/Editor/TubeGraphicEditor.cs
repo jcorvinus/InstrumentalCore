@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-namespace Lucidigital.Modeling.ProceduralGraphics
+namespace Instrumental.Modeling.ProceduralGraphics
 {
     [CustomEditor(typeof(TubeGraphic))]
     public class TubeGraphicEditor : Editor

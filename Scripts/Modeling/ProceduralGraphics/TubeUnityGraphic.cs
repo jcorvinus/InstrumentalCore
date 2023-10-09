@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Lucidigital.Modeling.ProceduralGraphics
+namespace Instrumental.Modeling.ProceduralGraphics
 {
     /// <summary>
     /// The Unity renderer version of the Tube Graphic. Use this if for some reason you cannot use a 
