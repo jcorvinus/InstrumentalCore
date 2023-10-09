@@ -571,7 +571,17 @@ namespace Instrumental.Modeling.ProceduralGraphics
                     };
                     break;
             }
+
+            WarpVerts();
         }
+
+        void WarpVerts()
+		{
+            for(int i=0; i < verts.Length; i++)
+			{
+                verts[i] = WarpVertex(verts[i], transform);
+			}
+		}
 
         public void GenerateUVs(Vector3[] verts, out Vector2[] uvs)
         {

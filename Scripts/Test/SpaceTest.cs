@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using Instrumental.Modeling.ProceduralGraphics;
+
 namespace Instrumental.Space
 {
 
@@ -28,13 +30,14 @@ namespace Instrumental.Space
 
         [SerializeField] Transform localRefPoint; // we use this for testing rectilinear-to-curved space transform
         [SerializeField] Transform worldRefPoint; // we use this world point for testing the curved-to-rectilinear-space transform
+        [SerializeField] ProcGenModel model;
 
         int numberOfPoints = 4;
 
         // Start is called before the first frame update
         void Start()
         {
-
+            model.SetSpace(space);
         }
 
         // Update is called once per frame
