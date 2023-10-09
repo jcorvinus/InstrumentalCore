@@ -56,7 +56,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
                 rimMeshFilter = transform.GetChild(1).GetComponent<MeshFilter>();
                 rimMeshRenderer = rimMeshFilter.GetComponent<MeshRenderer>();
 
-                buttonModel.PropertiesChanged += (ButtonModel sender) => { Regenerate(); };
+                buttonModel.PropertiesChanged += (ProcGenModel sender) => { Regenerate(); };
 
                 hasComponents = true;
             }

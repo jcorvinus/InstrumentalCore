@@ -6,11 +6,8 @@ using Instrumental.Schema;
 
 namespace Instrumental.Modeling.ProceduralGraphics
 {
-	public class ButtonModel : MonoBehaviour
+	public class ButtonModel : ProcGenModel
 	{
-		public delegate void ModelPropertiesHandler(ButtonModel sender);
-		public event ModelPropertiesHandler PropertiesChanged;
-
 		const bool closeLoop = true; // never change this
 
 		// I think we'll eventually migrate this into a stored copy of a button
@@ -91,10 +88,9 @@ namespace Instrumental.Modeling.ProceduralGraphics
 			GenerateModel();
 		}
 
-		private void OnValidate()
+		public override void OnValidate()
 		{
-			GenerateModel();
-			SetPropertiesChanged();
+			base.OnValidate();
 		}
 
 		private void OnEnable()
@@ -151,14 +147,6 @@ namespace Instrumental.Modeling.ProceduralGraphics
 				GenerateModel(); // todo: split this into generating mesh and updating verts
 					// according to the owning class' expected behaviors next
 				SetPropertiesChanged();
-			}
-		}
-
-		private void SetPropertiesChanged()
-		{
-			if (PropertiesChanged != null)
-			{
-				PropertiesChanged(this);
 			}
 		}
 
@@ -335,7 +323,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 			}
 		}
 
-		void GenerateModel()
+		public override void GenerateModel()
 		{
 			GenerateFaceMesh();
 			GenerateRimMesh();
@@ -438,12 +426,6 @@ namespace Instrumental.Modeling.ProceduralGraphics
 			LoopEdge(ref rimVertices, (rimInnerLoopBack.VertexBaseID + (cornerVertCount * 4)) + widthVertCount, false, 0, radius);
 		}
 		#endregion
-
-		// Update is called once per frame
-		void Update()
-		{
-
-		}
 
 		private void OnDrawGizmosSelected()
 		{

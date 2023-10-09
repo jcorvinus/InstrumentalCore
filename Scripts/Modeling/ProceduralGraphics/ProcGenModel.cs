@@ -9,11 +9,11 @@ namespace Instrumental.Modeling.ProceduralGraphics
         public delegate void ModelPropertiesHandler(ProcGenModel sender);
         public event ModelPropertiesHandler PropertiesChanged;
 
-        // Start is called before the first frame update
-        void Start()
-        {
-
-        }
+        public virtual void OnValidate()
+		{
+            GenerateModel();
+            SetPropertiesChanged();
+		}
 
         protected void SetPropertiesChanged()
         {
@@ -24,11 +24,5 @@ namespace Instrumental.Modeling.ProceduralGraphics
         }
 
         public abstract void GenerateModel();
-
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
     }
 }
