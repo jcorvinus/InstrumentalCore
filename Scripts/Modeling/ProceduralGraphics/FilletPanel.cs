@@ -164,7 +164,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
         private void Awake()
         {
-            GenerateMesh();
+            GenerateModel();
         }
 
         // Use this for initialization
@@ -192,7 +192,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
             depth = (depth >= 0) ? depth : 0;
 
-            GenerateMesh();
+            GenerateModel();
 
             SetPropertiesChanged();
         }
@@ -494,7 +494,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
         #region Meshing Methods
 
-        public void GenerateMesh()
+        public void GenerateModel()
         {
             PanelInfo panelInfo;
 
@@ -1616,7 +1616,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
         {
             if (mesh == null)
             {
-                GenerateMesh();
+                GenerateModel();
             }
             else
             {

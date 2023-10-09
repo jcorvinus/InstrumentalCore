@@ -127,7 +127,7 @@ namespace Instrumental.Controls
 
                     // then enable the fillet gameobject
                     filletPanel.gameObject.SetActive(true);
-                    filletPanel.GenerateMesh();
+                    filletPanel.GenerateModel();
                     break;
                 default:
                     break;

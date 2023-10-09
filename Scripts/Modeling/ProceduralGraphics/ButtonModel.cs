@@ -88,18 +88,18 @@ namespace Instrumental.Modeling.ProceduralGraphics
 		// Use this for initialization
 		void Start()
 		{
-			GenerateMesh();
+			GenerateModel();
 		}
 
 		private void OnValidate()
 		{
-			GenerateMesh();
+			GenerateModel();
 			SetPropertiesChanged();
 		}
 
 		private void OnEnable()
 		{
-			GenerateMesh();
+			GenerateModel();
 		}
 
 		public void SetNewButtonSchema(ButtonSchema newSchema)
@@ -148,7 +148,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
 			if (anyPropertyChanged)
 			{
-				GenerateMesh(); // todo: split this into generating mesh and updating verts
+				GenerateModel(); // todo: split this into generating mesh and updating verts
 					// according to the owning class' expected behaviors next
 				SetPropertiesChanged();
 			}
@@ -335,7 +335,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 			}
 		}
 
-		void GenerateMesh()
+		void GenerateModel()
 		{
 			GenerateFaceMesh();
 			GenerateRimMesh();
@@ -450,7 +450,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 			if(regenerate)
 			{
 				regenerate = false;
-				GenerateMesh();
+				GenerateModel();
 			}
 
 			if (drawLoops)

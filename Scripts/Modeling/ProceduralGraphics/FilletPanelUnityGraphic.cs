@@ -25,13 +25,13 @@ namespace Instrumental.Modeling.ProceduralGraphics
         // Use this for initialization
         void Start()
         {
-            filletPanel.GenerateMesh();
+            filletPanel.GenerateModel();
             meshFilter.sharedMesh = filletPanel.Mesh;
         }
 
         private void OnEnable()
         {
-            filletPanel.GenerateMesh();
+            filletPanel.GenerateModel();
             meshFilter.sharedMesh = filletPanel.Mesh;
         }
 

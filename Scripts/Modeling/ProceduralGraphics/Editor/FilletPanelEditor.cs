@@ -150,7 +150,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
             if (GUILayout.Button("Generate Mesh"))
             {
-                m_instance.GenerateMesh();
+                m_instance.GenerateModel();
             }
 
             if(GUILayout.Button("Generate VColors"))
