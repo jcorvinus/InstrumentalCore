@@ -6,11 +6,8 @@ using Instrumental.Modeling;
 
 namespace Instrumental.Modeling.ProceduralGraphics
 {
-    public class FilletPanel : MonoBehaviour
-    {
-        public delegate void PanelPropertiesHandler(FilletPanel sender);
-        public event PanelPropertiesHandler PropertiesChanged;            
-
+    public class FilletPanel : ProcGenModel
+    { 
         public enum BorderType
         {
             None,
@@ -173,7 +170,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
         }
 
-        private void OnValidate()
+        public override void OnValidate()
         {
             widthSegments = Mathf.Max(0, widthSegments);
             heightSegments = Mathf.Max(0, heightSegments);
@@ -192,17 +189,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
             depth = (depth >= 0) ? depth : 0;
 
-            GenerateModel();
-
-            SetPropertiesChanged();
-        }
-
-        private void SetPropertiesChanged()
-        {
-            if (PropertiesChanged != null)
-            {
-                PropertiesChanged(this);
-            }
+            base.OnValidate();
         }
 
         public void SetDimensions(Vector2 dimensions)
@@ -494,7 +481,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
         #region Meshing Methods
 
-        public void GenerateModel()
+        public override void GenerateModel()
         {
             PanelInfo panelInfo;
 
