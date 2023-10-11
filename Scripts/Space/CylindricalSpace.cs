@@ -13,11 +13,11 @@ namespace Instrumental.Space
 		public override Vector3 TransformPoint(Vector3 localPoint)
 		{
 			Vector3 anchorDelta;
-			Vector3 anchorRectPos = /*this.transform.InverseTransformPoint(*/Vector3.zero/*)*/;
+			Vector3 anchorRectPos = this.transform.InverseTransformPoint(Origin.position);
 			anchorDelta = localPoint - anchorRectPos;
 
-			float angle = angleOffset + anchorDelta.x / this.radius; // this.radius used to be radiusoffset, which
-			float height = heightOffset + anchorDelta.y; // was the space radius plus some offset (I think)
+			float angle = anchorDelta.x / this.radius;
+			float height = anchorDelta.y;
 			float radius = this.radius + anchorDelta.z; 
 
 			Vector3 position = Vector3.zero;
@@ -36,8 +36,8 @@ namespace Instrumental.Space
 			float radius = new Vector2(worldPoint.x, worldPoint.z).magnitude;
 
 			Vector3 anchorDelta;
-			anchorDelta.x = (angle - angleOffset) * this.radius; /** radiusOffset*/;
-			anchorDelta.y = height - heightOffset;
+			anchorDelta.x = (angle) * this.radius;
+			anchorDelta.y = height;
 			anchorDelta.z = radius - this.radius;
 
 			Vector3 anchorRectPos = Vector3.zero;
@@ -48,10 +48,10 @@ namespace Instrumental.Space
 		public override Quaternion TransformRotation(Vector3 localPosition, Quaternion localRotation)
 		{
 			Vector3 anchorDelta;
-			Vector3 anchorRectPos = /*this.transform.InverseTransformPoint(*/Vector3.zero/*)*/;
+			Vector3 anchorRectPos = this.transform.InverseTransformPoint(Origin.position);
 			anchorDelta = localPosition - anchorRectPos;
 
-			float angle = angleOffset + anchorDelta.x / this.radius; // this.radius can be 'radius offset'. See TransformPoint for more details
+			float angle = anchorDelta.x / this.radius;
 
 			Quaternion rotation = Quaternion.Euler(0, angle * Mathf.Rad2Deg, 0);
 
@@ -70,10 +70,10 @@ namespace Instrumental.Space
 		public override Vector3 TransformDirection(Vector3 localPosition, Vector3 localDirection)
 		{
 			Vector3 anchorDelta = Vector3.zero;
-			Vector3 anchorRectPos = Vector3.zero;
+			Vector3 anchorRectPos = this.transform.InverseTransformPoint(Origin.position);
 
 			anchorDelta = localPosition - anchorRectPos;
-			float angle = angleOffset + anchorDelta.x / this.radius;
+			float angle = anchorDelta.x / this.radius;
 
 			Quaternion rotation = Quaternion.Euler(0, angle * Mathf.Rad2Deg, 0);
 			return rotation * localDirection;

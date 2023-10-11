@@ -4,11 +4,8 @@ using UnityEngine;
 
 namespace Instrumental.Space
 {
-    public class RadialSpace : TransformSpace
+    public abstract class RadialSpace : TransformSpace
     {
-		protected float angleOffset;
-		protected float heightOffset;
-		protected float radiusOffset;
 		protected float radiansPerMeter;
 
 		[SerializeField]

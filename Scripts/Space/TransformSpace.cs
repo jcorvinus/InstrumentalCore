@@ -6,6 +6,10 @@ namespace Instrumental.Space
 {
     public abstract class TransformSpace : MonoBehaviour
     {
+        public Transform OriginRef;
+
+        protected Transform Origin { get { return (OriginRef) ? OriginRef : transform; } }
+
         public abstract Vector3 TransformPoint(Vector3 localPoint);
         public abstract Vector3 InverseTransformPoint(Vector3 worldPoint);
         public abstract Quaternion TransformRotation(Vector3 localPosition, Quaternion localRotation);
