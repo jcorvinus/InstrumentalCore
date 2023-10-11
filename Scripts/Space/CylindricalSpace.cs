@@ -14,7 +14,7 @@ namespace Instrumental.Space
 		{
 			Vector3 anchorDelta;
 			Vector3 anchorRectPos = this.transform.InverseTransformPoint(Origin.position);
-			anchorDelta = localPoint - anchorRectPos;
+			anchorDelta = anchorRectPos - localPoint;
 
 			float angle = anchorDelta.x / this.radius;
 			float height = anchorDelta.y;
@@ -49,7 +49,7 @@ namespace Instrumental.Space
 		{
 			Vector3 anchorDelta;
 			Vector3 anchorRectPos = this.transform.InverseTransformPoint(Origin.position);
-			anchorDelta = localPosition - anchorRectPos;
+			anchorDelta = anchorRectPos - localPosition;
 
 			float angle = anchorDelta.x / this.radius;
 
@@ -72,7 +72,7 @@ namespace Instrumental.Space
 			Vector3 anchorDelta = Vector3.zero;
 			Vector3 anchorRectPos = this.transform.InverseTransformPoint(Origin.position);
 
-			anchorDelta = localPosition - anchorRectPos;
+			anchorDelta = anchorRectPos - localPosition;
 			float angle = anchorDelta.x / this.radius;
 
 			Quaternion rotation = Quaternion.Euler(0, angle * Mathf.Rad2Deg, 0);
