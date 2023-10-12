@@ -159,15 +159,15 @@ namespace Instrumental.Modeling.ProceduralGraphics
         public bool DoExtrusion { get { return depth > 0; } }
         #endregion
 
-        private void Awake()
+        public override void Awake()
         {
-            GenerateModel();
+            base.Awake();
         }
 
         // Use this for initialization
-        void Start()
+        public override void Start()
         {
-
+            
         }
 
         public override void OnValidate()

@@ -13,6 +13,17 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
         protected TransformSpace space;
 
+        public virtual void Awake()
+		{
+            TransformSpace spaceInParent = GetComponentInParent<TransformSpace>();
+            if (spaceInParent) SetSpace(spaceInParent);
+		}
+
+        public virtual void Start()
+		{
+
+		}
+
         public virtual void OnValidate()
 		{
             GenerateModel();

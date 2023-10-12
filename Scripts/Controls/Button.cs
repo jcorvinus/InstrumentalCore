@@ -89,13 +89,20 @@ namespace Instrumental.Controls
 
 			float physDepth = (buttonSchema.Depth + (buttonSchema.Depth * buttonSchema.BevelDepth));
 			float physAndHoverDepth = physDepth + (hoverHeight);
-			float totalDepth = physAndHoverDepth + underFlow;// + hoverHeight + underFlow;
-			boxCollider.center = new Vector3(0, 0, (physAndHoverDepth * 0.5f) - (underFlow * 0.5f));
-			boxCollider.size = new Vector3(buttonSchema.Width + (buttonSchema.Radius * 2), buttonSchema.Radius * 2,
-				totalDepth);
+			float totalDepth = physAndHoverDepth + underFlow;
 
-			buttonRuntimeBehavior.ButtonFaceDistance = physDepth;
-			buttonRuntimeBehavior.ButtonThrowDistance = (buttonSchema.Depth * buttonSchema.RimDepth) * 0.5f; //(buttonSchema.Depth * buttonSchema.RimDepth);
+			if (boxCollider) // currently, some design mode prototypes of buttons don't have this
+			{
+				boxCollider.center = new Vector3(0, 0, (physAndHoverDepth * 0.5f) - (underFlow * 0.5f));
+				boxCollider.size = new Vector3(buttonSchema.Width + (buttonSchema.Radius * 2), buttonSchema.Radius * 2,
+					totalDepth);
+			}
+
+			if (buttonRuntimeBehavior) // currently, some design mode prorotypes of buttons don't have this
+			{
+				buttonRuntimeBehavior.ButtonFaceDistance = physDepth;
+				buttonRuntimeBehavior.ButtonThrowDistance = (buttonSchema.Depth * buttonSchema.RimDepth) * 0.5f; //(buttonSchema.Depth * buttonSchema.RimDepth);
+			}
 		}
 
 		public override void SetSchema(ControlSchema controlSchema)
