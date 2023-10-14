@@ -9,11 +9,11 @@ namespace Instrumental.Editing
     public class SpaceChangeCollider : MonoBehaviour
     {
         int layerMask;
-        SpaceChanger changer;
+        SpaceItem changer;
 
         private void Awake()
         {
-            changer = GetComponentInParent<SpaceChanger>();
+            changer = GetComponentInParent<SpaceItem>();
             layerMask = LayerMask.NameToLayer("SpaceZone");
         }
 
@@ -21,12 +21,12 @@ namespace Instrumental.Editing
         {
             if (other.gameObject.layer == layerMask)
             {
-                /*LeapGraphicRenderer newRenderer = other.GetComponent<LeapGraphicRenderer>();
+                TransformSpace newSpace = other.GetComponent<TransformSpace>();
 
-                if (newRenderer)
+                if (newSpace)
                 {
-                    changer.ChangeSpaces(newRenderer);
-                }*/
+                    changer.ChangeSpaces(newSpace);
+                }
             }
         }
 
@@ -34,23 +34,12 @@ namespace Instrumental.Editing
         {
             if (other.gameObject.layer == layerMask)
             {
-                /*LeapGraphicRenderer rendererCandidate = other.GetComponent<LeapGraphicRenderer>();
+                TransformSpace spaceCandidate = other.GetComponent<TransformSpace>();
 
-                if (rendererCandidate != null && rendererCandidate != GlobalSpace.Instance.GraphicRenderer)
+                if (spaceCandidate != null /*&& rendererCandidate != GlobalSpace.Instance.GraphicRenderer*/)
                 {
-                    changer.ChangeSpaces(GlobalSpace.Instance.GraphicRenderer);
-
-                    //transform.SetParent(GlobalSpace.Instance.GraphicRenderer.transform);
-
-                    //currentRenderer = GlobalSpace.Instance.GraphicRenderer;
-                    //for (int i = 0; i < allGraphics.Length; i++)
-                    //{
-                    //    // find the render group by name
-                    //    LeapGraphicGroup group = GlobalSpace.Instance.GraphicRenderer.FindGroup(allGraphicsInfo[i].favoriteGroupName);
-                    //    allGraphics[i].TryDetach();
-                    //    group.TryAddGraphic(allGraphics[i]);
-                    //}
-                }*/
+                    changer.ChangeSpaces(null);
+                }
             }
         }
     }

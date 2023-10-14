@@ -4,6 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using Instrumental.Space;
+
 namespace Instrumental.Controls
 {
     public enum ControlMode
@@ -41,7 +43,7 @@ namespace Instrumental.Controls
         protected GameObject editSoundEmitterGameObject;
         protected AudioSource placementGrabSource;
         protected AudioSource placementDropSource;
-        protected Editing.SpaceChanger spaceChanger;
+        protected SpaceItem spaceItem;
 
         protected string _name="";
         private bool isPrecisionPlacement = false;
@@ -56,7 +58,7 @@ namespace Instrumental.Controls
             /*anchorable = GetComponent<AnchorableBehaviour>();
             placementInteraction = GetComponent<InteractionBehaviour>();*/
             placementRigidbody = GetComponent<Rigidbody>();
-            spaceChanger = GetComponent<Editing.SpaceChanger>();
+            spaceItem = GetComponent<SpaceItem>();
 
             switch (mode)
             {
@@ -76,7 +78,7 @@ namespace Instrumental.Controls
                     // if we're in design mode or design palette mode,
                     // create our edit sound emitters
                     CreateEditSoundEmitters();
-                    spaceChanger.SpaceChanged += SpaceChanger_SpaceChanged;
+                    spaceItem.SpaceChanged += SpaceChanger_SpaceChanged;
                     break;
 
                 case ControlMode.Design_Palette:
@@ -90,7 +92,7 @@ namespace Instrumental.Controls
                     // if we're in design mode or design palette mode,
                     // create our edit sound emitters
                     CreateEditSoundEmitters();
-                    spaceChanger.SpaceChanged += SpaceChanger_SpaceChanged;
+                    spaceItem.SpaceChanged += SpaceChanger_SpaceChanged;
                     break;
 
                 default:
@@ -98,7 +100,8 @@ namespace Instrumental.Controls
             }
         }
 
-        private void SpaceChanger_SpaceChanged(Editing.SpaceChanger sender, GameObject oldSpace, GameObject newSpace)
+        private void SpaceChanger_SpaceChanged(SpaceItem sender, TransformSpace oldSpace, 
+            TransformSpace newSpace)
         {
             if(attachedPanel)
             {
