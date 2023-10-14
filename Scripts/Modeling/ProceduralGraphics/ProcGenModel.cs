@@ -11,12 +11,19 @@ namespace Instrumental.Modeling.ProceduralGraphics
         public delegate void ModelPropertiesHandler(ProcGenModel sender);
         public event ModelPropertiesHandler PropertiesChanged;
 
-        protected TransformSpace space;
+        protected SpaceItem spaceItem;
+        TransformSpace _space;
+        protected TransformSpace space { get { return (spaceItem) ? spaceItem.CurrentSpace : _space; } }
 
         public virtual void Awake()
 		{
-            TransformSpace spaceInParent = GetComponentInParent<TransformSpace>();
-            if (spaceInParent) SetSpace(spaceInParent);
+            spaceItem = GetComponentInParent<SpaceItem>();
+
+            if (!spaceItem)
+            {
+                TransformSpace spaceInParent = GetComponentInParent<TransformSpace>();
+                if (spaceInParent) SetSpace(spaceInParent);
+            }
 		}
 
         public virtual void Start()
@@ -32,7 +39,8 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
         public void SetSpace(TransformSpace space)
 		{
-            this.space = space;
+            // hook this into space item change event?
+            //this.space = space;
 
             // we need to update the verts.
             // not sure if there's a good way of doing this across all models rn

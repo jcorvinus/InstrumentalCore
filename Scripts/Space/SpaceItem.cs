@@ -14,7 +14,14 @@ namespace Instrumental.Space
 
         TransformSpace currentSpace;
 
-        private void Start()
+        public TransformSpace CurrentSpace { get { return currentSpace; } }
+
+		private void Awake()
+		{
+            currentSpace = transform.GetComponentInParent<TransformSpace>();
+		}
+
+		private void Start()
         {
 
         }
