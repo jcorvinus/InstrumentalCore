@@ -243,7 +243,6 @@ namespace Instrumental.Modeling.ProceduralGraphics
 			}
 		}
 
-
 		void GenerateRimColors(out Color[] vertexColors)
 		{
 			vertexColors = new Color[rimVertices.Length];
@@ -400,6 +399,8 @@ namespace Instrumental.Modeling.ProceduralGraphics
 				LoopSide(ref faceVertices, (startIndex + (cornerVertCount * 2)) + widthVertCount, false, sliceDepth, sliceRadius);
 				LoopEdge(ref faceVertices, (startIndex + (cornerVertCount * 4)) + widthVertCount, false, sliceDepth, sliceRadius);
 			}
+
+			WarpFaceVerts();
 		}
 
 		void SetRimVertices()
@@ -425,6 +426,24 @@ namespace Instrumental.Modeling.ProceduralGraphics
 			LoopEdge(ref rimVertices, rimInnerLoopBack.VertexBaseID + (cornerVertCount * 2), true, 0, radius);
 			LoopSide(ref rimVertices, (rimInnerLoopBack.VertexBaseID + (cornerVertCount * 2)) + widthVertCount, false, 0, radius);
 			LoopEdge(ref rimVertices, (rimInnerLoopBack.VertexBaseID + (cornerVertCount * 4)) + widthVertCount, false, 0, radius);
+
+			WarpRimVerts();
+		}
+
+		void WarpFaceVerts()
+		{
+			for(int i=0; i < faceVertices.Length; i++)
+			{
+				faceVertices[i] = WarpVertex(faceVertices[i], transform);
+			}
+		}
+
+		void WarpRimVerts()
+		{
+			for(int i=0; i < rimVertices.Length; i++)
+			{
+				rimVertices[i] = WarpVertex(rimVertices[i], transform);
+			}
 		}
 		#endregion
 
