@@ -40,7 +40,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
         public void SetSpace(TransformSpace space)
 		{
             // hook this into space item change event?
-            //this.space = space;
+            _space = space;
 
             // we need to update the verts.
             // not sure if there's a good way of doing this across all models rn
