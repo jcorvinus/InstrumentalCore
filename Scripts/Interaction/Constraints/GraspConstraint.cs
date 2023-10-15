@@ -8,7 +8,7 @@ namespace Instrumental.Interaction.Constraints
     {
 		InteractiveItem graspItem;
 
-		protected void Awake()
+		protected virtual void Awake()
 		{
 			graspItem = GetComponent<InteractiveItem>();
 			graspItem.SetConstraint(this);

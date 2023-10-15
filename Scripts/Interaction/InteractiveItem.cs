@@ -139,6 +139,7 @@ namespace Instrumental.Interaction
 		public delegate void GraspEventHandler(InteractiveItem sender);
         public event GraspEventHandler OnGrasped;
         public event GraspEventHandler OnUngrasped;
+        public event GraspEventHandler OnGraspMoved;
 
         float itemRadius;
         Bounds itemBounds;
@@ -1081,6 +1082,12 @@ namespace Instrumental.Interaction
                     rigidBody.angularVelocity = lerpedAngularVelocity;
 
                     //previousCenterOfMass = solvedCenterOfMass;
+				}
+
+                if(OnGraspMoved != null)
+				{
+                    GraspEventHandler dispatch = OnGraspMoved;
+                    dispatch(this);
 				}
             }
         }
