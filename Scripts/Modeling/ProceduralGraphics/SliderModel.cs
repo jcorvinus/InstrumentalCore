@@ -174,13 +174,22 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
 			int bridgeTriangleIndexCount = faceBevelBridges[0].GetTriangleIndexCount() * bridgeCount;
 
-			// todo: face fill?
+			// face fill
+			// there is a problem here - CreateLinearFaceFill requires 'corner vert count' which means
+			// that our slice count must be divisible by 4. I'm not sure the best way to handle this in other
+			// cases. I might need to make a circular fill one that can operate on arbitrary
+			// loops. We still want it to have ideal topology though, so I'll have to think about this.
+			faceFill = ModelUtils.CreateLinearFaceFill(ref triangleBaseID, faceBevelLoops[bridgeCount],
+				faceSliceCount, 0);
+			int faceFillTriangleIndexCount = faceFill.GetTriangleIndexCount();
 
-			faceTriangles = new int[bridgeTriangleIndexCount];
+			faceTriangles = new int[bridgeTriangleIndexCount + faceFillTriangleIndexCount];
 			for(int i=0; i < faceBevelBridges.Length; i++)
 			{
 				faceBevelBridges[i].TriangulateBridge(ref faceTriangles, false);
 			}
+
+			faceFill.TriangulateFace(ref faceTriangles, false);
 		}
 
 		void GenerateRimMesh()

@@ -274,6 +274,11 @@ namespace Instrumental.Modeling
 			}
 		}
 
+		static bool IsOutOfBounds(int index, int length)
+		{
+			return index < 0 || index >= length;
+		}
+
 		public static void DrawMesh(Vector3[] verts, int[] triangles)
 		{
 			int triangleCount = triangles.Length / 3;
@@ -289,16 +294,29 @@ namespace Instrumental.Modeling
 
 				bool didFail = false;
 
-				try
+				if(IsOutOfBounds(a, verts.Length))
+				{
+					Debug.Log(string.Format("Triangle {0} has IOOR for vertex A, index {1}, length {2}",
+						triangleIndex, a, verts.Length));
+					didFail = true;
+				}
+				else if (IsOutOfBounds(b, verts.Length))
+				{
+					Debug.Log(string.Format("Triangle {0} has IOOR for vertex A, index {1}, length {2}",
+						triangleIndex, b, verts.Length));
+					didFail = true;
+				}
+				else if (IsOutOfBounds(c, verts.Length))
+				{
+					Debug.Log(string.Format("Triangle {0} has IOOR for vertex A, index {1}, length {2}",
+						triangleIndex, c, verts.Length));
+					didFail = true;
+				}
+				else
 				{
 					Gizmos.DrawLine(verts[a], verts[b]);
 					Gizmos.DrawLine(verts[b], verts[c]);
 					Gizmos.DrawLine(verts[c], verts[a]);
-				}
-				catch (System.IndexOutOfRangeException e)
-				{
-					Debug.Log("IOOR in triangle at base index: " + triangleBaseIndex);
-					didFail = true;
 				}
 
 				if (didFail) break;
