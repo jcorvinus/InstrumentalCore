@@ -20,49 +20,37 @@ public class PolygonTestEditor : Editor
 		if(m_instance)
 		{
 			int vertCount = m_instance.VertCount;
-			Vector3[] verts = new Vector3[vertCount];
+			Vector3[] verts = m_instance.Verts();
 
-			float angleIncrement = 360 / vertCount;
-
-			for (int i = 0; i < vertCount; i++)
+			if (m_instance.DrawSegmentIDs)
 			{
-				Vector3 point = Vector3.up;
+				for (int i = 0; i < vertCount; i++)
+				{
+					Vector3 startPos = verts[i];
+					Vector3 endPos = verts[i];
+					if (i == verts.Length - 1)
+					{
+						endPos = verts[0];
+					}
+					else
+					{
+						endPos = verts[i + 1];
+					}
 
-				Quaternion rotatiton = Quaternion.AngleAxis(angleIncrement * i, Vector3.forward);
-				point = rotatiton * point;
-				verts[i] = point;
+					Vector3 center = (startPos + endPos) * 0.5f;
+					Vector3 direction = center.normalized;
+					center += (direction) * 0.1f;
+
+					int drawIndex = (m_instance.IndexAtZero) ? i : i + 1;
+					Handles.Label(center, drawIndex.ToString());
+				}
 			}
 
-			bool canQuad = (vertCount % 2 == 0);
-			Handles.color = (canQuad) ? Color.green : Color.red;
-			for (int i = 0; i < vertCount; i++)
+			if (m_instance.DrawHalfwayLine)
 			{
-				
-				if (i < vertCount - 1) Handles.DrawLine(verts[i], verts[i + 1]);
-				else Handles.DrawLine(verts[i], verts[0]);
-			}
-
-			// we need to figure out how many triangles we need
-			// then figure out connectivity for each one
-
-			for (int i = 0; i < vertCount; i++)
-			{
-				Vector3 startPos = verts[i];
-				Vector3 endPos = verts[i];
-				if(i == verts.Length - 1)
-				{
-					endPos = verts[0];
-				}
-				else
-				{
-					endPos = verts[i + 1];
-				}
-
-				Vector3 center = (startPos + endPos) * 0.5f;
-				Vector3 direction = center.normalized;
-				center += (direction) * 0.1f;
-
-				Handles.Label(center, i.ToString());
+				//get our bisecting line
+				int halfwayPoint = (vertCount / 2);
+				Handles.DrawLine(verts[0], verts[halfwayPoint]);
 			}
 		}
 	}

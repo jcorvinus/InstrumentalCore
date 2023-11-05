@@ -206,6 +206,76 @@ namespace Instrumental.Modeling
 		}
 	}
 
+	[System.Serializable]
+	public struct EdgeloopFaceFill
+	{
+		public EdgeLoop FaceLoop;
+		public int TriangleBaseID;
+
+		public int GetTriangleCount()
+		{
+			int vertCount = FaceLoop.GetSegmentCount();
+			return vertCount - 2;
+		}
+
+		public int GetTriangleIndexCount()
+		{
+			return GetTriangleCount() * 3;
+		}
+
+		public void TriangulateFace(ref int[] triangles, bool flip)
+		{
+			int vertCount = FaceLoop.GetSegmentCount();
+			bool isOdd = (vertCount % 2 != 0);
+
+			int halfwayPoint = (vertCount / 2);
+
+			int baseId = TriangleBaseID * 3;
+
+			for(int i=0; i < halfwayPoint; i++)
+			{
+				int opposite = (vertCount - 1) - i;
+
+				int segA, segB;
+				segA = i;
+				segB = i + 1;
+
+				int oppA, oppB;
+				oppA = (opposite == vertCount - 1) ? 0 : opposite;
+				oppB = (opposite == vertCount - 1) ? opposite : opposite + 1;
+
+				bool isFirst = i == 0;
+				bool isFirstOrLast = (isFirst) || (i == halfwayPoint - 1);
+				bool vertCountLessThanFour = (vertCount <= 4);
+				bool isTri = isFirst || vertCountLessThanFour || (isFirstOrLast && !isOdd);
+
+				if (isTri)
+				{
+					// triangle is seg a, seg b, opp a
+					// need to increment baseID for every triangle we add
+					triangles[baseId + 0] = segA;
+					triangles[baseId + 1] = segB;
+					triangles[baseId + 2] = oppB;
+					baseId += 3;
+				}
+				else
+				{
+					// triangle is seg a, seg b, opp a
+					triangles[baseId + 0] = segA;
+					triangles[baseId + 1] = segB;
+					triangles[baseId + 2] = oppB;
+					baseId += 3;
+
+					// triangle is opp a, opp b, sega
+					triangles[baseId + 0] = segB;
+					triangles[baseId + 1] = oppA;
+					triangles[baseId + 2] = oppB;
+					baseId += 3;
+				}
+			}
+		}
+	}
+
 	public static class ModelUtils
 	{
 		// creation

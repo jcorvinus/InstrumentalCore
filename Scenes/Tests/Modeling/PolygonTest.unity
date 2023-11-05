@@ -152,7 +152,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c2918516fe3e7048952e1addf05ca3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  vertCount: 8
+  vertCount: 13
+  stripIterCount: 1
+  indexAtZero: 1
+  drawHalfwayLine: 0
+  drawSegmentIDs: 1
+  drawTriangleCount: 1
+  debugTris: 1
 --- !u!4 &278197999
 Transform:
   m_ObjectHideFlags: 0

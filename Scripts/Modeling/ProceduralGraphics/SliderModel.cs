@@ -31,7 +31,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 		[SerializeField] float railForwardDistance=0;
 
 		[SerializeField] int faceBevelSliceCount=4;
-		[Range(4, 32)]
+		[Range(3, 32)]
 		[SerializeField] int faceSliceCount = 12;
 
 		[Range(0, 0.04f)]
@@ -84,9 +84,9 @@ namespace Instrumental.Modeling.ProceduralGraphics
 			int baseID, bool isBottom, float depth, float sideRadius)
 		{
 			int loopVertCount = faceSliceCount;
-			float angleIncrement = 360f / ((loopVertCount) - 1);
+			float angleIncrement = 360f / (float)loopVertCount;
 
-			for(int i = 0; i < loopVertCount; i++)
+			for (int i = 0; i < loopVertCount; i++)
 			{
 				float angle = angleIncrement * i;
 				Vector3 vertex = Vector3.up * sideRadius;
@@ -146,11 +146,45 @@ namespace Instrumental.Modeling.ProceduralGraphics
 				_faceMesh.MarkDynamic();
 			}
 
+			_faceMesh.colors = null;
+			_faceMesh.triangles = null;
+			_faceMesh.vertices = null;
+
+			NewGenerateMesh();
+
+			_faceMesh.vertices = faceVertices;
+			_faceMesh.triangles = faceTriangles;
+			_faceMesh.RecalculateNormals();
+		}
+
+		void NewGenerateMesh()
+		{
 			int baseID = 0;
-			int bridgeCount=faceBevelSliceCount - 1; // add another one back in here for the fill?
+
+			EdgeLoop faceLoop = ModelUtils.CreateEdgeLoop(ref baseID, true, faceSliceCount);
+
+			faceVertices = new Vector3[faceSliceCount];
+			Loop(ref faceVertices, 0, false, 0, radius);
+
+			int baseTriangleID = 0;
+
+			EdgeloopFaceFill faceFill = new EdgeloopFaceFill()
+			{ 
+				FaceLoop = faceLoop,
+				TriangleBaseID = baseTriangleID
+			};
+
+			faceTriangles = new int[faceFill.GetTriangleIndexCount()];
+			faceFill.TriangulateFace(ref faceTriangles, true);
+		}
+
+		void OldGenerateMesh()
+		{
+			int baseID = 0;
+			int bridgeCount = faceBevelSliceCount - 1; // add another one back in here for the fill?
 
 			faceBevelLoops = new EdgeLoop[faceBevelSliceCount];
-			for(int i=0; i < faceBevelLoops.Length; i++)
+			for (int i = 0; i < faceBevelLoops.Length; i++)
 			{
 				faceBevelLoops[i] = ModelUtils.CreateEdgeLoop(ref baseID, true, faceSliceCount);
 			}
@@ -184,7 +218,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 			int faceFillTriangleIndexCount = faceFill.GetTriangleIndexCount();
 
 			faceTriangles = new int[bridgeTriangleIndexCount + faceFillTriangleIndexCount];
-			for(int i=0; i < faceBevelBridges.Length; i++)
+			for (int i = 0; i < faceBevelBridges.Length; i++)
 			{
 				faceBevelBridges[i].TriangulateBridge(ref faceTriangles, false);
 			}
