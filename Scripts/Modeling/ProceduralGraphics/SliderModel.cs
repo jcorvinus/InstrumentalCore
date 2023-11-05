@@ -35,11 +35,11 @@ namespace Instrumental.Modeling.ProceduralGraphics
 		[SerializeField] float bevelRadius = 0.697f;
 
 		//[SerializeField] float railWidth = 0.01f; // maybe change this to an over-extension amount?
-		[Range(0, 1)]
+		[Range(0, 0.01f)]
 		[SerializeField] float railRadius = 0.005f;
 		[Range(0, 0.01f)]
 		[SerializeField] float railForwardDistance = 0;
-		[Range(4, 8)]
+		[Range(3, 8)]
 		[SerializeField] int railRadiusSliceCount = 6;
 		[Range(0, 32)]
 		[SerializeField] int railWidthSliceCount = 6;
@@ -70,10 +70,10 @@ namespace Instrumental.Modeling.ProceduralGraphics
 		// rim mesh stuff
 		Mesh _railMesh;
 		Vector3[] railVertices;
-		int railTriangles;
+		int[] railTriangles;
 		Color[] railColors;
 		EdgeLoop railLoop;
-		EdgeloopFaceFill railFill;
+		LinearEdgeLoopFaceFill railFill;
 
 		public Vector3[] RailVertices { get { return railVertices; } }
 
@@ -207,52 +207,50 @@ namespace Instrumental.Modeling.ProceduralGraphics
 			// do I have to mark meshes as modified? Will that help?
 		}
 
-		void SetRailVerts()
+		void LoopSideRail(ref Vector3[] vertices,
+			int baseID, bool isLeft, float depth, float sideRadius)
 		{
-			// do our left side verts
-			// remember that 0 vertex index is the center of the left side
-			// we'll use an index remapping technique to make it so that
-			// we can go radially with i, which represents the iteration of our
-			// operation, not the exact vertex index
+			float angleIncrement = 180f / (((float)railRadiusSliceCount * 2f) - 1);
 
-			// also we're flipping left/right here because of the orientations of the controls. This might seem weird,
-			// but it's because of how we transform finger coordinates into local space to detect press depth
-			float angleIncrement = 180f / (float)railRadiusSliceCount;
-			int halfRadiusSlice = railRadiusSliceCount / 2;
-			for (int i=0; i < railRadiusSliceCount; i++)
+			for (int i = 0; i < railRadiusSliceCount * 2; i++)
 			{
 				float angle = angleIncrement * i;
-				Vector3 vertex = Vector3.down * railRadius;
+
+				Vector3 vertex = Vector3.up * ((isLeft) ? sideRadius : -sideRadius);
 				vertex = Quaternion.AngleAxis(angle, Vector3.forward) * vertex;
-				vertex += Vector3.right * (width * 0.5f);
-				//vertex += Vector3.forward * depth;
-
-				int wrapStartIndex = (railLoop.VertCount - 1) - halfRadiusSlice;
-				wrapStartIndex += i;
-				wrapStartIndex = (int)Mathf.Repeat(wrapStartIndex, (railLoop.VertCount));
-				railVertices[wrapStartIndex] = vertex;
+				vertex += Vector3.right * (width * ((isLeft) ? -0.5f : 0.5f));
+				vertex += Vector3.forward * depth;
+				vertices[baseID + i] = vertex;
 			}
+		}
 
-			// do our middle verts
-			// top and bottom
-			
-			Vector3 horizStart = Vector3.right * (width * 0.5f);
-			for (int i=0; i < railWidthSliceCount; i++) // debugMaxWidthSlices
+		void LoopEdgeRail(ref Vector3[] vertices,
+			int baseID, bool isBottom, float depth, float sideRadius)
+		{
+			Vector3 leftEdge, rightEdge;
+			leftEdge = Vector3.right * -(width * 0.5f); // we might also have to subtract the radius here? Not sure.
+			rightEdge = Vector3.right * (width * 0.5f);
+
+			leftEdge += Vector3.up * ((isBottom) ? -sideRadius : sideRadius);
+			rightEdge += Vector3.up * ((isBottom) ? -sideRadius : sideRadius);
+			leftEdge += Vector3.forward * depth;
+			rightEdge += Vector3.forward * depth;
+
+			Vector3 startEdge = (isBottom) ? leftEdge : rightEdge;
+			Vector3 endEdge = (isBottom) ? rightEdge : leftEdge;
+
+			for (int i = 0; i < railWidthSliceCount; i++)
 			{
-				int topIndex = i + halfRadiusSlice;
-				int bottomIndex = ((railLoop.VertCount - 1) - halfRadiusSlice) - i;
-
-				// need to get our iteration
-				// remember that first and last points are handled by the radii
-				float horizIncrement = width / (railWidthSliceCount + 2);
-				float horiz = horizIncrement * (i + 1);
-				horiz = horizStart.x - horiz;
-
-				railVertices[topIndex] = new Vector3(horiz, railRadius, railForwardDistance);
-				railVertices[bottomIndex] = new Vector3(horiz, -railRadius, railForwardDistance);
+				vertices[baseID + i] = Vector3.Lerp(startEdge, endEdge, (float)i / railWidthSliceCount);
 			}
+		}
 
-			// do our right side verts
+		void SetRailVerts()
+		{
+			LoopSideRail(ref railVertices, railLoop.VertexBaseID, true, railForwardDistance, railRadius);
+			LoopEdgeRail(ref railVertices, railLoop.VertexBaseID + (railRadiusSliceCount * 2), true, railForwardDistance, railRadius);
+			LoopSideRail(ref railVertices, (railLoop.VertexBaseID + (railRadiusSliceCount * 2)) + railWidthSliceCount, false, railForwardDistance, railRadius);
+			LoopEdgeRail(ref railVertices, (railLoop.VertexBaseID + (railRadiusSliceCount * 4)) + railWidthSliceCount, false, railForwardDistance, railRadius);
 		}
 
 		void GenerateRailMesh()
@@ -268,14 +266,24 @@ namespace Instrumental.Modeling.ProceduralGraphics
 			_railMesh.vertices = null;
 
 			int vertexBaseID = 0;
-			int loopVertexCount = (railRadiusSliceCount * 2) + (railWidthSliceCount * 2);
+			int loopVertexCount = (railRadiusSliceCount * 4) + (railWidthSliceCount * 2);
 			railLoop = ModelUtils.CreateEdgeLoop(ref vertexBaseID, true, loopVertexCount);
 
 			railVertices = new Vector3[loopVertexCount];
+			railColors = new Color[loopVertexCount];
 
 			SetRailVerts();
 
+			int triangleBaseID = 0;
+			railFill = ModelUtils.CreateLinearFaceFill(ref triangleBaseID, railLoop, railRadiusSliceCount, railWidthSliceCount);
 
+			railTriangles = new int[railFill.GetTriangleIndexCount()];
+			railFill.TriangulateFace(ref railTriangles, false);
+
+			_railMesh.vertices = railVertices;
+			_railMesh.colors = railColors;
+			_railMesh.triangles = railTriangles;
+			_railMesh.RecalculateNormals();
 		}
 
 		public override void GenerateModel()
@@ -285,16 +293,22 @@ namespace Instrumental.Modeling.ProceduralGraphics
 		}
 
 		// debug drawing stuff
+		[SerializeField] bool drawProxy;
 		[SerializeField] bool drawLoops;
 		[SerializeField] bool drawMesh;
 
+		public bool DrawLoops { get { return drawLoops; } }
+
 		private void OnDrawGizmos()
 		{
-			Matrix4x4 localToWorld = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
-			Gizmos.matrix = localToWorld;
-			Gizmos.DrawWireCube(Vector3.forward * railForwardDistance, new Vector3(width, railRadius));
-			DebugExtension.DrawCircle(GetLeftExtent() + (Vector3.forward * buttonHeight), Vector3.forward, radius);
-			Gizmos.matrix = Matrix4x4.identity;
+			if (drawProxy)
+			{
+				Matrix4x4 localToWorld = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
+				Gizmos.matrix = localToWorld;
+				Gizmos.DrawWireCube(Vector3.forward * railForwardDistance, new Vector3(width, railRadius));
+				DebugExtension.DrawCircle(GetLeftExtent() + (Vector3.forward * buttonHeight), Vector3.forward, radius);
+				Gizmos.matrix = Matrix4x4.identity;
+			}
 
 			if(drawLoops)
 			{

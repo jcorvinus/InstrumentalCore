@@ -16,7 +16,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
 		private void OnSceneGUI()
 		{
-			if(m_instance)
+			if(m_instance && m_instance.DrawLoops)
 			{
 				for(int i=0; i < m_instance.RailVertices.Length; i++)
 				{
