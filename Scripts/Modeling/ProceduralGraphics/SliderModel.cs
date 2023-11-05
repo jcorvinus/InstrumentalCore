@@ -24,24 +24,25 @@ namespace Instrumental.Modeling.ProceduralGraphics
 		[Range(0,1)]
 		[SerializeField] float radius = 0.022f;
 		[SerializeField] float buttonHeight = 0.017f;
+		[SerializeField] int faceBevelSliceCount=4;
+		[Range(3, 32)]
+		[SerializeField] int faceSliceCount = 12;
+		[Range(0, 0.04f)]
+		[SerializeField] float extrusionDepth = 0.017f;
+		[Range(0, 0.4f)]
+		[SerializeField] float bevelExtrusionDepth = 0.246f;
+		[Range(0,1)]
+		[SerializeField] float bevelRadius = 0.697f;
+
 		//[SerializeField] float railWidth = 0.01f; // maybe change this to an over-extension amount?
 		[Range(0, 1)]
 		[SerializeField] float railRadius = 0.005f;
 		[Range(0, 0.01f)]
-		[SerializeField] float railForwardDistance=0;
-
-		[SerializeField] int faceBevelSliceCount=4;
-		[Range(3, 32)]
-		[SerializeField] int faceSliceCount = 12;
-
-		[Range(0, 0.04f)]
-		[SerializeField] float extrusionDepth = 0.017f;
-
-		[Range(0, 0.4f)]
-		[SerializeField] float bevelExtrusionDepth = 0.246f;
-
-		[Range(0,1)]
-		[SerializeField] float bevelRadius = 0.697f;
+		[SerializeField] float railForwardDistance = 0;
+		[Range(4, 8)]
+		[SerializeField] int railRadiusSliceCount = 6;
+		[Range(0, 32)]
+		[SerializeField] int railWidthSliceCount = 6;
 
 
 		// face mesh stuff
@@ -62,13 +63,21 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
 		EdgeLoop[] faceBevelLoops;
 		EdgeBridge[] faceBevelBridges;
-		LinearEdgeLoopFaceFill faceFill;
+		EdgeloopFaceFill faceFill;
 
 		public Mesh FaceMesh { get { return _faceMesh; } }
 
 		// rim mesh stuff
 		Mesh _railMesh;
+		Vector3[] railVertices;
+		int railTriangles;
+		Color[] railColors;
+		EdgeLoop railLoop;
+		EdgeloopFaceFill railFill;
 
+		public Vector3[] RailVertices { get { return railVertices; } }
+
+		public Mesh RailMesh { get { return _railMesh; } }
 
 		Vector3 GetLeftExtent()
 		{
@@ -101,7 +110,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 		{
 			float extraExtrudeDepth = extrusionDepth * bevelExtrusionDepth;
 			float totalExtrudeDepth = extrusionDepth + extraExtrudeDepth;
-			float innerRadius = radius;
+			float innerRadius = radius * bevelRadius;
 			for(int i=0; i < faceBevelSliceCount; i++)
 			{
 				float depthTValue = ((float)i + 1) / (float)faceBevelSliceCount;
@@ -150,43 +159,13 @@ namespace Instrumental.Modeling.ProceduralGraphics
 			_faceMesh.triangles = null;
 			_faceMesh.vertices = null;
 
-			NewGenerateMesh();
-
-			_faceMesh.vertices = faceVertices;
-			_faceMesh.triangles = faceTriangles;
-			_faceMesh.RecalculateNormals();
-		}
-
-		void NewGenerateMesh()
-		{
-			int baseID = 0;
-
-			EdgeLoop faceLoop = ModelUtils.CreateEdgeLoop(ref baseID, true, faceSliceCount);
-
-			faceVertices = new Vector3[faceSliceCount];
-			Loop(ref faceVertices, 0, false, 0, radius);
-
-			int baseTriangleID = 0;
-
-			EdgeloopFaceFill faceFill = new EdgeloopFaceFill()
-			{ 
-				FaceLoop = faceLoop,
-				TriangleBaseID = baseTriangleID
-			};
-
-			faceTriangles = new int[faceFill.GetTriangleIndexCount()];
-			faceFill.TriangulateFace(ref faceTriangles, true);
-		}
-
-		void OldGenerateMesh()
-		{
-			int baseID = 0;
+			int vertexBaseID = 0;
 			int bridgeCount = faceBevelSliceCount - 1; // add another one back in here for the fill?
 
 			faceBevelLoops = new EdgeLoop[faceBevelSliceCount];
 			for (int i = 0; i < faceBevelLoops.Length; i++)
 			{
-				faceBevelLoops[i] = ModelUtils.CreateEdgeLoop(ref baseID, true, faceSliceCount);
+				faceBevelLoops[i] = ModelUtils.CreateEdgeLoop(ref vertexBaseID, true, faceSliceCount);
 			}
 
 			int vertexCount = faceSliceCount * faceBevelSliceCount;
@@ -209,12 +188,8 @@ namespace Instrumental.Modeling.ProceduralGraphics
 			int bridgeTriangleIndexCount = faceBevelBridges[0].GetTriangleIndexCount() * bridgeCount;
 
 			// face fill
-			// there is a problem here - CreateLinearFaceFill requires 'corner vert count' which means
-			// that our slice count must be divisible by 4. I'm not sure the best way to handle this in other
-			// cases. I might need to make a circular fill one that can operate on arbitrary
-			// loops. We still want it to have ideal topology though, so I'll have to think about this.
-			faceFill = ModelUtils.CreateLinearFaceFill(ref triangleBaseID, faceBevelLoops[bridgeCount],
-				faceSliceCount, 0);
+			faceFill = ModelUtils.CreateFaceFill(ref triangleBaseID, faceBevelLoops[bridgeCount],
+				faceSliceCount);
 			int faceFillTriangleIndexCount = faceFill.GetTriangleIndexCount();
 
 			faceTriangles = new int[bridgeTriangleIndexCount + faceFillTriangleIndexCount];
@@ -224,17 +199,89 @@ namespace Instrumental.Modeling.ProceduralGraphics
 			}
 
 			faceFill.TriangulateFace(ref faceTriangles, false);
+
+			_faceMesh.vertices = faceVertices;
+			_faceMesh.triangles = faceTriangles;
+			_faceMesh.RecalculateNormals();
+
+			// do I have to mark meshes as modified? Will that help?
 		}
 
-		void GenerateRimMesh()
+		void SetRailVerts()
 		{
+			// do our left side verts
+			// remember that 0 vertex index is the center of the left side
+			// we'll use an index remapping technique to make it so that
+			// we can go radially with i, which represents the iteration of our
+			// operation, not the exact vertex index
+
+			// also we're flipping left/right here because of the orientations of the controls. This might seem weird,
+			// but it's because of how we transform finger coordinates into local space to detect press depth
+			float angleIncrement = 180f / (float)railRadiusSliceCount;
+			int halfRadiusSlice = railRadiusSliceCount / 2;
+			for (int i=0; i < railRadiusSliceCount; i++)
+			{
+				float angle = angleIncrement * i;
+				Vector3 vertex = Vector3.down * railRadius;
+				vertex = Quaternion.AngleAxis(angle, Vector3.forward) * vertex;
+				vertex += Vector3.right * (width * 0.5f);
+				//vertex += Vector3.forward * depth;
+
+				int wrapStartIndex = (railLoop.VertCount - 1) - halfRadiusSlice;
+				wrapStartIndex += i;
+				wrapStartIndex = (int)Mathf.Repeat(wrapStartIndex, (railLoop.VertCount));
+				railVertices[wrapStartIndex] = vertex;
+			}
+
+			// do our middle verts
+			// top and bottom
+			
+			Vector3 horizStart = Vector3.right * (width * 0.5f);
+			for (int i=0; i < railWidthSliceCount; i++) // debugMaxWidthSlices
+			{
+				int topIndex = i + halfRadiusSlice;
+				int bottomIndex = ((railLoop.VertCount - 1) - halfRadiusSlice) - i;
+
+				// need to get our iteration
+				// remember that first and last points are handled by the radii
+				float horizIncrement = width / (railWidthSliceCount + 2);
+				float horiz = horizIncrement * (i + 1);
+				horiz = horizStart.x - horiz;
+
+				railVertices[topIndex] = new Vector3(horiz, railRadius, railForwardDistance);
+				railVertices[bottomIndex] = new Vector3(horiz, -railRadius, railForwardDistance);
+			}
+
+			// do our right side verts
+		}
+
+		void GenerateRailMesh()
+		{
+			if(_railMesh == null)
+			{
+				_railMesh = new Mesh();
+				_railMesh.MarkDynamic();
+			}
+
+			_railMesh.colors = null;
+			_railMesh.triangles = null;
+			_railMesh.vertices = null;
+
+			int vertexBaseID = 0;
+			int loopVertexCount = (railRadiusSliceCount * 2) + (railWidthSliceCount * 2);
+			railLoop = ModelUtils.CreateEdgeLoop(ref vertexBaseID, true, loopVertexCount);
+
+			railVertices = new Vector3[loopVertexCount];
+
+			SetRailVerts();
+
 
 		}
 
 		public override void GenerateModel()
 		{
 			GenerateFaceMesh();
-			GenerateRimMesh();
+			GenerateRailMesh();
 		}
 
 		// debug drawing stuff
@@ -256,6 +303,9 @@ namespace Instrumental.Modeling.ProceduralGraphics
 				{
 					ModelUtils.DrawEdgeLoopGizmo(faceVertices, faceBevelLoops[i]);
 				}
+
+				Gizmos.color = Color.grey;
+				ModelUtils.DrawEdgeLoopGizmo(railVertices, railLoop);
 			}
 
 			if (drawMesh)

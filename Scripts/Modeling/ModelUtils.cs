@@ -230,7 +230,7 @@ namespace Instrumental.Modeling
 
 			int halfwayPoint = (vertCount / 2);
 
-			int baseId = TriangleBaseID * 3;
+			int baseId = TriangleBaseID;
 
 			for(int i=0; i < halfwayPoint; i++)
 			{
@@ -244,6 +244,11 @@ namespace Instrumental.Modeling
 				oppA = (opposite == vertCount - 1) ? 0 : opposite;
 				oppB = (opposite == vertCount - 1) ? opposite : opposite + 1;
 
+				segA += FaceLoop.VertexBaseID;
+				segB += FaceLoop.VertexBaseID;
+				oppA += FaceLoop.VertexBaseID;
+				oppB += FaceLoop.VertexBaseID;
+
 				bool isFirst = i == 0;
 				bool isFirstOrLast = (isFirst) || (i == halfwayPoint - 1);
 				bool vertCountLessThanFour = (vertCount <= 4);
@@ -253,23 +258,23 @@ namespace Instrumental.Modeling
 				{
 					// triangle is seg a, seg b, opp a
 					// need to increment baseID for every triangle we add
-					triangles[baseId + 0] = segA;
+					triangles[baseId + 0] = (!flip) ? segA : oppB;
 					triangles[baseId + 1] = segB;
-					triangles[baseId + 2] = oppB;
+					triangles[baseId + 2] = (!flip) ? oppB : segA;
 					baseId += 3;
 				}
 				else
 				{
 					// triangle is seg a, seg b, opp a
-					triangles[baseId + 0] = segA;
+					triangles[baseId + 0] = (!flip) ? segA : oppB;
 					triangles[baseId + 1] = segB;
-					triangles[baseId + 2] = oppB;
+					triangles[baseId + 2] = (!flip) ? oppB : segA;
 					baseId += 3;
 
 					// triangle is opp a, opp b, sega
-					triangles[baseId + 0] = segB;
+					triangles[baseId + 0] = (!flip) ? segB : oppB;
 					triangles[baseId + 1] = oppA;
-					triangles[baseId + 2] = oppB;
+					triangles[baseId + 2] = (!flip) ? oppB : segB;
 					baseId += 3;
 				}
 			}
@@ -320,6 +325,18 @@ namespace Instrumental.Modeling
 
 			baseID += faceFill.GetTriangleIndexCount();
 
+			return faceFill;
+		}
+
+		public static EdgeloopFaceFill CreateFaceFill(ref int baseID,
+			EdgeLoop loop, int vertexCount)
+		{
+			EdgeloopFaceFill faceFill = new EdgeloopFaceFill()
+			{
+				FaceLoop = loop,
+				TriangleBaseID = baseID
+			};
+			baseID += faceFill.GetTriangleIndexCount();
 			return faceFill;
 		}
 
