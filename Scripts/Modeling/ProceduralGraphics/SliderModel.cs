@@ -123,6 +123,24 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
 				Loop(ref faceVertices, startIndex, false, sliceDepth, sliceRadius);
 			}
+
+			WarpFaceVerts();
+		}
+
+		void WarpFaceVerts()
+		{
+			for (int i = 0; i < faceVertices.Length; i++)
+			{
+				faceVertices[i] = WarpVertex(faceVertices[i], transform);
+			}
+		}
+
+		void WarpRailVerts()
+		{
+			for (int i = 0; i < railVertices.Length; i++)
+			{
+				railVertices[i] = WarpVertex(railVertices[i], transform);
+			}
 		}
 
 		void GenerateFaceColors(out Color[] vertexColors)
@@ -251,6 +269,8 @@ namespace Instrumental.Modeling.ProceduralGraphics
 			LoopEdgeRail(ref railVertices, railLoop.VertexBaseID + (railRadiusSliceCount * 2), true, railForwardDistance, railRadius);
 			LoopSideRail(ref railVertices, (railLoop.VertexBaseID + (railRadiusSliceCount * 2)) + railWidthSliceCount, false, railForwardDistance, railRadius);
 			LoopEdgeRail(ref railVertices, (railLoop.VertexBaseID + (railRadiusSliceCount * 4)) + railWidthSliceCount, false, railForwardDistance, railRadius);
+
+			WarpRailVerts();
 		}
 
 		void GenerateRailMesh()
