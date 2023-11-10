@@ -3,13 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Instrumental.Schema;
+using Instrumental.Modeling.ProceduralGraphics;
 
 namespace Instrumental.Controls
 {
     public class Slider : UIControl
     {
+        [SerializeField] SliderModel sliderModel;
+        [SerializeField] SliderSchema sliderSchema = SliderSchema.GetDefault();
         GameObject physicsObject;
         GameObject rimObject;
+
+        [SerializeField] BoxCollider boxCollider;
+
+        [SerializeField] float hoverHeight = 0.03f;
+        [SerializeField] float underFlow = 0.01f;
 
         public override void SetSchema(ControlSchema controlSchema)
         {
@@ -18,6 +26,8 @@ namespace Instrumental.Controls
             transform.localPosition = controlSchema.Position;
             transform.localRotation = controlSchema.Rotation;
             _name = controlSchema.Name;
+
+            sliderSchema = SliderSchema.CreateFromControl(controlSchema);
         }
 
         protected override void Awake()
@@ -32,7 +42,12 @@ namespace Instrumental.Controls
             // also get our graphics so we can do hover animations
         }
 
-        protected override void Start()
+		private void OnValidate()
+		{
+			
+		}
+
+		protected override void Start()
         {
             base.Start();
         }

@@ -38,7 +38,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 		[Range(0, 0.01f)]
 		[SerializeField] float railRadius = 0.005f;
 		[Range(0, 0.01f)]
-		[SerializeField] float railForwardDistance = 0;
+		[SerializeField] float railForwardDistance = 0.00158f;
 		[Range(3, 8)]
 		[SerializeField] int railRadiusSliceCount = 6;
 		[Range(0, 32)]
@@ -100,7 +100,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 				float angle = angleIncrement * i;
 				Vector3 vertex = Vector3.up * sideRadius;
 				vertex = Quaternion.AngleAxis(angle, Vector3.forward) * vertex;
-				vertex += Vector3.right * (width * 0.5f);
+				//vertex += Vector3.right * (width * 0.5f);
 				vertex += Vector3.forward * depth;
 				vertices[baseID + i] = vertex;
 			}
