@@ -98,7 +98,7 @@ namespace Instrumental.Controls
 					totalDepth);
 			}
 
-			if (buttonRuntimeBehavior) // currently, some design mode prorotypes of buttons don't have this
+			if (buttonRuntimeBehavior) // currently, some design mode prototypes of buttons don't have this
 			{
 				buttonRuntimeBehavior.ButtonFaceDistance = physDepth;
 				buttonRuntimeBehavior.ButtonThrowDistance = (buttonSchema.Depth * buttonSchema.RimDepth) * 0.5f; //(buttonSchema.Depth * buttonSchema.RimDepth);

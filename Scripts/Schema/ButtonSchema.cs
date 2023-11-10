@@ -217,7 +217,7 @@ namespace Instrumental.Schema
 
 		public void SetControlSchema(ref ControlSchema control)
 		{
-			// set all of our proeprties back into the control
+			// set all of our properties back into the control
 			#region HasRim
 			Func<ControlVariable, bool> hasRimFunc = new Func<ControlVariable, bool>(item => 
 				item.Name == "HasRim" && item.Type == typeof(bool));
