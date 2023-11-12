@@ -32,8 +32,11 @@ namespace Instrumental.Editing
         [SerializeField]
         Transform curvatureButtonContainer;
 
-        /*[SerializeField]
-        InteractionSlider curvatureSlider;*/
+        [SerializeField]
+        Slider curvatureSlider;
+
+        [SerializeField] Button rectilinearButton;
+        [SerializeField] Button cylindricalButton;
 
         [Range(0, 1)]
         [SerializeField]
@@ -78,14 +81,24 @@ namespace Instrumental.Editing
                 SetCurvatureControlPosition();
 
                 // set the slider to its default position
-                /*curvatureSlider.HorizontalSliderPercent = Mathf.InverseLerp(radiusMin, radiusMin, uiSchema.Panel.SpaceCurveRadius);
+                curvatureSlider.HorizontalPercent = Mathf.InverseLerp(radiusMin, radiusMin, uiSchema.Panel.SpaceCurveRadius);
                 curvatureSlider.transform.parent.gameObject.SetActive(uiSchema.Panel.SpaceType != SpaceType.Rectilinear);
 
-                curvatureSlider.HorizontalSlideEvent += (float slide) =>
+                curvatureSlider.HorizontalAmountChanged += (Slider sender) =>
                 {
-                    float radius = Mathf.Lerp(radiusMin, radiusMax, curvatureSlider.HorizontalSliderPercent);
+                    float radius = Mathf.Lerp(radiusMin, radiusMax, curvatureSlider.HorizontalPercent);
                     panel.Radius = radius;
-                };*/
+                };
+
+                rectilinearButton.Runtime.ButtonActivated += (ButtonRuntime button) =>
+                {
+                    SetPanelRectilinear();
+                };
+
+                cylindricalButton.Runtime.ButtonActivated += (ButtonRuntime button) =>
+                {
+                    SetPanelCylindrical();
+                };
             }
         }
 
@@ -106,21 +119,21 @@ namespace Instrumental.Editing
         public void SetPanelRectilinear()
         {
             panel.SetSpaceType(SpaceType.Rectilinear);
-            //curvatureSlider.transform.parent.gameObject.SetActive(false);
+            curvatureSlider.transform.parent.gameObject.SetActive(false);
         }
 
         public void SetPanelCylindrical()
         {
             panel.SetSpaceType(SpaceType.Cylindrical);
-            /*curvatureSlider.transform.parent.gameObject.SetActive(true);
-            curvatureSlider.HorizontalSliderPercent = Mathf.InverseLerp(radiusMin, radiusMin, uiSchema.Panel.SpaceCurveRadius);*/
+            curvatureSlider.transform.parent.gameObject.SetActive(true);
+            curvatureSlider.HorizontalPercent = Mathf.InverseLerp(radiusMin, radiusMin, uiSchema.Panel.SpaceCurveRadius);
         }
 
         public void SetPanelSpherical()
         {
             panel.SetSpaceType(SpaceType.Spherical);
-            /*curvatureSlider.transform.parent.gameObject.SetActive(true);
-            curvatureSlider.HorizontalSliderPercent = Mathf.InverseLerp(radiusMin, radiusMin, uiSchema.Panel.SpaceCurveRadius);*/
+            curvatureSlider.transform.parent.gameObject.SetActive(true);
+            curvatureSlider.HorizontalPercent = Mathf.InverseLerp(radiusMin, radiusMin, uiSchema.Panel.SpaceCurveRadius);
         }
 
         Vector3 GetCurvatureControlTargetPosition()

@@ -10,6 +10,17 @@ namespace Instrumental.Controls
 {
     public class Slider : UIControl
     {
+        #region Runtime Events
+        public delegate void SliderRuntimeEventHandler(Slider sender);
+        public event SliderRuntimeEventHandler OnTouched;
+        public event SliderRuntimeEventHandler OnUntouched;
+        public event SliderRuntimeEventHandler OnPressed;
+        public event SliderRuntimeEventHandler OnUnpressed;
+        public event SliderRuntimeEventHandler OnHovered;
+        public event SliderRuntimeEventHandler OnUnhovered;
+        public event SliderRuntimeEventHandler HorizontalAmountChanged;
+        #endregion
+
         [SerializeField] SliderModel sliderModel;
         [SerializeField] SliderSchema sliderSchema = SliderSchema.GetDefault();
         GameObject faceObject;
@@ -28,6 +39,18 @@ namespace Instrumental.Controls
         bool isRightInBounds;
 
         Vector3 furthestPushPoint;
+
+        float horizontalPercent = 0;
+
+        public float HorizontalPercent 
+        {
+            get { return horizontalPercent; }
+            set 
+            {
+                horizontalPercent = value;
+                SetHorizPosForValue();
+            }
+        }
 
         public Vector3 FurthestPushPoint { get { return furthestPushPoint; } }
         public float FurthestPushDistance { get { return furthestPushPoint.z; } }
@@ -144,6 +167,24 @@ namespace Instrumental.Controls
             return hand.GetAnchorPose(AnchorPoint.IndexTip).position;
         }
 
+        void SetHorizPosForValue()
+		{
+            float lowExtent = sliderSchema.Width * -0.5f;
+            float highExtent = sliderSchema.Width * 0.5f;
+            faceObject.transform.localPosition = new Vector3(Mathf.Lerp(lowExtent, highExtent, horizontalPercent),
+                0, faceObject.transform.localPosition.z);
+		}
+
+        float GetHorizValueFromPos()
+		{
+            float lowExtent = sliderSchema.Width * -0.5f;
+            float highExtent = sliderSchema.Width * 0.5f;
+
+            float horizPos = faceObject.transform.localPosition.x;
+
+            return Mathf.InverseLerp(lowExtent, highExtent, horizPos);
+        }
+
         void RuntimeUpdate()
 		{
             runtimeFaceCollider.enabled = true;
@@ -217,12 +258,9 @@ namespace Instrumental.Controls
 			{
                 float pushInDistance = Mathf.Min(furthestPushPoint.z, SliderFaceDistance);
                 pushInDistance = Mathf.Clamp(pushInDistance, 0, SliderFaceDistance);
-                float xValue = faceObject.transform.localPosition.x;
 
-                if(isPressed)
-				{
-                    xValue = furthestPushPoint.x;
-				}
+                float oldXValue = faceObject.transform.localPosition.x;
+                float xValue = furthestPushPoint.x;
 
                 xValue = Mathf.Clamp(xValue, -sliderSchema.Width * 0.5f, sliderSchema.Width * 0.5f);
 
@@ -239,27 +277,49 @@ namespace Instrumental.Controls
 
         void StartTouch()
 		{
-
+            if(OnTouched != null)
+			{
+                SliderRuntimeEventHandler dispatch = OnTouched;
+                dispatch(this);
+			}
 		}
 
         void EndTouch()
 		{
-
+            if(OnUntouched != null)
+			{
+                SliderRuntimeEventHandler dispatch = OnUntouched;
+                dispatch(this);
+			}
 		}
 
         void StartPress()
 		{
-
+            if(OnPressed != null)
+			{
+                SliderRuntimeEventHandler dispatch = OnPressed;
+                dispatch(this);
+			}
 		}
 
         void EndPress()
 		{
-
+            if(OnUnpressed != null)
+			{
+                SliderRuntimeEventHandler dispatch = OnUnpressed;
+                dispatch(this);
+			}
 		}
 
         void Hover()
 		{
             isHovering = true;
+
+            if(OnHovered != null)
+			{
+                SliderRuntimeEventHandler dispatch = OnHovered;
+                dispatch(this);
+			}
 		}
 
         void CancelHover()

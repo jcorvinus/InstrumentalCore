@@ -11,7 +11,6 @@ namespace Instrumental.Controls
 {
     public class Panel : MonoBehaviour
     {
-        //LeapGraphicRenderer graphicRenderer;
         SphericalSpace sphericalSpace;
         CylindricalSpace cylindricalSpace;
 
@@ -62,7 +61,6 @@ namespace Instrumental.Controls
         private void Awake()
         {
             filletPanel = transform.GetChild(0).GetComponent<FilletPanel>();
-            //panelGraphic = transform.GetChild(2).GetComponent<LeapPanelGraphic>();
             panelCollider = transform.GetChild(4).GetComponent<BoxCollider>();
             rendererSpaceCollider = GetComponent<BoxCollider>();
 

@@ -57,6 +57,9 @@ namespace Instrumental.Modeling.ProceduralGraphics
                 faceMeshRenderer = faceMeshFilter.GetComponent<MeshRenderer>();
                 railMeshFilter = transform.GetChild(1).GetComponent<MeshFilter>();
                 railMeshRenderer = railMeshFilter.GetComponent<MeshRenderer>();
+
+                sliderModel.PropertiesChanged += (ProcGenModel sender) => { Regenerate(); };
+
                 hasComponents = true;
 			}
 		}
