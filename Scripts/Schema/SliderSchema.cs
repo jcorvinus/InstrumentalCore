@@ -14,6 +14,7 @@ namespace Instrumental.Schema
 		SolidRail // tube, kinda like the leap pinch sliders
 	}
 
+	[System.Serializable]
 	public struct SliderSchema
 	{
 		#region Constraint Defines
@@ -54,18 +55,30 @@ namespace Instrumental.Schema
 		public const int MAX_RAIL_WIDTH_SLICE_COUNT = 32;
 		#endregion
 
+		[Range(MIN_WIDTH, MAX_WIDTH)]
 		public float Width;
+		[Range(MIN_RADIUS, MAX_RADIUS)]
 		public float Radius;
+		[Range(MIN_BUTTON_HEIGHT, MAX_BUTTON_HEIGHT)]
 		public float ButtonHeight;
+		[Range(MIN_FACE_BEVEL_SLICE_COUNT, MAX_FACE_BEVEL_SLICE_COUNT)]
 		public int FaceBevelSliceCount;
+		[Range(MIN_FACE_SLICE_COUNT, MAX_FACE_SLICE_COUNT)]
 		public int FaceSliceCount;
+		[Range(MIN_EXTRUSION_DEPTH, MAX_EXTRUSION_DEPTH)]
 		public float ExtrusionDepth;
+		[Range(MIN_BEVEL_EXTRUSION_DEPTH, MAX_BEVEL_EXTRUSION_DEPTH)]
 		public float BevelExtrusionDepth;
+		[Range(MIN_BEVEL_RADIUS, MAX_BEVEL_RADIUS)]
 		public float BevelRadius;
 
+		[Range(MIN_RAIL_RADIUS, MAX_RAIL_RADIUS)]
 		public float RailRadius;
+		[Range(MIN_RAIL_FORWARD_DIST, MAX_RAIL_FORWARD_DIST)]
 		public float RailForwardDistance;
+		[Range(MIN_RAIL_RADIUS_SLICE_COUNT, MAX_RAIL_RADIUS_SLICE_COUNT)]
 		public int RailRadiusSliceCount;
+		[Range(MIN_RAIL_WIDTH_SLICE_COUNT, MAX_RAIL_WIDTH_SLICE_COUNT)]
 		public int RailWidthSliceCount;
 
 		public static SliderSchema CreateFromControl(ControlSchema control)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Instrumental.Space;
+using Instrumental.Schema;
 
 namespace Instrumental.Modeling.ProceduralGraphics
 {
@@ -19,31 +20,20 @@ namespace Instrumental.Modeling.ProceduralGraphics
 		// solid rail (tube)
 
 		// schema stuff
-		[Range(0,1)]
-		[SerializeField] float width = 0.05f;
-		[Range(0,1)]
-		[SerializeField] float radius = 0.022f;
-		[SerializeField] float buttonHeight = 0.017f;
-		[SerializeField] int faceBevelSliceCount=4;
-		[Range(3, 32)]
-		[SerializeField] int faceSliceCount = 12;
-		[Range(0, 0.04f)]
-		[SerializeField] float extrusionDepth = 0.017f;
-		[Range(0, 0.4f)]
-		[SerializeField] float bevelExtrusionDepth = 0.246f;
-		[Range(0,1)]
-		[SerializeField] float bevelRadius = 0.697f;
+		float width = 0.05f;
+		float radius = 0.022f;
+		float buttonHeight = 0.017f;
+		int faceBevelSliceCount=4;
+		int faceSliceCount = 12;
+		float extrusionDepth = 0.017f;
+		float bevelExtrusionDepth = 0.246f;
+		float bevelRadius = 0.697f;
 
 		//[SerializeField] float railWidth = 0.01f; // maybe change this to an over-extension amount?
-		[Range(0, 0.01f)]
-		[SerializeField] float railRadius = 0.005f;
-		[Range(0, 0.01f)]
-		[SerializeField] float railForwardDistance = 0.00158f;
-		[Range(3, 8)]
-		[SerializeField] int railRadiusSliceCount = 6;
-		[Range(0, 32)]
-		[SerializeField] int railWidthSliceCount = 6;
-
+		float railRadius = 0.005f;
+		float railForwardDistance = 0.00158f;
+		int railRadiusSliceCount = 6;
+		int railWidthSliceCount = 6;
 
 		// face mesh stuff
 		[Header("Face Color")]
@@ -79,6 +69,73 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
 		public Mesh RailMesh { get { return _railMesh; } }
 
+		public override void Start()
+		{
+			base.Start();
+			GenerateModel();
+		}
+
+		public override void OnValidate()
+		{
+			base.OnValidate();
+		}
+
+		private void OnEnable()
+		{
+			GenerateModel();
+		}
+
+		public void SetNewSliderSchema(SliderSchema newSchema)
+		{
+			bool widthHasChanged = newSchema.Width != width;
+			width = newSchema.Width;
+
+			bool radiusHasChanged = newSchema.Radius != radius;
+			radius = newSchema.Radius;
+
+			bool buttonHeightHasChanged = newSchema.ButtonHeight != buttonHeight;
+			buttonHeight = newSchema.ButtonHeight;
+
+			bool faceBevelSliceCountHasChanged = newSchema.FaceBevelSliceCount != faceBevelSliceCount;
+			faceBevelSliceCount = newSchema.FaceBevelSliceCount;
+
+			bool faceSliceCountHasChanged = newSchema.FaceSliceCount != faceSliceCount;
+			faceSliceCount = newSchema.FaceSliceCount;
+
+			bool extrusionDepthHasChanged = newSchema.ExtrusionDepth != extrusionDepth;
+			extrusionDepth = newSchema.ExtrusionDepth;
+
+			bool bevelExtrusionDepthHasChanged = newSchema.BevelExtrusionDepth != bevelExtrusionDepth;
+			bevelExtrusionDepth = newSchema.BevelExtrusionDepth;
+
+			bool bevelRadiusHasChanged = newSchema.BevelRadius != bevelRadius;
+			bevelRadius = newSchema.BevelRadius;
+
+			bool railRadiusHasChanged = newSchema.RailRadius != railRadius;
+			railRadius = newSchema.RailRadius;
+
+			bool railForwardDistanceHasChanged = newSchema.RailForwardDistance != railForwardDistance;
+			railForwardDistance = newSchema.RailForwardDistance;
+
+			bool railRadiusSliceCountHasChanged = newSchema.RailRadiusSliceCount != railRadiusSliceCount;
+			railRadiusSliceCount = newSchema.RailRadiusSliceCount;
+
+			bool railWidthSliceCountHasChanged = newSchema.RailWidthSliceCount != railWidthSliceCount;
+			railWidthSliceCount = newSchema.RailWidthSliceCount;
+
+			bool anyPropertyChanged = widthHasChanged || radiusHasChanged || buttonHeightHasChanged ||
+				faceBevelSliceCountHasChanged || faceSliceCountHasChanged || extrusionDepthHasChanged ||
+				bevelExtrusionDepthHasChanged || bevelRadiusHasChanged || railRadiusHasChanged ||
+				railForwardDistanceHasChanged || railRadiusSliceCountHasChanged || railWidthSliceCountHasChanged;
+
+			if(anyPropertyChanged)
+			{
+				GenerateModel(); // split this into generating mesh and updating verts
+								 // according to the owning class' expected behaviors next
+				SetPropertiesChanged();
+			}
+		}
+
 		Vector3 GetLeftExtent()
 		{
 			return Vector3.right * (width * 0.5f);
@@ -109,7 +166,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 		void SetFaceVertices()
 		{
 			float extraExtrudeDepth = extrusionDepth * bevelExtrusionDepth;
-			float totalExtrudeDepth = extrusionDepth + extraExtrudeDepth;
+			float totalExtrudeDepth = extraExtrudeDepth;
 			float innerRadius = radius * bevelRadius;
 			for(int i=0; i < faceBevelSliceCount; i++)
 			{
@@ -119,7 +176,9 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
 
 				float sliceRadius = MathSupplement.Sinerp(innerRadius, radius, 1 - depthTValue);
-				float sliceDepth = (i == faceBevelSliceCount - 1) ? Mathf.Lerp(extrusionDepth, totalExtrudeDepth, ((tValue) + (depthTValue)) * 0.5f) : Mathf.Lerp(extrusionDepth, totalExtrudeDepth, depthTValue);
+				float sliceDepth = (i == faceBevelSliceCount - 1) ? 
+					Mathf.Lerp(0, totalExtrudeDepth, ((tValue) + (depthTValue)) * 0.5f) : 
+					Mathf.Lerp(0, totalExtrudeDepth, depthTValue);
 
 				Loop(ref faceVertices, startIndex, false, sliceDepth, sliceRadius);
 			}
@@ -219,6 +278,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 			faceFill.TriangulateFace(ref faceTriangles, false);
 
 			_faceMesh.vertices = faceVertices;
+			_faceMesh.colors = faceColors;
 			_faceMesh.triangles = faceTriangles;
 			_faceMesh.RecalculateNormals();
 

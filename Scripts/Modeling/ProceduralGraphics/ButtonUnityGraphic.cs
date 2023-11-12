@@ -108,7 +108,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
             faceMeshPropertyBlock.SetInteger(useDistanceGlowHash, 1); // I just realized that if I wanted to get
             faceMeshPropertyBlock.SetInteger(isPressingHash, buttonRuntime.IsPressed ? 1 : 0); // really crazy
             faceMeshPropertyBlock.SetInteger(isHoveringHash, buttonRuntime.IsHovering ? 1 : 0); // I could bitpack
-            faceMeshPropertyBlock.SetInteger(isTouchingHash, buttonRuntime.IsTouching ? 1 : 0); // these bools intoa single integer
+            faceMeshPropertyBlock.SetInteger(isTouchingHash, buttonRuntime.IsTouching ? 1 : 0); // these bools into a single integer
 
             faceMeshRenderer.SetPropertyBlock(faceMeshPropertyBlock);
         }
