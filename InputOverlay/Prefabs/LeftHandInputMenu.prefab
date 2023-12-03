@@ -36,7 +36,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
   m_AnchoredPosition: {x: 0.0137, y: 0.0431}
-  m_SizeDelta: {x: 7.85, y: 2.1}
+  m_SizeDelta: {x: 7.94, y: 3.19}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!23 &369255150306496166
 MeshRenderer:
@@ -100,7 +100,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Application Menu
+  m_text: App Menu
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -127,10 +127,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 10.2
-  m_fontSizeBase: 36
+  m_fontSize: 16
+  m_fontSizeBase: 16
   m_fontWeight: 400
-  m_enableAutoSizing: 1
+  m_enableAutoSizing: 0
   m_fontSizeMin: 1
   m_fontSizeMax: 18
   m_fontStyle: 0
@@ -407,7 +407,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
   m_AnchoredPosition: {x: 0.0137, y: -0.0431}
-  m_SizeDelta: {x: 7.85, y: 2.1}
+  m_SizeDelta: {x: 7.94, y: 3.19}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!23 &4498426028266880046
 MeshRenderer:
@@ -498,10 +498,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18
-  m_fontSizeBase: 36
+  m_fontSize: 16
+  m_fontSizeBase: 16
   m_fontWeight: 400
-  m_enableAutoSizing: 1
+  m_enableAutoSizing: 0
   m_fontSizeMin: 1
   m_fontSizeMax: 18
   m_fontStyle: 0
@@ -579,7 +579,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
   m_AnchoredPosition: {x: 0.0137, y: 0}
-  m_SizeDelta: {x: 7.85, y: 2.1}
+  m_SizeDelta: {x: 7.94, y: 3.19}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!23 &1392364856588593049
 MeshRenderer:
@@ -670,10 +670,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18
-  m_fontSizeBase: 36
+  m_fontSize: 16
+  m_fontSizeBase: 16
   m_fontWeight: 400
-  m_enableAutoSizing: 1
+  m_enableAutoSizing: 0
   m_fontSizeMin: 1
   m_fontSizeMax: 18
   m_fontStyle: 0
@@ -989,6 +989,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inputLabel: {fileID: 6471616512785616257}
+--- !u!114 &5210660809018722668
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 891288629112094348}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec9dfe5c198644c429f628ea269727bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dataSources:
+  - Type: 1
+    Name: Input0
+    Guid: dce1d69f-354b-43e5-834e-fd63fea86413
 --- !u!1001 &3152600832930658494
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1097,6 +1113,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inputLabel: {fileID: 5488110591117894471}
+--- !u!114 &6006137348873191514
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1021862127318458673}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec9dfe5c198644c429f628ea269727bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dataSources:
+  - Type: 1
+    Name: Input1
+    Guid: 0b07ed4b-31a5-4065-860a-65855df05028
 --- !u!4 &1021862127318458679 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2733170341325265289, guid: 8d37fa135d8d78c46ae249b0d36e4561,
@@ -1217,3 +1249,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inputLabel: {fileID: 1769453567017964530}
+--- !u!114 &8669562362726160454
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2040174692207990663}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec9dfe5c198644c429f628ea269727bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dataSources:
+  - Type: 1
+    Name: Input2
+    Guid: e610933f-a99b-48ec-a32e-f0904e5127d2
