@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using Instrumental.Overlay;
 using Instrumental.Interaction;
 using Instrumental.Interaction.Constraints;
 using Instrumental.Interaction.VirtualJoystick;
@@ -12,6 +13,7 @@ namespace Instrumental.Interaction.VirtualJoystick
     {
         [SerializeField] Joystick joystick;
         LeftMasterJoystick joystickMaster;
+        InputDataSources inputDataSources;
 
         [SerializeField] LineRenderer outboundRenderer;
         bool isDeployed = false;
@@ -44,6 +46,8 @@ namespace Instrumental.Interaction.VirtualJoystick
         const float coneSnapDist = 0.023f;
         private bool isSnapLeft = false;
         private bool isSnapRight = false;
+        int snapLeftIndex;
+        int snapRightIndex;
 
         AudioSource snapSource;
         [SerializeField] AudioClip[] snapClips;
@@ -59,6 +63,14 @@ namespace Instrumental.Interaction.VirtualJoystick
             linearConstraint = handle.GetComponent<LinearConstraint>();
             handleCollider = handle.GetComponent<SphereCollider>();
             snapSource = GetComponent<AudioSource>();
+
+            inputDataSources = GetComponent<InputDataSources>();
+
+            if(inputDataSources)
+			{
+                snapLeftIndex = inputDataSources.GetIndexForDataSource("SnapLeft");
+                snapRightIndex = inputDataSources.GetIndexForDataSource("SnapRight");
+			}
         }
 
 		// Start is called before the first frame update
@@ -205,6 +217,12 @@ namespace Instrumental.Interaction.VirtualJoystick
                 isSnapLeft = false;
                 isSnapRight = false;
             }
+
+            if(inputDataSources)
+			{
+                inputDataSources.SetData(snapLeftIndex, isSnapLeft);
+                inputDataSources.SetData(snapRightIndex, isSnapRight);
+			}
         }
 
         void PlaySnapSound()
