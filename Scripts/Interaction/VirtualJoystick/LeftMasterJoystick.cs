@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using Instrumental.Overlay;
 using Instrumental.Interaction.Triggers;
 
 namespace Instrumental.Interaction.VirtualJoystick
@@ -14,11 +15,22 @@ namespace Instrumental.Interaction.VirtualJoystick
         [SerializeField] Joystick joystick;
         [Range(1, 2)]
         [SerializeField] float outerRadiusMultiplier = 1.5f;
+        InputDataSources inputDataSource;
+        int directionDataIndex;
+        int isActiveDataIndex;
 
 		private void Awake()
 		{
             logicTrigger = GetComponent<LogicTrigger>();
             ringActivator = GetComponentInChildren<RingActivator>();
+            inputDataSource = GetComponent<InputDataSources>();
+
+            if(inputDataSource)
+			{
+                directionDataIndex = inputDataSource.GetIndexForDataSource("Direction");
+                isActiveDataIndex = inputDataSource.GetIndexForDataSource("InputActive");
+			}
+
             GetHand();
 		}
 
@@ -87,6 +99,12 @@ namespace Instrumental.Interaction.VirtualJoystick
 
 
                 DoDistanceJoystickFeedback();
+
+                if(inputDataSource)
+				{
+                    inputDataSource.SetData(directionDataIndex, joystick.Value);
+                    inputDataSource.SetData(isActiveDataIndex, joystick.InputActive);
+				}
             }
         }
 

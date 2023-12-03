@@ -225,8 +225,10 @@ namespace Instrumental.Overlay
 				{
 					controllerEmulationData.Left.thumbstick_active =
 						(hookup.joystick.isActiveAndEnabled) ? 1 : 0;
-					controllerEmulationData.Left.thumbstick_x = hookup.joystick.Value.x;
-					controllerEmulationData.Left.thumbstick_y = hookup.joystick.Value.y;
+					Vector2 leftJoystickInput = hookup.joystick.Value;
+
+					controllerEmulationData.Left.thumbstick_x = leftJoystickInput.x;
+					controllerEmulationData.Left.thumbstick_y = leftJoystickInput.y;
 				}
 				else if (hookup.Data.Name == "Snap")
 				{

@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using Instrumental.Overlay;
+
 namespace Instrumental.Interaction.VirtualJoystick
 { 
     public class Joystick : MonoBehaviour
@@ -159,5 +161,5 @@ namespace Instrumental.Interaction.VirtualJoystick
 
             if (signifierValue == 0) gameObject.SetActive(false);
         }
-    }
+	}
 }
