@@ -53,8 +53,18 @@ namespace Instrumental.Interaction.VirtualJoystick
         [SerializeField] AudioClip[] snapClips;
 
         public bool IsDeployed { get { return isDeployed; } }
-        public bool IsSnapLeft { get { return isSnapLeft; } }
-        public bool IsSnapRight { get { return isSnapRight; } }
+
+        public bool IsSnapActive { get { return isSnapLeft || isSnapRight; } }
+
+        public Vector2 Value 
+        { 
+            get 
+            {
+                if (isSnapLeft) return Vector2.left;
+                else if (isSnapRight) return Vector2.right;
+                else return Vector2.zero;
+            }
+        }
 
 		private void Awake()
 		{

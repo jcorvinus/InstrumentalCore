@@ -35,6 +35,16 @@ namespace Instrumental.Overlay
 				return dataVec2;
 			}
 
+			public T GetValue<T>()
+			{
+				System.Type type = typeof(T);
+
+				if (type == typeof(bool)) return (T)System.Convert.ChangeType(GetBool(), type);
+				else if (type == typeof(float)) return (T)System.Convert.ChangeType(GetFloat(), type);
+				else if (type == typeof(Vector2)) return (T)System.Convert.ChangeType(GetVec2(), type);
+				else return default(T);
+			}
+
 			public void SetDataBool(bool value)
 			{
 				dataBool = value;

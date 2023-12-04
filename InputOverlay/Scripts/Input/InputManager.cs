@@ -33,16 +33,29 @@ namespace Instrumental.Overlay
 	public struct InputData
 	{
         public DataType Type;
+		public ControllerEmulationInput EmulatedInput;
+		public bool IsLeftController;
         public string Name;
+	}
+
+	[System.Serializable]
+	public enum ControllerEmulationInput
+	{
+		None=0,
+		A=1,
+		B=2,
+		Trigger=3,
+		Grip=4,
+		Thumbstick=5,
+		System=6
 	}
 
     [System.Serializable]
 	public struct InputHookup
 	{ 
         public InputData Data;
-        public Button Button; // come up with an abstract interface for this later
-		public Joystick joystick;
-		public Snap Snap;
+		public string DataSourceGuid;
+		public string Vec2IsActiveDataSourceGuid;
 	}
 
 	// controller data and controller emulation data
@@ -69,7 +82,7 @@ namespace Instrumental.Overlay
 	public class InputManager : MonoBehaviour
     {
         [SerializeField] int port;
-        [SerializeField] InputHookup[] hookups;
+		[SerializeField] InputConfiguration inputConfig;
 
 		[SerializeField] bool printOutput;
 		[SerializeField] bool useJsonSend = true;
@@ -202,48 +215,50 @@ namespace Instrumental.Overlay
 			if (printOutput) Debug.Log(payload);
 		}
 
+
+
 		ControllerEmulationData GetControllerData()
 		{
 			ControllerEmulationData controllerEmulationData = new ControllerEmulationData();
+			InputHookup[] hookups = inputConfig.Hookups;
 
 			// send all of our data
 			foreach (InputHookup hookup in hookups)
 			{
 				if (hookup.Data.Name == "Menu") // replace these string lookups with hashes at some point
 				{
-					controllerEmulationData.Left.b = (hookup.Button.Runtime.IsPressed) ? 1 : 0; // no way to get runtime values right now.
+					bool menuInputState = InputDataSources.LiveDataSources[hookup.DataSourceGuid].GetBool();
+					controllerEmulationData.Left.b = (menuInputState) ? 1 : 0; // no way to get runtime values right now.
 				}
 				else if (hookup.Data.Name == "AppSpecific1")
 				{
-					controllerEmulationData.Left.a = (hookup.Button.Runtime.IsPressed) ? 1 : 0;
+					bool appSpecific1InputState = InputDataSources.LiveDataSources[hookup.DataSourceGuid].GetBool();
+					controllerEmulationData.Left.a = (appSpecific1InputState) ? 1 : 0;
 				}
 				else if (hookup.Data.Name == "SystemDashboard")
 				{
-					controllerEmulationData.Left.system = (hookup.Button.Runtime.IsPressed) ? 1 : 0;
+					bool systemDashboardInputState = InputDataSources.LiveDataSources[hookup.DataSourceGuid].GetBool();
+					controllerEmulationData.Left.system = (systemDashboardInputState) ? 1 : 0;
 				}
 				else if (hookup.Data.Name == "LeftJoystick")
 				{
+					bool leftJoystickIsActive = InputDataSources.LiveDataSources[hookup.Vec2IsActiveDataSourceGuid].GetBool();
 					controllerEmulationData.Left.thumbstick_active =
-						(hookup.joystick.isActiveAndEnabled) ? 1 : 0;
-					Vector2 leftJoystickInput = hookup.joystick.Value;
+						(leftJoystickIsActive) ? 1 : 0;
+					Vector2 leftJoystickInput = InputDataSources.LiveDataSources[hookup.DataSourceGuid].GetVec2();
 
 					controllerEmulationData.Left.thumbstick_x = leftJoystickInput.x;
 					controllerEmulationData.Left.thumbstick_y = leftJoystickInput.y;
 				}
-				else if (hookup.Data.Name == "Snap")
+				else if (hookup.Data.Name == "RightJoystick")
 				{
-					bool isActive = (hookup.Snap.IsSnapLeft || hookup.Snap.IsSnapRight);
+					bool isActive = InputDataSources.LiveDataSources[hookup.Vec2IsActiveDataSourceGuid].GetBool();
 					controllerEmulationData.Right.thumbstick_active =
 						isActive ? 1 : 0;
 
-					if (isActive)
-					{
-						controllerEmulationData.Right.thumbstick_x = (hookup.Snap.IsSnapLeft) ? -1 : 1;
-					}
-					else
-					{
-						controllerEmulationData.Right.thumbstick_x = 0;
-					}
+					Vector2 rightJoystickInput = InputDataSources.LiveDataSources[hookup.DataSourceGuid].GetVec2();
+					controllerEmulationData.Right.thumbstick_x = rightJoystickInput.x;
+					controllerEmulationData.Right.thumbstick_y = rightJoystickInput.y;
 				}
 			}
 
