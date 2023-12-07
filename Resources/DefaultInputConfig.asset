@@ -18,40 +18,40 @@ MonoBehaviour:
       EmulatedInput: 2
       IsLeftController: 1
       Name: Menu
-    DataSourceGuid: 
+    DataSourceGuid: dce1d69f-354b-43e5-834e-fd63fea86413
     Vec2IsActiveDataSourceGuid: 
   - Data:
       Type: 1
       EmulatedInput: 1
       IsLeftController: 1
       Name: AppSpecific1
-    DataSourceGuid: 
+    DataSourceGuid: 0b07ed4b-31a5-4065-860a-65855df05028
     Vec2IsActiveDataSourceGuid: 
   - Data:
       Type: 1
       EmulatedInput: 1
       IsLeftController: 1
       Name: AppSpecific2
-    DataSourceGuid: 
+    DataSourceGuid: e610933f-a99b-48ec-a32e-f0904e5127d2
     Vec2IsActiveDataSourceGuid: 
   - Data:
       Type: 1
       EmulatedInput: 6
       IsLeftController: 1
       Name: Dashboard
-    DataSourceGuid: 
+    DataSourceGuid: 960b9083-7812-498d-9758-4d12b5676a0f
     Vec2IsActiveDataSourceGuid: 
   - Data:
       Type: 3
       EmulatedInput: 5
       IsLeftController: 1
       Name: Left Joystick
-    DataSourceGuid: 
-    Vec2IsActiveDataSourceGuid: 
+    DataSourceGuid: 216b02cb-e372-4f1d-9ff0-0938be1e6561
+    Vec2IsActiveDataSourceGuid: ee39876c-337d-40db-a351-c99a1e02025b
   - Data:
       Type: 3
       EmulatedInput: 5
       IsLeftController: 0
       Name: Right Joystick
-    DataSourceGuid: 
-    Vec2IsActiveDataSourceGuid: 
+    DataSourceGuid: 47d5243c-ae86-4f8c-94f5-afe1f6bb1f46
+    Vec2IsActiveDataSourceGuid: 1af5b424-e59b-401e-ac52-3f14bc535add
