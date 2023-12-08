@@ -4942,10 +4942,22 @@ MonoBehaviour:
       Button: {fileID: 1250358862}
     - KeyModes: 2e000000
       Button: {fileID: 1250358861}
-  topRow: []
-  midRow: []
-  bottomRow: []
-  modifiers: []
+  returnButton:
+    KeyModes: 0d000000
+    Button: {fileID: 1403686215}
+  returnImage: {fileID: 1403686214}
+  caseButton:
+    KeyModes: 30010000
+    Button: {fileID: 1403686213}
+  caseImage: {fileID: 1403686212}
+  symbolButton:
+    KeyModes: 
+    Button: {fileID: 1403686211}
+  symbolImage: {fileID: 1403686210}
+  backspaceButton:
+    KeyModes: 08000000
+    Button: {fileID: 1403686209}
+  backspaceFace: {fileID: 1403686208}
 --- !u!1 &506571191
 GameObject:
   m_ObjectHideFlags: 0
@@ -7664,10 +7676,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   output: {fileID: 0}
-  topRow: []
-  midRow: []
-  bottomRow: []
-  modifiers: []
+  rows: []
   returnButton:
     KeyModes: 
     Button: {fileID: 0}
@@ -13612,6 +13621,90 @@ MonoBehaviour:
   - Type: 1
     Name: IsInputActive
     Guid: 1af5b424-e59b-401e-ac52-3f14bc535add
+--- !u!1 &1403686208 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1042054892503252, guid: 6ddbe306051f74145b5d083df6910f1d,
+    type: 3}
+  m_PrefabInstance: {fileID: 1250358859}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1403686209 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114440432366577470, guid: 6ddbe306051f74145b5d083df6910f1d,
+    type: 3}
+  m_PrefabInstance: {fileID: 1250358859}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f61e1cd0a762b8b4d98b61a6259712fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &1403686210 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1277707802095434, guid: 6ddbe306051f74145b5d083df6910f1d,
+    type: 3}
+  m_PrefabInstance: {fileID: 1250358859}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1403686211 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114998571218483008, guid: 6ddbe306051f74145b5d083df6910f1d,
+    type: 3}
+  m_PrefabInstance: {fileID: 1250358859}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f61e1cd0a762b8b4d98b61a6259712fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1403686212 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114236021162572468, guid: 6ddbe306051f74145b5d083df6910f1d,
+    type: 3}
+  m_PrefabInstance: {fileID: 1250358859}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1403686213 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114092387425522486, guid: 6ddbe306051f74145b5d083df6910f1d,
+    type: 3}
+  m_PrefabInstance: {fileID: 1250358859}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f61e1cd0a762b8b4d98b61a6259712fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1403686214 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114087773525066536, guid: 6ddbe306051f74145b5d083df6910f1d,
+    type: 3}
+  m_PrefabInstance: {fileID: 1250358859}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1403686215 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114291792205382874, guid: 6ddbe306051f74145b5d083df6910f1d,
+    type: 3}
+  m_PrefabInstance: {fileID: 1250358859}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f61e1cd0a762b8b4d98b61a6259712fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!43 &1420075958
 Mesh:
   m_ObjectHideFlags: 0

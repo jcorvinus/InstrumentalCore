@@ -2959,68 +2959,69 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   output: {fileID: 4881943508970964}
-  topRow:
-  - KeyModes: 7100000031000000
-    Button: {fileID: 114942078946210830}
-  - KeyModes: 7700000032000000
-    Button: {fileID: 114563020641594070}
-  - KeyModes: 6500000033000000
-    Button: {fileID: 114332651522270642}
-  - KeyModes: 7200000034000000
-    Button: {fileID: 114555097913620384}
-  - KeyModes: 7400000035000000
-    Button: {fileID: 114919502916625082}
-  - KeyModes: 7900000036000000
-    Button: {fileID: 114929200726721762}
-  - KeyModes: 7500000037000000
-    Button: {fileID: 114292585974073570}
-  - KeyModes: 6900000038000000
-    Button: {fileID: 114103332621716136}
-  - KeyModes: 6f00000039000000
-    Button: {fileID: 114337543826251730}
-  - KeyModes: 7000000030000000
-    Button: {fileID: 114022815634684044}
-  midRow:
-  - KeyModes: 6100000040000000
-    Button: {fileID: 114642306771408064}
-  - KeyModes: 7300000023000000
-    Button: {fileID: 114296093046911686}
-  - KeyModes: 6400000024000000
-    Button: {fileID: 114706589211928364}
-  - KeyModes: 660000005f000000
-    Button: {fileID: 114269625311625966}
-  - KeyModes: 670000002d000000
-    Button: {fileID: 114194740686634658}
-  - KeyModes: 680000002b000000
-    Button: {fileID: 114733536209838654}
-  - KeyModes: 6a00000028000000
-    Button: {fileID: 114646462978108738}
-  - KeyModes: 6b00000029000000
-    Button: {fileID: 114907434562201860}
-  - KeyModes: 6c0000002f000000
-    Button: {fileID: 114332313111148104}
-  bottomRow:
-  - KeyModes: 7a0000002a000000
-    Button: {fileID: 114951560081283996}
-  - KeyModes: 7800000022000000
-    Button: {fileID: 114735438443313698}
-  - KeyModes: 6300000027000000
-    Button: {fileID: 114996272332154518}
-  - KeyModes: 760000003a000000
-    Button: {fileID: 114638049339675110}
-  - KeyModes: 620000003b000000
-    Button: {fileID: 114577546131003578}
-  - KeyModes: 6e00000021000000
-    Button: {fileID: 114499096934492756}
-  - KeyModes: 6d0000003f000000
-    Button: {fileID: 114813718594084388}
-  modifiers:
-  - KeyModes: 20000000
-    Button: {fileID: 114952221251051186}
-  - KeyModes: 2c000000
-    Button: {fileID: 114459592692956054}
-  - KeyModes: 2e000000
-    Button: {fileID: 114231461382411278}
+  rows:
+  - KeyInfo:
+    - KeyModes: 7100000031000000
+      Button: {fileID: 114942078946210830}
+    - KeyModes: 7700000032000000
+      Button: {fileID: 114563020641594070}
+    - KeyModes: 6500000033000000
+      Button: {fileID: 114332651522270642}
+    - KeyModes: 7200000034000000
+      Button: {fileID: 114555097913620384}
+    - KeyModes: 7400000035000000
+      Button: {fileID: 114919502916625082}
+    - KeyModes: 7900000036000000
+      Button: {fileID: 114929200726721762}
+    - KeyModes: 7500000037000000
+      Button: {fileID: 114292585974073570}
+    - KeyModes: 6900000038000000
+      Button: {fileID: 114103332621716136}
+    - KeyModes: 6f00000039000000
+      Button: {fileID: 114337543826251730}
+    - KeyModes: 7000000030000000
+      Button: {fileID: 114022815634684044}
+  - KeyInfo:
+    - KeyModes: 6100000040000000
+      Button: {fileID: 114642306771408064}
+    - KeyModes: 7300000023000000
+      Button: {fileID: 114296093046911686}
+    - KeyModes: 6400000024000000
+      Button: {fileID: 114706589211928364}
+    - KeyModes: 660000005f000000
+      Button: {fileID: 114269625311625966}
+    - KeyModes: 670000002d000000
+      Button: {fileID: 114194740686634658}
+    - KeyModes: 680000002b000000
+      Button: {fileID: 114733536209838654}
+    - KeyModes: 6a00000028000000
+      Button: {fileID: 114646462978108738}
+    - KeyModes: 6b00000029000000
+      Button: {fileID: 114907434562201860}
+    - KeyModes: 6c0000002f000000
+      Button: {fileID: 114332313111148104}
+  - KeyInfo:
+    - KeyModes: 7a0000002a000000
+      Button: {fileID: 114951560081283996}
+    - KeyModes: 7800000022000000
+      Button: {fileID: 114735438443313698}
+    - KeyModes: 6300000027000000
+      Button: {fileID: 114996272332154518}
+    - KeyModes: 760000003a000000
+      Button: {fileID: 114638049339675110}
+    - KeyModes: 620000003b000000
+      Button: {fileID: 114577546131003578}
+    - KeyModes: 6e00000021000000
+      Button: {fileID: 114499096934492756}
+    - KeyModes: 6d0000003f000000
+      Button: {fileID: 114813718594084388}
+  - KeyInfo:
+    - KeyModes: 20000000
+      Button: {fileID: 114952221251051186}
+    - KeyModes: 2c000000
+      Button: {fileID: 114459592692956054}
+    - KeyModes: 2e000000
+      Button: {fileID: 114231461382411278}
   returnButton:
     KeyModes: 0d000000
     Button: {fileID: 114291792205382874}
@@ -3037,6 +3038,11 @@ MonoBehaviour:
     KeyModes: 08000000
     Button: {fileID: 114440432366577470}
   backspaceFace: {fileID: 1042054892503252}
+  textInput: {fileID: 114824891758682216}
+  volumeKeyTimeReset: 1.5
+  timeTillMinVolume: 4
+  minVolume: 0.3
+  Contents: 
   xScaleCurve:
     serializedVersion: 2
     m_Curve:
@@ -3118,12 +3124,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
-  textInput: {fileID: 114824891758682216}
   CharacterPrefabText: {fileID: 114613559793306886}
-  volumeKeyTimeReset: 1.5
-  timeTillMinVolume: 4
-  minVolume: 0.3
-  Contents: 
 --- !u!54 &54578277856322772
 Rigidbody:
   m_ObjectHideFlags: 0

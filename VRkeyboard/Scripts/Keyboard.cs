@@ -44,10 +44,7 @@ namespace VRKeyboard
 
         #region KeyInfo
         [Header("Key Info")]
-        [SerializeField] protected KeyInfo[] topRow;
-        [SerializeField] protected KeyInfo[] midRow;
-        [SerializeField] protected KeyInfo[] bottomRow;
-        [SerializeField] protected KeyInfo[] modifiers;
+        [SerializeField] protected KeyRow[] rows;
 
         [SerializeField] protected KeyInfo returnButton;
         [SerializeField] protected Image returnImage;
@@ -338,10 +335,13 @@ namespace VRKeyboard
 
             // populate the button faces with text component
 
-            ButtonInit(topRow, true);
-            ButtonInit(midRow, true);
-            ButtonInit(bottomRow, true);
-            ButtonInit(modifiers, true);
+            for(int rowIndex=0; rowIndex < rows.Length; rowIndex++)
+			{
+                for (int keyIndex = 0; keyIndex < rows[rowIndex].KeyInfo.Length; keyIndex++)
+                {
+                    ButtonInit(rows[rowIndex].KeyInfo[keyIndex], true);
+                }
+			}
 
             returnButton = ButtonInit(returnButton, false);
             returnButton.FaceIcon = returnImage.gameObject;
@@ -439,9 +439,12 @@ namespace VRKeyboard
         void ChangeCase()
         {
             // change all case flags in buttons
-            ChangeCase(topRow);
-            ChangeCase(midRow);
-            ChangeCase(bottomRow);
+            // todo: there may be problems with changing the case of buttons that can't
+            // have their case changed. werid stuff.
+            for(int rowIndex=0; rowIndex < rows.Length; rowIndex++)
+			{
+                ChangeCase(rows[rowIndex].KeyInfo);
+			}
         }
 
         void ChangeCase(KeyInfo[] buttons)
@@ -459,9 +462,10 @@ namespace VRKeyboard
 
             Debug.Log("Changing mode.");
 
-            ChangeMode(topRow);
-            ChangeMode(midRow);
-            ChangeMode(bottomRow);
+            for(int rowIndex=0; rowIndex < rows.Length; rowIndex++)
+			{
+                ChangeMode(rows[rowIndex].KeyInfo);
+			}
         }
 
         void ChangeMode(KeyInfo[] keyInfo)

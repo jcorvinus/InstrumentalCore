@@ -50,9 +50,9 @@ namespace VRKeyboard
 			key.FaceIcon.gameObject.SetActive(enable);
 		}
 
-		void SetButtonRowEnable(KeyInfo[] row, bool enable)
+		void SetButtonRowEnable(KeyRow row, bool enable)
 		{
-			foreach(KeyInfo key in row)
+			foreach(KeyInfo key in row.KeyInfo)
 			{
 				SetButtonEnable(key, enable);
 			}
@@ -72,9 +72,7 @@ namespace VRKeyboard
 			textInput.gameObject.transform.parent.gameObject.SetActive(true);
 
 			// enable all of our components!
-			SetButtonRowEnable(topRow, true);
-			SetButtonRowEnable(midRow, true);
-			SetButtonRowEnable(bottomRow, true);
+			for (int rowIndex = 0; rowIndex < rows.Length; rowIndex++) SetButtonRowEnable(rows[rowIndex], true);
 			SetButtonEnable(returnButton, true);
 			SetButtonEnable(caseButton, true);
 			SetButtonEnable(symbolButton, true);
@@ -173,9 +171,10 @@ namespace VRKeyboard
 
 			transform.localScale = Vector3.zero;
 
-			SetButtonRowEnable(topRow, false);
-			SetButtonRowEnable(midRow, false);
-			SetButtonRowEnable(bottomRow, false);
+			for(int rowIndex=0; rowIndex < rows.Length; rowIndex++)
+			{
+				SetButtonRowEnable(rows[rowIndex], false);
+			}
 			SetButtonEnable(returnButton, false);
 			SetButtonEnable(caseButton, false);
 			SetButtonEnable(symbolButton, false);
