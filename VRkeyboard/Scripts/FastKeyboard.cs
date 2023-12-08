@@ -2,17 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FastKeyboard : MonoBehaviour
+namespace VRKeyboard
 {
-    // Start is called before the first frame update
-    void Start()
+    public class FastKeyboard : Keyboard
     {
-        
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+		public override void Show()
+		{
+			throw new System.NotImplementedException();
+		}
+
+		public override void Hide()
+		{
+			throw new System.NotImplementedException();
+		}
+	}
 }

@@ -1,7 +1,7 @@
-﻿using UnityEngine;
-using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Events;
 using System.Text;
 
 using UnityEngine.UI;
@@ -12,10 +12,13 @@ using Instrumental.Controls;
 
 namespace VRKeyboard
 {
-    /// <summary>
-    /// A virtual keyboard for providing text input.
-    /// </summary>
-    public class Keyboard : MonoBehaviour
+    [System.Serializable]
+    public struct KeyRow
+	{
+        public Keyboard.KeyInfo[] KeyInfo;
+	}
+
+    public abstract class Keyboard : MonoBehaviour
     {
         public delegate void KeyboardModeHandler(Keyboard sender, bool normalMode);
         public event KeyboardModeHandler ModeChange;
@@ -32,54 +35,45 @@ namespace VRKeyboard
             private Collider _collider; // hackjob
             private GameObject faceIcon;
 
-            public ButtonRuntime FButton { get { return fingerButton; }  set { fingerButton = value; } }
-            public Collider collider { get { return _collider; } set { _collider = value; } } 
+            public ButtonRuntime FButton { get { return fingerButton; } set { fingerButton = value; } }
+            public Collider collider { get { return _collider; } set { _collider = value; } }
             public GameObject FaceIcon { get { return faceIcon; } set { faceIcon = value; } }
         }
 
-		[SerializeField] Transform output;
+        [SerializeField] Transform output;
 
-		#region KeyInfo
-		[Header("Key Info")]
-        [SerializeField] KeyInfo[] topRow;
-        [SerializeField] KeyInfo[] midRow;
-        [SerializeField] KeyInfo[] bottomRow;
-        [SerializeField] KeyInfo[] modifiers;
+        #region KeyInfo
+        [Header("Key Info")]
+        [SerializeField] protected KeyInfo[] topRow;
+        [SerializeField] protected KeyInfo[] midRow;
+        [SerializeField] protected KeyInfo[] bottomRow;
+        [SerializeField] protected KeyInfo[] modifiers;
 
-        [SerializeField] KeyInfo returnButton;
-        [SerializeField] Image returnImage;
+        [SerializeField] protected KeyInfo returnButton;
+        [SerializeField] protected Image returnImage;
 
-        [SerializeField] KeyInfo caseButton;
-        [SerializeField] Image caseImage;
+        [SerializeField] protected KeyInfo caseButton;
+        [SerializeField] protected Image caseImage;
 
-        [SerializeField] KeyInfo symbolButton;
-        [SerializeField] GameObject symbolImage;
+        [SerializeField] protected KeyInfo symbolButton;
+        [SerializeField] protected GameObject symbolImage;
 
-        [SerializeField] KeyInfo backspaceButton;
-        [SerializeField] GameObject backspaceFace;
-		#endregion
+        [SerializeField] protected KeyInfo backspaceButton;
+        [SerializeField] protected GameObject backspaceFace;
+        #endregion
 
-		[Header("Scaling Variables")]
-		[SerializeField] AnimationCurve xScaleCurve = AnimationCurve.Linear(0, 0, 1, 1);
-		[SerializeField] AnimationCurve yScaleCurve = AnimationCurve.Linear(0, 0, 1, 1);
-		[SerializeField] AnimationCurve zScaleCurve = AnimationCurve.Linear(0, 0, 1, 1);
-        Coroutine showCoroutine;
-        Coroutine hideCoroutine;
+        protected int currentMode = 0;
 
-        int currentMode = 0;
-
-        bool visible = false;
+        protected bool visible = false;
 
         private StringBuilder stringBuilder;
 
-        [SerializeField] UnityEngine.UI.InputField textInput;
+        [SerializeField] protected UnityEngine.UI.InputField textInput;
 
         public UnityEngine.UI.InputField TextInput { get { return textInput; } }
-		public Transform Output { get { return output; } }
+        public Transform Output { get { return output; } }
 
         public bool Visible { get { return visible; } }
-
-        public Text CharacterPrefabText; // duplicate this for each button, anchor it to the button face.
 
         [Header("Audio Tuning")]
         float volumeAdjust = 1;
@@ -90,7 +84,7 @@ namespace VRKeyboard
         [SerializeField] float minVolume;
         float timeSinceLastReset;
 
-        public float VolumeAdjust { get { return volumeAdjust; } }    
+        public float VolumeAdjust { get { return volumeAdjust; } }
 
         [Header("Debug Variables")]
         public string Contents = "";
@@ -370,46 +364,31 @@ namespace VRKeyboard
             //textInput.ActivateInputField();
         }
 
-		private void Start()
-		{
-			transform.localScale = Vector3.zero;
-		}
+        private void Start()
+        {
+            transform.localScale = Vector3.zero;
+        }
 
-		private void ModeButton_ButtonActivated(ButtonRuntime sender)
+        private void ModeButton_ButtonActivated(ButtonRuntime sender)
         {
             ChangeMode();
         }
 
         void ButtonInit(KeyInfo[] buttons, bool textFace)
         {
-            for(int i=0; i < buttons.Length; i++)
+            for (int i = 0; i < buttons.Length; i++)
             {
                 buttons[i] = ButtonInit(buttons[i], textFace);
-				buttons[i].Button.gameObject.SetActive(false);
+                buttons[i].Button.gameObject.SetActive(false);
             }
         }
 
-        KeyInfo ButtonInit(KeyInfo button, bool textFace)
+        protected virtual KeyInfo ButtonInit(KeyInfo button, bool textFace)
         {
             button.FButton = button.Button.GetComponent<ButtonRuntime>();
-            if (textFace)
-            {
-                Transform buttonFace = button.FButton.ButtonFace;
-                GameObject newTextObject = GameObject.Instantiate(CharacterPrefabText.gameObject, CharacterPrefabText.transform.parent);
-
-                TransformAnchor textAnchor = newTextObject.gameObject.AddComponent<TransformAnchor>();
-				textAnchor.Offset = new Vector3(0, 0.012f, 0);
-				textAnchor.Anchor = buttonFace;
-				textAnchor.AnchorForward = Vector3.down;
-				textAnchor.AnchorUp = Vector3.forward;
-
-				button.Button.CharacterText = newTextObject.GetComponent<Text>();
-
-                button.FaceIcon = newTextObject;
-            }
 
             button.collider = button.FButton.GetComponent<Collider>();
-            if(button.KeyModes.Length > 0) button.Button.Key = button.KeyModes[0];
+            if (button.KeyModes.Length > 0) button.Button.Key = button.KeyModes[0];
 
             AddKeyEvents(button);
 
@@ -421,19 +400,19 @@ namespace VRKeyboard
         // Update is called once per frame
         void Update()
         {
-			if (visible)
-			{
-				DoVolumeAdjustments();
-			}
+            if (visible)
+            {
+                DoVolumeAdjustments();
+            }
         }
 
         void DoVolumeAdjustments()
         {
-            if(timeSinceLastKey != float.PositiveInfinity) timeSinceLastKey += Time.deltaTime;
+            if (timeSinceLastKey != float.PositiveInfinity) timeSinceLastKey += Time.deltaTime;
 
             timeSinceLastReset += Time.deltaTime;
 
-            if(timeSinceLastKey > volumeKeyTimeReset)
+            if (timeSinceLastKey > volumeKeyTimeReset)
             {
                 timeSinceLastReset = 0;
             }
@@ -510,146 +489,15 @@ namespace VRKeyboard
             textInput.selectionAnchorPosition = 0;
         }
 
-		[ExposeMethodInEditor]
-        public void Show()
-        {
-			gameObject.SetActive(true);
-            if (showCoroutine != null)
-            {
-                StopCoroutine(showCoroutine);
-                showCoroutine = null;
-            }
+        /// <summary>
+        /// Remember to set IsVisible to true when done showing!
+        /// </summary>
+        public abstract void Show();
 
-            if (hideCoroutine != null)
-            {
-                StopCoroutine(hideCoroutine);
-                hideCoroutine = null;
-            }
-
-            showCoroutine = StartCoroutine(ShowCoroutine());
-        }
-
-		void SetButtonEnable(KeyInfo key, bool enable)
-		{
-			key.Button.gameObject.SetActive(enable);
-			key.FaceIcon.gameObject.SetActive(enable);
-		}
-
-		void SetButtonRowEnable(KeyInfo[] row, bool enable)
-		{
-			foreach(KeyInfo key in row)
-			{
-				SetButtonEnable(key, enable);
-			}
-		}
-
-		public void LookAtPoint(Vector3 point, Vector3 up)
-		{
-			transform.LookAt(point, up);
-			transform.Rotate(new Vector3(0, 180, 0), Space.Self);
-			transform.Rotate(new Vector3(-15, 0, 0), Space.Self);
-		}
-
-		IEnumerator ShowCoroutine()
-        {
-			textInput.enabled = false;
-
-			textInput.gameObject.transform.parent.gameObject.SetActive(true);
-
-			// enable all of our components!
-			SetButtonRowEnable(topRow, true);
-			SetButtonRowEnable(midRow, true);
-			SetButtonRowEnable(bottomRow, true);
-			SetButtonEnable(returnButton, true);
-			SetButtonEnable(caseButton, true);
-			SetButtonEnable(symbolButton, true);
-			SetButtonEnable(backspaceButton, true);
-
-			float time = 0;
-			float duration = 0.25f;
-
-			while(time < duration)
-			{
-				float tValue = Mathf.InverseLerp(0, duration, time);
-
-				Vector3 newScale = new Vector3(
-					Mathf.LerpUnclamped(0, 1, xScaleCurve.Evaluate(tValue)),
-					Mathf.LerpUnclamped(0, 1, yScaleCurve.Evaluate(tValue)),
-					Mathf.LerpUnclamped(0, 1, zScaleCurve.Evaluate(tValue)));
-
-				transform.localScale = newScale;
-
-				time += Time.deltaTime;
-				yield return null;
-			}
-
-			transform.localScale = Vector3.one;
-
-			yield return null;
-			textInput.enabled = true;
-
-            visible = true;
-
-			/*textInput.text = "";
-			textInput.ActivateInputField();*/ // can't focus input field because of this.
-
-			yield break;
-        }
-
-        [ExposeMethodInEditor]
-        public void Hide()
-        {
-            if (showCoroutine != null)
-            {
-                StopCoroutine(showCoroutine);
-                showCoroutine = null;
-            }
-
-            if (hideCoroutine != null)
-            {
-                StopCoroutine(hideCoroutine);
-                hideCoroutine = null;
-            }
-
-            hideCoroutine = StartCoroutine(HideCoroutine());
-        }
-
-        IEnumerator HideCoroutine()
-        {
-			float time = 0;
-			float duration = 0.25f;
-
-			while (time < duration)
-			{
-				float tValue = 1 - Mathf.InverseLerp(0, duration, time);
-
-				Vector3 newScale = new Vector3(
-					Mathf.LerpUnclamped(0, 1, xScaleCurve.Evaluate(tValue)),
-					Mathf.LerpUnclamped(0, 1, yScaleCurve.Evaluate(tValue)),
-					Mathf.LerpUnclamped(0, 1, zScaleCurve.Evaluate(tValue)));
-
-				transform.localScale = newScale;
-
-				time += Time.deltaTime;
-				yield return null;
-			}
-
-			transform.localScale = Vector3.zero;
-
-			SetButtonRowEnable(topRow, false);
-			SetButtonRowEnable(midRow, false);
-			SetButtonRowEnable(bottomRow, false);
-			SetButtonEnable(returnButton, false);
-			SetButtonEnable(caseButton, false);
-			SetButtonEnable(symbolButton, false);
-			SetButtonEnable(backspaceButton, false);
-
-			visible = false;
-
-            textInput.gameObject.transform.parent.gameObject.SetActive(false);
-
-            yield break;
-        }
+        /// <summary>
+        /// Remember to set IsVisible to false when done hiding;
+        /// </summary>
+        public abstract void Hide();
 
         #region Key Button Event Methods
         private bool KeyIsChar(KeyCode suspect)
@@ -674,7 +522,7 @@ namespace VRKeyboard
                 else textInput.text = textInput.text + ConvertCodeToChar(sender.Key.ToString()).ToLower();
 
                 textInput.selectionAnchorPosition++;
-				textInput.selectionFocusPosition = textInput.selectionAnchorPosition;
+                textInput.selectionFocusPosition = textInput.selectionAnchorPosition;
             }
             else
             {
@@ -691,17 +539,17 @@ namespace VRKeyboard
                         textInput.text = textInput.text.Remove(position,
                         length);
                     }
-                    else if(textInput.text.Length > 0)
+                    else if (textInput.text.Length > 0)
                     {
                         textInput.text = textInput.text.Remove(textInput.selectionAnchorPosition - 1, 1);
                     }
                 }
                 else if (sender.Key == KeyCode.Space)
                 {
-                    textInput.text+=(" ");
+                    textInput.text += (" ");
                     textInput.selectionAnchorPosition++;
-					textInput.selectionFocusPosition = textInput.selectionAnchorPosition;
-				}
+                    textInput.selectionFocusPosition = textInput.selectionAnchorPosition;
+                }
                 else if ((sender.Key == KeyCode.LeftShift) || (sender.Key == KeyCode.RightShift))
                 {
                     ChangeCase();
