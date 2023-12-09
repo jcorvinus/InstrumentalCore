@@ -8844,7 +8844,7 @@ MonoBehaviour:
   OnReturn:
     m_PersistentCalls:
       m_Calls: []
-  output: {fileID: 0}
+  output: {fileID: 1195697223}
   rows:
   - KeyInfo:
     - KeyModes: 600000007e000000
@@ -8991,7 +8991,7 @@ MonoBehaviour:
   textInput: {fileID: 0}
   volumeKeyTimeReset: 1.5
   timeTillMinVolume: 4
-  minVolume: 0
+  minVolume: 0.3
   Contents: 
 --- !u!1 &800455645
 GameObject:
