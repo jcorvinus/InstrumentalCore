@@ -10,7 +10,6 @@ namespace VRKeyboard
     /// Connects to a button and relays those events to
     /// a virtual keyboard.
     /// </summary>
-    [RequireComponent(typeof(ButtonRuntime))]
     public class KeyButton : MonoBehaviour
     {
         public delegate void KeyButtonEventHandler(KeyButton sender);
