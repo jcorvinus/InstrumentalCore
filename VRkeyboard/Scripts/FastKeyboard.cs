@@ -9,12 +9,14 @@ namespace VRKeyboard
 
 		public override void Show()
 		{
-			throw new System.NotImplementedException();
+			gameObject.SetActive(true);
+			visible = true;
 		}
 
 		public override void Hide()
 		{
-			throw new System.NotImplementedException();
+			gameObject.SetActive(false);
+			visible = false;
 		}
 	}
 }

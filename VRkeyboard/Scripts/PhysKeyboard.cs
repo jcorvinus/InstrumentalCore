@@ -126,7 +126,7 @@ namespace VRKeyboard
 
 				baseInfo.Button.CharacterText = newTextObject.GetComponent<Text>();
 
-				baseInfo.FaceIcon = newTextObject;
+				//baseInfo.FaceIcon = newTextObject;
 			}
 
 			return baseInfo;

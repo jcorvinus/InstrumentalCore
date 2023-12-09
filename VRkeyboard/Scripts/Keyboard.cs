@@ -33,11 +33,11 @@ namespace VRKeyboard
 
             private ButtonRuntime fingerButton;
             private Collider _collider; // hackjob
-            private GameObject faceIcon;
+            private Image faceIcon;
 
             public ButtonRuntime FButton { get { return fingerButton; } set { fingerButton = value; } }
-            public Collider collider { get { return _collider; } set { _collider = value; } }
-            public GameObject FaceIcon { get { return faceIcon; } set { faceIcon = value; } }
+            public Collider Collider { get { return _collider; } set { _collider = value; } }
+            public Image FaceIcon { get { return faceIcon; } set { faceIcon = value; } }
         }
 
         [SerializeField] Transform output;
@@ -343,21 +343,21 @@ namespace VRKeyboard
                 }
 			}
 
-            returnButton = ButtonInit(returnButton, false);
-            returnButton.FaceIcon = returnImage.gameObject;
-            returnImage.gameObject.SetActive(false);
+            //returnButton = ButtonInit(returnButton, false);
+            //returnButton.FaceIcon = returnImage;
+            //returnImage.gameObject.SetActive(false);
 
-            caseButton = ButtonInit(caseButton, false);
-            caseButton.FaceIcon = caseImage.gameObject;
-            caseImage.gameObject.SetActive(false);
+            //caseButton = ButtonInit(caseButton, false);
+            //caseButton.FaceIcon = caseImage;
+            //caseImage.gameObject.SetActive(false);
 
-            symbolButton = ButtonInit(symbolButton, false);
-            symbolButton.FaceIcon = symbolImage.gameObject;
-            symbolImage.SetActive(false);
+            //symbolButton = ButtonInit(symbolButton, false);
+            //symbolButton.FaceIcon = symbolImage;
+            //symbolImage.SetActive(false);
 
-            backspaceButton = ButtonInit(backspaceButton, false);
-            backspaceButton.FaceIcon = backspaceFace;
-            backspaceFace.SetActive(false);
+            //backspaceButton = ButtonInit(backspaceButton, false);
+            //backspaceButton.FaceIcon = backspaceFace;
+            //backspaceFace.SetActive(false);
 
             symbolButton.FButton.ButtonActivated += ModeButton_ButtonActivated;
 
@@ -387,7 +387,7 @@ namespace VRKeyboard
         {
             button.FButton = button.Button.GetComponent<ButtonRuntime>();
 
-            button.collider = button.FButton.GetComponent<Collider>();
+            button.Collider = button.FButton.GetComponent<Collider>();
             if (button.KeyModes.Length > 0) button.Button.Key = button.KeyModes[0];
 
             AddKeyEvents(button);
