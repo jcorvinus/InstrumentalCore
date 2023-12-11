@@ -53,6 +53,8 @@ namespace VRKeyboard
             set { key = value; SetText(); }
         }
 
+        public bool HasRuntimeButton { get { return button; } }
+
         void Awake()
         {
             keyboard = GetComponentInParent<Keyboard>();

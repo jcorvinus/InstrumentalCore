@@ -31,6 +31,9 @@ namespace Instrumental.Interaction
         private Vector3 forwardDirection;
         private Quaternion noRollHeadRotation;
 
+        private Ray leftHandRay;
+        private Ray rightHandRay;
+
         [Range(0, 45)]
         [SerializeField] float palmComfyUpOffset = 21;
         const float palmDiagonalOffset = 45f;
@@ -131,6 +134,19 @@ namespace Instrumental.Interaction
             leftPalmDiagonal = flattenedNeckRotation * leftPalmDiagonal;
             rightPalmDiagonal = flattenedNeckRotation * rightPalmComfyUp;
         }
+
+        void UpdateRaycastPoses()
+		{
+            if(leftHand.IsTracking)
+			{
+
+			}
+
+            if(rightHand.IsTracking)
+			{
+
+			}
+		}
 
         // Update is called once per frame
         void Update()

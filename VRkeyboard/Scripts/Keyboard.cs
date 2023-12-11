@@ -72,7 +72,10 @@ namespace VRKeyboard
 
         public bool Visible { get { return visible; } }
 
-        [Header("Audio Tuning")]
+        [Header("Audio")]
+        [SerializeField] AudioSource clickSource;
+        [SerializeField] AudioSource hoverSource;
+        
         float volumeAdjust = 1;
         float timeSinceLastKey = float.PositiveInfinity;
         [SerializeField] float volumeKeyTimeReset = 1.5f;
@@ -420,6 +423,19 @@ namespace VRKeyboard
             volumeAdjust = Mathf.Lerp(minVolume, 1, 1 - Mathf.InverseLerp(0, timeTillMinVolume, timeSinceLastReset));
         }
 
+        void PlayClick()
+		{
+            clickSource.time = 0;
+            clickSource.volume = 1 * volumeAdjust;
+            clickSource.Play();
+		}
+
+        void PlayHover()
+		{
+            hoverSource.time = 0;
+            hoverSource.Play();
+		}
+
         [ExposeMethodInEditor]
         void DPressKeyTimer()
         {
@@ -567,7 +583,17 @@ namespace VRKeyboard
             Contents = stringBuilder.ToString();
 
             timeSinceLastKey = 0;
+
+            if (!sender.HasRuntimeButton) PlayClick();
         }
+
+        void button_Hover(KeyButton sender)
+		{
+            if(!sender.HasRuntimeButton)
+			{
+                PlayHover();
+			}
+		}
         #endregion
 
         public static string ConvertCodeToChar(string input)
