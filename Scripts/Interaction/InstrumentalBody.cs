@@ -45,16 +45,15 @@ namespace Instrumental.Interaction
         const float filterFreq = 30;
 
         Vector3 wristOffset = new Vector3(0.0425f, 0.0f, 0.0f);
-        Vector3 leftKnuckleOffset = new Vector3 { x = 0.0f, y = 0.02f, z = 0.05f };
-        [SerializeField] Vector3 rightKnuckleOffset;
-        [SerializeField] bool doKnuckleOffsetDebug = true;
+        Vector3 knuckleOffset = new Vector3 { x = 0.0f, y = 0.02f, z = 0.05f };
+        bool doKnuckleOffsetDebug = false;
         private GameObject leftKnuckleOffsetVis;
         private GameObject rightKnuckleOffsetVis;
 
         private Ray leftHandRay;
         private Ray rightHandRay;
 
-        bool doWristOffsetDebug = true;
+        bool doWristOffsetDebug = false;
         private GameObject leftWristOffsetVis;
         private GameObject rightWristOffsetVis;
 		#endregion
@@ -81,6 +80,9 @@ namespace Instrumental.Interaction
 
         public Vector3 LeftPalmDiagonal { get { return leftPalmDiagonal; } }
         public Vector3 RightPalmDiagonal { get { return rightPalmDiagonal; } }
+
+        public Ray LeftHandRay { get { return leftHandRay; } }
+        public Ray RightHandRay { get { return rightHandRay; } }
 
         public HandAvatar Avatar { get { return handAvatar; } }
 
@@ -209,13 +211,19 @@ namespace Instrumental.Interaction
                 leftWristOffset += leftWrist.position;
 
                 Vector3 leftOrigin = Vector3.Lerp(leftShoulder, leftWristOffset, 0.532f);
+                leftOrigin = leftRayOriginFilter.Filter(leftOrigin, Time.time);
 
-                // todo: filter the left aim position
-                Vector3 leftKnucklePos = leftHandData.IndexJoints[(int)JointType.Proximal].Pose.position;
-                Vector3 leftKnucklePosOffset = leftHand.GetAnchorPose(AnchorPoint.Palm).rotation * leftKnuckleOffset;
+                Vector3 leftKnucklePos = leftHandData.IndexJoints[(int)JointType.Proximal].Pose.position +
+                    (leftHand.GetAnchorPose(AnchorPoint.Palm).rotation * knuckleOffset);
+                leftKnucklePos = leftAimPosFilter.Filter(leftKnucklePos, Time.time);
+
+                Vector3 leftDirection = (leftKnucklePos - leftOrigin).normalized;
+                leftHandRay.direction = leftDirection;
+                leftHandRay.origin = leftOrigin;
+
                 if(doKnuckleOffsetDebug)
 				{
-                    leftKnuckleOffsetVis.transform.position = leftKnucklePos + leftKnucklePosOffset;
+                    leftKnuckleOffsetVis.transform.position = leftKnucklePos;
                     leftKnuckleOffsetVis.SetActive(true);
 				}
 
@@ -237,13 +245,20 @@ namespace Instrumental.Interaction
                 rightWristOffset = rightWrist.rotation * rightWristOffset;
                 rightWristOffset += rightWrist.position;
 
-                // todo: filter the right aim position
-                Vector3 rightKnucklePos = rightHandData.IndexJoints[(int)JointType.Proximal].Pose.position;
-                Vector3 rightKnucklePosOffset = rightHand.GetAnchorPose(AnchorPoint.Palm).rotation * rightKnuckleOffset;
+                Vector3 rightOrigin = Vector3.Lerp(rightShoulder, rightWristOffset, 0.532f);
+                rightOrigin = rightRayOriginFilter.Filter(rightOrigin, Time.time);
+
+                Vector3 rightKnucklePos = rightHandData.IndexJoints[(int)JointType.Proximal].Pose.position + 
+                    (rightHand.GetAnchorPose(AnchorPoint.Palm).rotation * knuckleOffset);
+                rightAimPosFilter.Filter(rightKnucklePos, Time.time);
+
+                Vector3 rightDirection = (rightKnucklePos - rightOrigin).normalized;
+                rightHandRay.direction = rightDirection;
+                rightHandRay.origin = rightOrigin;
 
                 if(doKnuckleOffsetDebug)
 				{
-                    rightKnuckleOffsetVis.transform.position = rightKnucklePos + rightKnucklePosOffset;
+                    rightKnuckleOffsetVis.transform.position = rightKnucklePos;
                     rightKnuckleOffsetVis.SetActive(true);
 				}
 
