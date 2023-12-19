@@ -219,7 +219,7 @@ namespace Instrumental.Interaction
 
                 Vector3 leftDirection = (leftKnucklePos - leftOrigin).normalized;
                 leftHandRay.direction = leftDirection;
-                leftHandRay.origin = leftOrigin;
+                leftHandRay.origin = leftKnucklePos;
 
                 if(doKnuckleOffsetDebug)
 				{
@@ -254,7 +254,7 @@ namespace Instrumental.Interaction
 
                 Vector3 rightDirection = (rightKnucklePos - rightOrigin).normalized;
                 rightHandRay.direction = rightDirection;
-                rightHandRay.origin = rightOrigin;
+                rightHandRay.origin = rightKnucklePos;
 
                 if(doKnuckleOffsetDebug)
 				{
