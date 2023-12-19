@@ -23,7 +23,16 @@ namespace Instrumental.Interaction.Input
         // Update is called once per frame
         void Update()
         {
+            InstrumentalHand hand = (isLeft) ? InstrumentalHand.LeftHand : InstrumentalHand.RightHand;
 
+            if(hand.IsTracking)
+			{
+
+			}
+            else
+			{
+
+			}
         }
     }
 }

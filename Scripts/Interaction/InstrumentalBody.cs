@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using Instrumental.Interaction.Input;
+
 namespace Instrumental.Interaction
 {
     public enum HandAvatar
@@ -31,10 +33,33 @@ namespace Instrumental.Interaction
         private Vector3 forwardDirection;
         private Quaternion noRollHeadRotation;
 
+		#region Hand Rays
+		private OneEuroFilter<Vector3> leftAimPosFilter;
+        private OneEuroFilter<Vector3> leftRayOriginFilter;
+
+        private OneEuroFilter<Vector3> rightAimPosFilter;
+        private OneEuroFilter<Vector3> rightRayOriginFilter;
+
+        const float filterBeta = 100;
+        const float filterMinCutoff = 5;
+        const float filterFreq = 30;
+
+        Vector3 wristOffset = new Vector3(0.0425f, 0.0f, 0.0f);
+        Vector3 leftKnuckleOffset = new Vector3 { x = 0.0f, y = 0.02f, z = 0.05f };
+        [SerializeField] Vector3 rightKnuckleOffset;
+        [SerializeField] bool doKnuckleOffsetDebug = true;
+        private GameObject leftKnuckleOffsetVis;
+        private GameObject rightKnuckleOffsetVis;
+
         private Ray leftHandRay;
         private Ray rightHandRay;
 
-        [Range(0, 45)]
+        bool doWristOffsetDebug = true;
+        private GameObject leftWristOffsetVis;
+        private GameObject rightWristOffsetVis;
+		#endregion
+
+		[Range(0, 45)]
         [SerializeField] float palmComfyUpOffset = 21;
         const float palmDiagonalOffset = 45f;
         Vector3 leftPalmComfyUp = Vector3.up;
@@ -82,6 +107,42 @@ namespace Instrumental.Interaction
         {
             torsoRotation = Quaternion.Euler(0, head.rotation.eulerAngles.y, 0);
             neckPosition = head.position + (Vector3.down * neckHeadOffset);
+
+            leftAimPosFilter = new OneEuroFilter<Vector3>(filterFreq, filterMinCutoff, filterBeta);
+            leftRayOriginFilter = new OneEuroFilter<Vector3>(filterFreq, filterMinCutoff, filterBeta);
+
+            rightAimPosFilter = new OneEuroFilter<Vector3>(filterFreq, filterMinCutoff, filterBeta);
+            rightRayOriginFilter = new OneEuroFilter<Vector3>(filterFreq, filterMinCutoff, filterBeta);
+
+            if(doWristOffsetDebug)
+			{
+                leftWristOffsetVis = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                BoxCollider leftWristVisCollider = leftWristOffsetVis.GetComponent<BoxCollider>();
+                Destroy(leftWristVisCollider);
+                leftWristOffsetVis.SetActive(false);
+                leftWristOffsetVis.transform.localScale = Vector3.one * 0.01f;
+
+                rightWristOffsetVis = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                BoxCollider rightWristVisCollider = rightWristOffsetVis.GetComponent<BoxCollider>();
+                Destroy(rightWristVisCollider);
+                rightWristOffsetVis.SetActive(false);
+                rightWristOffsetVis.transform.localScale = Vector3.one * 0.01f;
+            }
+
+            if(doKnuckleOffsetDebug)
+			{
+                leftKnuckleOffsetVis = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                SphereCollider leftKnuckleCollider = leftKnuckleOffsetVis.GetComponent<SphereCollider>();
+                Destroy(leftKnuckleCollider);
+                leftKnuckleOffsetVis.SetActive(false);
+                leftKnuckleOffsetVis.transform.localScale = Vector3.one * 0.01f;
+
+                rightKnuckleOffsetVis = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                SphereCollider rightKnuckleCollider = rightKnuckleOffsetVis.GetComponent<SphereCollider>();
+                Destroy(rightKnuckleCollider);
+                rightKnuckleOffsetVis.SetActive(false);
+                rightKnuckleOffsetVis.transform.localScale = Vector3.one * 0.01f;
+			}
         }
 
         void UpdateTorso()
@@ -139,13 +200,61 @@ namespace Instrumental.Interaction
 		{
             if(leftHand.IsTracking)
 			{
+                // left wrist offset
+                HandData leftHandData = leftHand.GetHandData();
+                Pose leftWrist = leftHandData.WristPose;
 
-			}
+                Vector3 leftWristOffset = wristOffset;
+                leftWristOffset = leftWrist.rotation * leftWristOffset;
+                leftWristOffset += leftWrist.position;
 
-            if(rightHand.IsTracking)
+                Vector3 leftOrigin = Vector3.Lerp(leftShoulder, leftWristOffset, 0.532f);
+
+                // todo: filter the left aim position
+                Vector3 leftKnucklePos = leftHandData.IndexJoints[(int)JointType.Proximal].Pose.position;
+                Vector3 leftKnucklePosOffset = leftHand.GetAnchorPose(AnchorPoint.Palm).rotation * leftKnuckleOffset;
+                if(doKnuckleOffsetDebug)
+				{
+                    leftKnuckleOffsetVis.transform.position = leftKnucklePos + leftKnucklePosOffset;
+                    leftKnuckleOffsetVis.SetActive(true);
+				}
+
+                if (leftWristOffsetVis) leftWristOffsetVis.transform.position = leftWristOffset;
+            }
+            else
 			{
-
+                if (leftKnuckleOffsetVis) leftKnuckleOffsetVis.SetActive(false);
 			}
+
+            if (leftWristOffsetVis) leftWristOffsetVis.SetActive(leftHand.IsTracking);
+
+            if (rightHand.IsTracking)
+			{
+                HandData rightHandData = rightHand.GetHandData();
+                Pose rightWrist = rightHandData.WristPose;
+
+                Vector3 rightWristOffset = -wristOffset;
+                rightWristOffset = rightWrist.rotation * rightWristOffset;
+                rightWristOffset += rightWrist.position;
+
+                // todo: filter the right aim position
+                Vector3 rightKnucklePos = rightHandData.IndexJoints[(int)JointType.Proximal].Pose.position;
+                Vector3 rightKnucklePosOffset = rightHand.GetAnchorPose(AnchorPoint.Palm).rotation * rightKnuckleOffset;
+
+                if(doKnuckleOffsetDebug)
+				{
+                    rightKnuckleOffsetVis.transform.position = rightKnucklePos + rightKnucklePosOffset;
+                    rightKnuckleOffsetVis.SetActive(true);
+				}
+
+                if (rightWristOffsetVis) rightWristOffsetVis.transform.position = rightWristOffset;
+			}
+            else
+			{
+                if (rightKnuckleOffsetVis) rightKnuckleOffsetVis.SetActive(false);
+			}
+
+            if (rightWristOffsetVis) rightWristOffsetVis.SetActive(rightHand.IsTracking);
 		}
 
         // Update is called once per frame
@@ -153,7 +262,7 @@ namespace Instrumental.Interaction
         {
             // track virtual torso
             UpdateTorso();
-
+            UpdateRaycastPoses();
 
             // allow avatar switching
             if(UnityEngine.Input.GetKeyUp(avatarSwitchKey))
