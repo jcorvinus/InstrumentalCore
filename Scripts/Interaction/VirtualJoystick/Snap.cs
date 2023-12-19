@@ -46,8 +46,8 @@ namespace Instrumental.Interaction.VirtualJoystick
         const float coneSnapDist = 0.023f;
         private bool isSnapLeft = false;
         private bool isSnapRight = false;
-        int snapLeftIndex;
-        int snapRightIndex;
+        int directionIndex;
+        int inputIsActiveIndex;
 
         AudioSource snapSource;
         [SerializeField] AudioClip[] snapClips;
@@ -78,8 +78,8 @@ namespace Instrumental.Interaction.VirtualJoystick
 
             if(inputDataSources)
 			{
-                snapLeftIndex = inputDataSources.GetIndexForDataSource("SnapLeft");
-                snapRightIndex = inputDataSources.GetIndexForDataSource("SnapRight");
+                directionIndex = inputDataSources.GetIndexForDataSource("Direction");
+                inputIsActiveIndex = inputDataSources.GetIndexForDataSource("IsInputActive");
 			}
         }
 
@@ -230,8 +230,8 @@ namespace Instrumental.Interaction.VirtualJoystick
 
             if(inputDataSources)
 			{
-                inputDataSources.SetData(snapLeftIndex, isSnapLeft);
-                inputDataSources.SetData(snapRightIndex, isSnapRight);
+                inputDataSources.SetData(directionIndex, Value);
+                inputDataSources.SetData(inputIsActiveIndex, IsSnapActive);
 			}
         }
 
