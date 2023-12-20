@@ -50,6 +50,8 @@ namespace Instrumental.Interaction
         private GameObject leftKnuckleOffsetVis;
         private GameObject rightKnuckleOffsetVis;
 
+        private Vector3 leftAimPosition;
+        private Vector3 rightAimPosition;
         private Ray leftHandRay;
         private Ray rightHandRay;
 
@@ -81,6 +83,10 @@ namespace Instrumental.Interaction
         public Vector3 LeftPalmDiagonal { get { return leftPalmDiagonal; } }
         public Vector3 RightPalmDiagonal { get { return rightPalmDiagonal; } }
 
+        public Vector3 ForwardDirection { get { return forwardDirection; } }
+
+        public Vector3 LeftAimPosition { get { return leftAimPosition; } }
+        public Vector3 RightAimPosition { get { return rightAimPosition; } }
         public Ray LeftHandRay { get { return leftHandRay; } }
         public Ray RightHandRay { get { return rightHandRay; } }
 
@@ -150,6 +156,7 @@ namespace Instrumental.Interaction
         void UpdateTorso()
 		{
             Quaternion flattenedNeckRotation = Quaternion.Euler(0, head.rotation.eulerAngles.y, 0);
+            forwardDirection = flattenedNeckRotation * Vector3.forward;
 
             if (!isTorsoSmoothing)
             {
@@ -216,10 +223,11 @@ namespace Instrumental.Interaction
                 Vector3 leftKnucklePos = leftHandData.IndexJoints[(int)JointType.Proximal].Pose.position +
                     (leftHand.GetAnchorPose(AnchorPoint.Palm).rotation * knuckleOffset);
                 leftKnucklePos = leftAimPosFilter.Filter(leftKnucklePos, Time.time);
+                leftAimPosition = leftKnucklePos;
 
                 Vector3 leftDirection = (leftKnucklePos - leftOrigin).normalized;
                 leftHandRay.direction = leftDirection;
-                leftHandRay.origin = leftKnucklePos;
+                leftHandRay.origin = leftOrigin;
 
                 if(doKnuckleOffsetDebug)
 				{
@@ -251,10 +259,11 @@ namespace Instrumental.Interaction
                 Vector3 rightKnucklePos = rightHandData.IndexJoints[(int)JointType.Proximal].Pose.position + 
                     (rightHand.GetAnchorPose(AnchorPoint.Palm).rotation * knuckleOffset);
                 rightAimPosFilter.Filter(rightKnucklePos, Time.time);
+                rightAimPosition = rightKnucklePos;
 
                 Vector3 rightDirection = (rightKnucklePos - rightOrigin).normalized;
                 rightHandRay.direction = rightDirection;
-                rightHandRay.origin = rightKnucklePos;
+                rightHandRay.origin = rightOrigin;
 
                 if(doKnuckleOffsetDebug)
 				{

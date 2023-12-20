@@ -2,17 +2,51 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
+
 namespace Instrumental.Interaction.Input
 {
-    public class HandPointer : MonoBehaviour
+	public enum PointerState
+	{ 
+        OnCanvas=0,
+        OnElement=1,
+        PinchCanvas=2,
+        PinchControl=3,
+        OffCanvas=4
+    }
+
+	public class HandPointer : MonoBehaviour
     {
         InstrumentalBody body;
-        MeshRenderer pinchConeRenderer;
+        InstrumentalHand hand;
+
+        #region Input Stuff
+        [SerializeField] bool isLeft = false;
+        private EventSystem eventSystem;
+        private HandInputModule inputModule;
+
+        private PointerState currentState;
+        private PointerState previousState;
+        private PointerEventData eventData;
+
+        private Vector2 prevPosition;
+        private Vector2 dragStartPosition;
+
+        private GameObject previousObject;
+        private GameObject currentObject;
+        private GameObject currentDragObject;
+        private GameObject hoverObject;
+
+        private List<RaycastResult> raycastResults = new List<RaycastResult>();
+		#endregion
+
+		#region Feedback Stuff
+		MeshRenderer pinchConeRenderer;
         int pinchDiffuseHash;
         int pinchEmissHash;
         Color defaultColor;
         Color defaultEmissionColor;
-        [SerializeField] bool isLeft = false;
 
         [Range(0, 0.025f)]
         [SerializeField] float minSquishDistance = 0.01f;
@@ -21,20 +55,29 @@ namespace Instrumental.Interaction.Input
         float squashStartDistance = 0.05f;
 
         [SerializeField] AnimationCurve squishBlend = AnimationCurve.Linear(0, 0, 1, 1);
+		#endregion
 
-        private void Awake()
+		private void Awake()
 		{
-            pinchConeRenderer = transform.GetChild(0).GetComponent<MeshRenderer>();
+            inputModule = GetComponentInParent<HandInputModule>();
+            eventSystem = GetComponentInParent<EventSystem>();
+
+			#region Feedback Stuff
+			pinchConeRenderer = transform.GetChild(0).GetComponent<MeshRenderer>();
             pinchDiffuseHash = Shader.PropertyToID("_Color");
             pinchEmissHash = Shader.PropertyToID("_EmissionColor");
             defaultColor = pinchConeRenderer.material.GetColor(pinchDiffuseHash);
             defaultEmissionColor = pinchConeRenderer.material.GetColor(pinchEmissHash);
+			#endregion
 		}
 
 		// Start is called before the first frame update
 		void Start()
         {
             body = InstrumentalBody.Instance;
+            hand = (isLeft) ? InstrumentalHand.LeftHand : InstrumentalHand.RightHand;
+
+            eventData = new PointerEventData(eventSystem);
         }
 
         void SetScaleFactor(float scaleFactor)
@@ -49,30 +92,30 @@ namespace Instrumental.Interaction.Input
             // Calculate zScale for volume preservation
             float zScaleVol = Mathf.Pow(1f / (Mathf.Pow(xScale, 2)), 1f / 3f);
 
-            // Smoothstep zScale equal to scaleFactor
-            //float zScaleUniform = Mathf.SmoothStep(minFloatScale, 1f, scaleFactor);
-
-            // Interpolate between the two zScale values using smoothstep
-            //float zScale = Mathf.Lerp(zScaleVol, zScaleUniform, squishBlend.Evaluate(t)); //Mathf.SmoothStep(0f, 1f, t)
-
             Vector3 scale = new Vector3(xScale, yScale, zScaleVol);
 
             pinchConeRenderer.transform.localScale = Vector3.Scale(scale, Vector3.one);
         }
 
+        // keep track of this, we might need to de-conflict reasons for deactivation
+        bool IsActive()
+		{
+            return hand.IsTracking;
+		}
+
         // Update is called once per frame
         void Update()
         {
-            InstrumentalHand hand = (isLeft) ? InstrumentalHand.LeftHand : InstrumentalHand.RightHand;
             Ray handRay = (isLeft) ? body.LeftHandRay : body.RightHandRay;
+            Vector3 aimPosition = (isLeft) ? body.LeftAimPosition : body.RightAimPosition;
             Pose palmPose = hand.GetAnchorPose(AnchorPoint.Palm);
 
-            bool active = (hand.IsTracking); // todo: add palm direction filtering here
+            bool active = IsActive(); // todo: add palm direction filtering here
 
             if(active)
 			{
                 // set our transform position and rotation to that of the ray
-                transform.SetPositionAndRotation(handRay.origin, Quaternion.LookRotation(handRay.direction, 
+                pinchConeRenderer.transform.SetPositionAndRotation(aimPosition, Quaternion.LookRotation(handRay.direction, 
                     palmPose.rotation * Vector3.back));
 
                 // enable pinch cone
@@ -95,5 +138,98 @@ namespace Instrumental.Interaction.Input
                 pinchConeRenderer.enabled = false;
 			}
         }
+
+        bool DoRaycast()
+		{
+            eventData.Reset();
+            eventData.button = PointerEventData.InputButton.Left;
+
+            Ray handRay = (isLeft) ? body.LeftHandRay : body.RightHandRay;
+            Vector3 aimPosition = (isLeft) ? body.LeftAimPosition : body.RightAimPosition;
+            Vector3 localizedPosition = inputModule.ScreenCamera.transform.position - handRay.origin + aimPosition;
+
+            eventData.position = inputModule.ScreenCamera.WorldToScreenPoint(localizedPosition);
+            eventData.delta = eventData.position - prevPosition;
+            eventData.scrollDelta = Vector2.zero;
+
+            eventSystem.RaycastAll(eventData, raycastResults);
+            eventData.pointerCurrentRaycast = HandInputModule.FindFirstRaycast(raycastResults);
+
+            raycastResults.Clear();
+
+            return eventData.pointerCurrentRaycast.gameObject != null;
+		}
+
+        void ProcessPointer(PointerEventData hitData)
+		{
+            GameObject pointerHitObject = eventData.pointerCurrentRaycast.gameObject;
+
+            if(pointerHitObject)
+			{
+                RectTransform dragRef = eventData.pointerCurrentRaycast.gameObject.GetComponent<RectTransform>();
+
+                if(RectTransformUtility.ScreenPointToWorldPointInRectangle(dragRef,  hitData.position,
+                    hitData.enterEventCamera, out Vector3 globalLookPosition))
+				{
+                    GameObject hoverObject = ExecuteEvents.GetEventHandler<IPointerEnterHandler>(pointerHitObject);
+
+                    if (hoverObject)
+					{
+                        Vector3 pointerInDragRef = hoverObject.transform.InverseTransformPoint(globalLookPosition);
+                        pointerInDragRef = new Vector3(pointerInDragRef.x, pointerInDragRef.y, 0);
+                        transform.position = hoverObject.transform.TransformPoint(pointerInDragRef);
+					}
+                    else
+					{
+                        transform.position = globalLookPosition - transform.forward * 0.01f;
+					}
+
+                    transform.rotation = dragRef.rotation;
+				}
+			}
+		}
+
+        void ProcessState()
+		{
+            if(eventData.pointerCurrentRaycast.gameObject)
+			{
+                PinchInfo indexPinch = hand.GetPinchInfo(Finger.Index);
+                bool isPinching = indexPinch.PinchAmount < 0.01f;
+
+                if (ExecuteEvents.GetEventHandler<IPointerClickHandler>(
+                    eventData.pointerCurrentRaycast.gameObject))
+				{
+                    // get pointer state for pinching element or on element
+                    currentState = isPinching ? PointerState.PinchControl : PointerState.OnElement;
+				}
+                else
+				{
+                    // do the same as above, but for the canvas
+                    currentState = isPinching ? PointerState.PinchCanvas : PointerState.OnCanvas;
+				}
+			}
+            else
+            {
+                currentState = PointerState.OffCanvas;
+            }
+
+            if (currentState != previousState)
+            {
+                // todo: dispatch pointer state change event
+            }
+        }
+
+        public void Process()
+		{
+            // check our eligibility requirements
+            if(IsActive())
+			{
+                bool hit = DoRaycast();
+
+                previousState = currentState;
+                ProcessPointer(eventData);
+                ProcessState();
+			}
+		}
     }
 }

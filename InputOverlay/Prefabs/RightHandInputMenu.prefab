@@ -476,6 +476,7 @@ GameObject:
   - component: {fileID: 4079726732628830437}
   - component: {fileID: 1394328721620377636}
   - component: {fileID: 4674509169592695131}
+  - component: {fileID: 632005245241694489}
   m_Layer: 0
   m_Name: RightHandInputMenu
   m_TagString: Untagged
@@ -543,6 +544,19 @@ MonoBehaviour:
   exitAngle: 30
   feedbackActivationAngleOuter: 80
   DrawLength: 0.2
+--- !u!114 &632005245241694489
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4079726732628830459}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62b116c5c69ad0141b1f2f5f298b7877, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  settingsButton: {fileID: 332629293469931205}
 --- !u!1 &7407452433184291576
 GameObject:
   m_ObjectHideFlags: 0
@@ -954,6 +968,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8d37fa135d8d78c46ae249b0d36e4561, type: 3}
+--- !u!114 &332629293469931205 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 731302364273269603, guid: 8d37fa135d8d78c46ae249b0d36e4561,
+    type: 3}
+  m_PrefabInstance: {fileID: 1061625980344552870}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fef36970fb92b8f4b842e43c910a4fc7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &3122556696997663791 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2733170341325265289, guid: 8d37fa135d8d78c46ae249b0d36e4561,

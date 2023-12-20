@@ -362,7 +362,7 @@ namespace VRKeyboard
             //backspaceButton.FaceIcon = backspaceFace;
             //backspaceFace.SetActive(false);
 
-            symbolButton.FButton.ButtonActivated += ModeButton_ButtonActivated;
+            //symbolButton.FButton.ButtonActivated += ModeButton_ButtonActivated;
 
             //textInput.ActivateInputField();
         }

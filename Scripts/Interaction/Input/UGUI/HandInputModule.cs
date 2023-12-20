@@ -31,7 +31,18 @@ namespace Instrumental.Interaction.Input
 
 		public override void Process()
 		{
-			//throw new System.NotImplementedException();
+			leftPointer.Process();
+			rightPointer.Process();
+		}
+
+		public new static RaycastResult FindFirstRaycast(List<RaycastResult> results)
+		{
+			return BaseInputModule.FindFirstRaycast(results);
+		}
+
+		public override bool ShouldActivateModule()
+		{
+			return true;
 		}
 	}
 }

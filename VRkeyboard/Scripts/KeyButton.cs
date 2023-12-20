@@ -142,7 +142,7 @@ namespace VRKeyboard
 
         private void Update()
         {
-            button.VolumeModifier = keyboard.VolumeAdjust;
+            if(button) button.VolumeModifier = keyboard.VolumeAdjust;
         }
 
         void Activate()
