@@ -21,6 +21,8 @@ namespace Instrumental.Interaction.Input
         InstrumentalBody body;
         InstrumentalHand hand;
 
+        UICursor cursor;
+
         #region Input Stuff
         [SerializeField] bool isLeft = false;
         private EventSystem eventSystem;
@@ -39,6 +41,8 @@ namespace Instrumental.Interaction.Input
         private GameObject hoverObject;
 
         private List<RaycastResult> raycastResults = new List<RaycastResult>();
+
+        const float defaultRaycastLength = 1f;
 		#endregion
 
 		#region Feedback Stuff
@@ -64,6 +68,7 @@ namespace Instrumental.Interaction.Input
 		{
             inputModule = GetComponentInParent<HandInputModule>();
             eventSystem = GetComponentInParent<EventSystem>();
+            cursor = GetComponentInChildren<UICursor>();
 
 			#region Feedback Stuff
 			pinchConeRenderer = transform.GetChild(0).GetComponent<MeshRenderer>();
@@ -86,6 +91,8 @@ namespace Instrumental.Interaction.Input
             hand = (isLeft) ? InstrumentalHand.LeftHand : InstrumentalHand.RightHand;
 
             eventData = new PointerEventData(eventSystem);
+
+            cursor.Init(hand, inputModule, eventSystem);
         }
 
         void SetScaleFactor(float scaleFactor)
@@ -142,7 +149,9 @@ namespace Instrumental.Interaction.Input
 
                 // do our line renderer feedback
                 lineRenderer.enabled = true;
-                DoLine(aimPosition, handRay.direction, 0.5f);
+                Vector3 endpoint = handRay.origin + (handRay.direction * defaultRaycastLength);
+                if (cursor.SurfaceTarget) endpoint = cursor.transform.position;
+                DoLine(aimPosition, endpoint);
 			}
             else
 			{
@@ -151,10 +160,9 @@ namespace Instrumental.Interaction.Input
 			}
         }
 
-        void DoLine(Vector3 origin, Vector3 direction, float distance)
+        void DoLine(Vector3 origin, Vector3 endPoint)
 		{
             Vector3 startPoint = origin;
-            Vector3 endPoint = origin + (direction * distance);
 
             for(int i = 0; i < lineRenderer.positionCount; i++)
 			{
@@ -182,15 +190,45 @@ namespace Instrumental.Interaction.Input
             eventData.button = PointerEventData.InputButton.Left;
 
             Ray handRay = (isLeft) ? body.LeftHandRay : body.RightHandRay;
-            Vector3 aimPosition = (isLeft) ? body.LeftAimPosition : body.RightAimPosition;
-            Vector3 localizedPosition = inputModule.ScreenCamera.transform.position - handRay.origin + aimPosition;
 
-            eventData.position = inputModule.ScreenCamera.WorldToScreenPoint(localizedPosition);
-            eventData.delta = eventData.position - prevPosition;
-            eventData.scrollDelta = Vector2.zero;
+            // find our UISurfaceTarget if there is one
+            UISurfaceTarget hitSurface = null;
 
-            eventSystem.RaycastAll(eventData, raycastResults);
-            eventData.pointerCurrentRaycast = HandInputModule.FindFirstRaycast(raycastResults);
+            for(int i=0; i < UISurfaceTarget.SurfaceTargets.Count; i++)
+			{
+                if(UISurfaceTarget.SurfaceTargets[i])
+				{
+                    hitSurface = UISurfaceTarget.SurfaceTargets[i];
+                    break;
+                }
+			}
+
+            if (hitSurface)
+            {
+                // raycast against our hit target, send the cursor there
+                UIRaycastHit uiRaycastHt;
+                bool didHitSurface = hitSurface.DoRaycast(handRay, defaultRaycastLength, out uiRaycastHt);
+
+                if(didHitSurface)
+				{
+                    cursor.RegisterSurfaceHit(hitSurface, uiRaycastHt);
+				}
+                else
+				{
+                    cursor.ClearSurfaceHit();
+				}
+
+                eventData.position = inputModule.ScreenCamera.WorldToScreenPoint(cursor.transform.position);
+                eventData.delta = eventData.position - prevPosition;
+                eventData.scrollDelta = Vector2.zero;
+
+                eventSystem.RaycastAll(eventData, raycastResults);
+                eventData.pointerCurrentRaycast = HandInputModule.FindFirstRaycast(raycastResults);
+            }
+			else
+			{
+                cursor.ClearSurfaceHit();
+			}
 
             raycastResults.Clear();
 
@@ -261,6 +299,7 @@ namespace Instrumental.Interaction.Input
             // check our eligibility requirements
             if(IsActive())
 			{
+                // raycast against ui surface, update UICursor
                 bool hit = DoRaycast();
 
                 previousState = currentState;
