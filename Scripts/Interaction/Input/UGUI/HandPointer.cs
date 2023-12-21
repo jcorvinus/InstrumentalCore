@@ -55,6 +55,9 @@ namespace Instrumental.Interaction.Input
         float squashStartDistance = 0.05f;
 
         [SerializeField] AnimationCurve squishBlend = AnimationCurve.Linear(0, 0, 1, 1);
+
+        LineRenderer lineRenderer;
+        Vector3[] linePoints;
 		#endregion
 
 		private void Awake()
@@ -68,6 +71,11 @@ namespace Instrumental.Interaction.Input
             pinchEmissHash = Shader.PropertyToID("_EmissionColor");
             defaultColor = pinchConeRenderer.material.GetColor(pinchDiffuseHash);
             defaultEmissionColor = pinchConeRenderer.material.GetColor(pinchEmissHash);
+
+            lineRenderer = GetComponent<LineRenderer>();
+            lineRenderer.enabled = false;
+
+            linePoints = new Vector3[lineRenderer.positionCount];
 			#endregion
 		}
 
@@ -131,6 +139,10 @@ namespace Instrumental.Interaction.Input
 
                 pinchConeRenderer.material.SetColor(pinchDiffuseHash, Color.Lerp(defaultColor, Color.white, invScale));
                 pinchConeRenderer.material.SetColor(pinchEmissHash, Color.Lerp(defaultEmissionColor, Color.white, invScale));
+
+                // do our line renderer feedback
+                lineRenderer.enabled = true;
+                DoLine(aimPosition, handRay.direction, 0.5f);
 			}
             else
 			{
@@ -138,6 +150,31 @@ namespace Instrumental.Interaction.Input
                 pinchConeRenderer.enabled = false;
 			}
         }
+
+        void DoLine(Vector3 origin, Vector3 direction, float distance)
+		{
+            Vector3 startPoint = origin;
+            Vector3 endPoint = origin + (direction * distance);
+
+            for(int i = 0; i < lineRenderer.positionCount; i++)
+			{
+                if(i == 0)
+				{
+                    linePoints[0] = startPoint;
+				}
+                else if (i == lineRenderer.positionCount - 1)
+				{
+                    linePoints[lineRenderer.positionCount - 1] = endPoint;
+				}
+                else
+				{
+                    float tValue = Mathf.InverseLerp(0, lineRenderer.positionCount, i);
+                    linePoints[i] = Vector3.Lerp(startPoint, endPoint, tValue);
+				}
+			}
+
+            lineRenderer.SetPositions(linePoints);
+		}
 
         bool DoRaycast()
 		{

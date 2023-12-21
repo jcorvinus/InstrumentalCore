@@ -25,6 +25,12 @@ namespace Instrumental.Interaction.Input
 				screenCamera = cameraCandidate.GetComponent<Camera>();
 			}
 
+			Canvas[] canvases = FindObjectsOfType<Canvas>();
+			for(int i=0; i < canvases.Length; i++)
+			{
+				if (!canvases[i].worldCamera) canvases[i].worldCamera = screenCamera;
+			}
+
 			leftPointer = transform.GetChild(0).GetComponent<HandPointer>();
 			rightPointer = transform.GetChild(1).GetComponent<HandPointer>();
 		}
