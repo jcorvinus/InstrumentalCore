@@ -35,10 +35,14 @@ namespace Instrumental.Interaction.Input
         private Vector2 prevPosition;
         private Vector2 dragStartPosition;
 
-        private GameObject previousObject;
+        private GameObject previousHoverObject;
         private GameObject currentObject;
         private GameObject currentDragObject;
-        private GameObject hoverObject;
+        private GameObject currentHoverObject;
+
+        private bool previousPinching;
+
+        private float enteredCanvasTime;
 
         private List<RaycastResult> raycastResults = new List<RaycastResult>();
 
@@ -184,6 +188,12 @@ namespace Instrumental.Interaction.Input
             lineRenderer.SetPositions(linePoints);
 		}
 
+        private bool IsPinching()
+		{
+            PinchInfo indexPinch = hand.GetPinchInfo(Finger.Index);
+            return indexPinch.PinchAmount > 0.9f;
+        }
+
         bool DoRaycast()
 		{
             eventData.Reset();
@@ -268,8 +278,7 @@ namespace Instrumental.Interaction.Input
 		{
             if(eventData.pointerCurrentRaycast.gameObject)
 			{
-                PinchInfo indexPinch = hand.GetPinchInfo(Finger.Index);
-                bool isPinching = indexPinch.PinchAmount < 0.01f;
+                bool isPinching = IsPinching();
 
                 if (ExecuteEvents.GetEventHandler<IPointerClickHandler>(
                     eventData.pointerCurrentRaycast.gameObject))
@@ -290,7 +299,16 @@ namespace Instrumental.Interaction.Input
 
             if (currentState != previousState)
             {
+                if(currentState == PointerState.OnCanvas && previousState != PointerState.OffCanvas)
+				{
+                    enteredCanvasTime = Time.time;
+				}
+
                 // todo: dispatch pointer state change event
+                //if(OnStateChanged != null)
+				//{
+                //  OnStateChanged(previousState, currentState);
+				//}
             }
         }
 
@@ -305,7 +323,194 @@ namespace Instrumental.Interaction.Input
                 previousState = currentState;
                 ProcessPointer(eventData);
                 ProcessState();
+                ProcessEvents();
 			}
 		}
-    }
+
+        void ProcessEvents()
+        {
+            // don't process empty events
+            if (eventData == null) return;
+
+			#region Raycast
+			if (eventData.pointerCurrentRaycast.gameObject == null || currentState == PointerState.OffCanvas)
+			{
+                return;
+			}
+
+            previousHoverObject = currentHoverObject;
+            currentHoverObject = eventData.pointerCurrentRaycast.gameObject;
+
+            // handle in out events
+            inputModule.HandlePointerExitAndEnterWrapper(eventData, currentObject);
+
+            if(!previousPinching && IsPinching())
+			{
+                previousPinching = true;
+
+                // If we just entered this canvas
+                if(Time.time - enteredCanvasTime >= Time.deltaTime)
+				{
+                    if(eventSystem.currentSelectedGameObject)
+					{
+                        eventSystem.SetSelectedGameObject(null);
+					}
+
+                    // update pointer stuff
+                    eventData.pressPosition = eventData.position;
+                    eventData.pointerPressRaycast = eventData.pointerCurrentRaycast;
+                    eventData.pointerPress = null;
+                    eventData.useDragThreshold = true;
+
+                    if(currentHoverObject)
+					{
+                        currentObject = currentHoverObject;
+
+                        // check for pointer down handlers
+                        GameObject gameObjectJustPressed = ExecuteEvents.ExecuteHierarchy(currentObject,
+                            eventData, ExecuteEvents.pointerDownHandler);
+
+                        if(!gameObjectJustPressed)
+						{
+                            GameObject gameObjectJustClicked = ExecuteEvents.ExecuteHierarchy(currentObject,
+                                eventData, ExecuteEvents.pointerClickHandler);
+
+                            if(gameObjectJustClicked)
+							{
+                                currentObject = gameObjectJustClicked;
+							}
+						}
+                        else
+						{
+                            currentObject = gameObjectJustPressed;
+						}
+
+                        if(gameObjectJustPressed)
+						{
+                            eventData.pointerPress = gameObjectJustPressed;
+                            currentObject = gameObjectJustPressed;
+
+                            // select it
+                            if(ExecuteEvents.GetEventHandler<IPointerClickHandler>(currentObject))
+							{
+                                eventSystem.SetSelectedGameObject(currentObject);
+							}
+						}
+
+                        // look for anything that has dragging
+                        eventData.pointerDrag = ExecuteEvents.GetEventHandler<IDragHandler>(currentObject);
+
+                        if(eventData.pointerDrag)
+						{
+                            IDragHandler dragHandler = eventData.pointerDrag.GetComponent<IDragHandler>();
+
+                            if (dragHandler != null)
+                            {
+                                if(dragHandler is EventTrigger && eventData.pointerDrag.transform.parent)
+								{
+                                    eventData.pointerDrag = ExecuteEvents.GetEventHandler<IDragHandler>(
+                                        eventData.pointerDrag.transform.parent.gameObject);
+
+                                    if(eventData.pointerDrag != null)
+									{
+                                        dragHandler = eventData.pointerDrag.GetComponent<IDragHandler>();
+
+                                        if(dragHandler != null && !(dragHandler is EventTrigger))
+										{
+                                            currentDragObject = eventData.pointerDrag;
+                                            dragStartPosition = eventData.position;
+
+                                            if(currentObject && currentObject == currentDragObject)
+											{
+                                                ExecuteEvents.Execute(
+                                                    eventData.pointerDrag,
+                                                    eventData,
+                                                    ExecuteEvents.beginDragHandler);
+
+                                                eventData.dragging = true;
+											}
+										}
+                                    }
+								}
+                            }
+                            else
+							{
+                                currentDragObject = eventData.pointerDrag;
+                                dragStartPosition = eventData.position;
+
+                                if(currentObject && currentObject == currentDragObject)
+								{
+                                    ExecuteEvents.Execute(eventData.pointerDrag,
+                                        eventData, ExecuteEvents.beginDragHandler);
+                                    eventData.dragging = true;
+								}
+							}
+						}
+					}
+				}
+			}
+
+			#endregion
+
+			#region Scrolling
+            if(!eventData.dragging && currentDragObject && 
+                Vector2.Distance(eventData.position, dragStartPosition) * 100f >
+                EventSystem.current.pixelDragThreshold)
+			{
+                if(currentObject && !currentObject.GetComponent<ScrollRect>()) // I don't like this GetComponent
+                    // call inside of an update sub method, but I can't think of a better way
+				{
+                    ExecuteEvents.Execute(eventData.pointerDrag,
+                        eventData, ExecuteEvents.beginDragHandler);
+                    eventData.dragging = true;
+
+                    ExecuteEvents.Execute(currentObject, eventData,
+                        ExecuteEvents.pointerUpHandler);
+
+                    eventData.rawPointerPress = null;
+                    eventData.pointerPress = null;
+                    currentObject = null;
+				}
+			}
+			#endregion
+
+			#region End Interaction
+            if(!IsPinching())
+			{
+                previousPinching = false;
+
+                if(currentDragObject)
+				{
+                    ExecuteEvents.Execute(currentDragObject, eventData, ExecuteEvents.endDragHandler);
+
+                    if(currentObject && currentDragObject == currentObject)
+					{
+                        ExecuteEvents.ExecuteHierarchy(currentHoverObject, eventData,
+                            ExecuteEvents.dropHandler);
+					}
+
+                    eventData.pointerDrag = null;
+                    eventData.dragging = false;
+                    currentDragObject = null;
+				}
+
+                if(currentObject)
+				{
+                    ExecuteEvents.Execute(currentObject, eventData, ExecuteEvents.pointerUpHandler);
+                    ExecuteEvents.Execute(currentObject, eventData, ExecuteEvents.pointerClickHandler);
+                    eventData.rawPointerPress = null;
+                    eventData.pointerPress = null;
+                    currentObject = null;
+                    currentDragObject = null;
+                }
+			}
+			#endregion
+
+			// dragging
+            if(eventData.pointerDrag != null && eventData.dragging)
+			{
+                ExecuteEvents.Execute(eventData.pointerDrag, eventData, ExecuteEvents.dragHandler);
+			}
+		}
+	}
 }

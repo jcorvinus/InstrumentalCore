@@ -46,9 +46,19 @@ namespace Instrumental.Interaction.Input
 			return BaseInputModule.FindFirstRaycast(results);
 		}
 
+		public void HandlePointerExitAndEnterWrapper(PointerEventData eventData, GameObject newEnterTarget)
+		{
+			base.HandlePointerExitAndEnter(eventData, newEnterTarget);
+		}
+
 		public override bool ShouldActivateModule()
 		{
 			return true;
+		}
+
+		private void SendUpdateToSelectedObject()
+		{
+			if (!eventSystem.currentSelectedGameObject) return;
 		}
 	}
 }
