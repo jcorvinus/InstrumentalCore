@@ -342,7 +342,7 @@ namespace Instrumental.Interaction.Input
             currentHoverObject = eventData.pointerCurrentRaycast.gameObject;
 
             // handle in out events
-            inputModule.HandlePointerExitAndEnterWrapper(eventData, currentObject);
+            inputModule.HandlePointerExitAndEnterWrapper(eventData, currentHoverObject);
 
             if(!previousPinching && IsPinching())
 			{
