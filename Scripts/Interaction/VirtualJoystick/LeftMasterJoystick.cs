@@ -15,21 +15,14 @@ namespace Instrumental.Interaction.VirtualJoystick
         [SerializeField] Joystick joystick;
         [Range(1, 2)]
         [SerializeField] float outerRadiusMultiplier = 1.5f;
-        InputDataSources inputDataSource;
-        int directionDataIndex;
-        int isActiveDataIndex;
+
+        public Vector2 Value { get { return joystick.Value; } }
+        public bool InputActive { get { return joystick.InputActive; } }
 
 		private void Awake()
 		{
             logicTrigger = GetComponent<LogicTrigger>();
             ringActivator = GetComponentInChildren<RingActivator>();
-            inputDataSource = GetComponent<InputDataSources>();
-
-            if(inputDataSource)
-			{
-                directionDataIndex = inputDataSource.GetIndexForDataSource("Direction");
-                isActiveDataIndex = inputDataSource.GetIndexForDataSource("InputActive");
-			}
 
             GetHand();
 		}
@@ -99,12 +92,6 @@ namespace Instrumental.Interaction.VirtualJoystick
 
 
                 DoDistanceJoystickFeedback();
-
-                if(inputDataSource)
-				{
-                    inputDataSource.SetData(directionDataIndex, joystick.Value);
-                    inputDataSource.SetData(isActiveDataIndex, joystick.InputActive);
-				}
             }
         }
 
