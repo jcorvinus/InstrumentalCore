@@ -18,7 +18,12 @@ namespace Instrumental.UI
     {
         [SerializeField] MenuEntry[] menuCollection;
 
-        public void GetAllSubMenus()
+		private void Start()
+		{
+            GetAllSubMenus();
+		}
+
+		public void GetAllSubMenus()
 		{
             Menu[] childMenus = GetComponentsInChildren<Menu>(true);
 
@@ -66,6 +71,8 @@ namespace Instrumental.UI
                     };
 				}
 			}
+
+            menuCollection = newChildMenus;
         }
 
         public bool ContainsMenu(string name)
