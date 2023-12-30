@@ -7,6 +7,7 @@ namespace Instrumental.UI
     /// <summary>
     /// Just a simple key-value pair
     /// </summary>
+    [System.Serializable]
     public struct MenuEntry
 	{
         public string Name;
