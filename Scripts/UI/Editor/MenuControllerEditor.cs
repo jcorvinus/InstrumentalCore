@@ -33,8 +33,8 @@ namespace Instrumental.UI
 			for(int i=0; i < menuCollectionProperty.arraySize; i++)
 			{
 				SerializedProperty menuEntryProperty = menuCollectionProperty.GetArrayElementAtIndex(i);
-				SerializedProperty menuNameProperty = menuCollectionProperty.FindPropertyRelative("Name");
-				SerializedProperty menuMenuProperty = menuCollectionProperty.FindPropertyRelative("Menu");
+				SerializedProperty menuNameProperty = menuEntryProperty.FindPropertyRelative("Name");
+				SerializedProperty menuMenuProperty = menuEntryProperty.FindPropertyRelative("Menu");
 
 				for(int checkEntry =0; checkEntry < menuCollectionProperty.arraySize; checkEntry++)
 				{
