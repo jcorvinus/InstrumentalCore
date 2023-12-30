@@ -45,7 +45,7 @@ namespace VRKeyboard
 			Quaternion rotation = Quaternion.LookRotation(rotationDirection,
 				-(Quaternion.AngleAxis(120, userRight) * body.ForwardDirection));
 
-			transform.SetPositionAndRotation(placementPosition, rotation));
+			transform.SetPositionAndRotation(placementPosition, rotation);
 			keyboards[currentKeboardIndex].gameObject.SetActive(true);
 
 			keyboards[currentKeboardIndex].Show();
