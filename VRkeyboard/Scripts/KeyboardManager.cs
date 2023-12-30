@@ -42,9 +42,10 @@ namespace VRKeyboard
 			Vector3 userForwardDirection = Quaternion.AngleAxis(30, userRight) * body.ForwardDirection;
 			Vector3 placementPosition = body.Head.position + (userForwardDirection * 0.46f);
 			Vector3 rotationDirection = (body.Head.position - placementPosition);
+			Quaternion rotation = Quaternion.LookRotation(rotationDirection,
+				-(Quaternion.AngleAxis(120, userRight) * body.ForwardDirection));
 
-			transform.SetPositionAndRotation(placementPosition, Quaternion.LookRotation(rotationDirection,
-				-(Quaternion.AngleAxis(120, userRight) * body.ForwardDirection)));
+			transform.SetPositionAndRotation(placementPosition, rotation));
 			keyboards[currentKeboardIndex].gameObject.SetActive(true);
 
 			keyboards[currentKeboardIndex].Show();
