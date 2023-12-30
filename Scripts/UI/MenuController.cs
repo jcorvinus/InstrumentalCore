@@ -18,7 +18,7 @@ namespace Instrumental.UI
     {
         [SerializeField] MenuEntry[] menuCollection;
 
-		private void Start()
+		private void Awake()
 		{
             GetAllSubMenus();
 		}
