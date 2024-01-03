@@ -91,6 +91,12 @@ namespace Instrumental.Controls
 			float physAndHoverDepth = physDepth + (hoverHeight);
 			float totalDepth = physAndHoverDepth + underFlow;
 
+			// handle our component differentiation
+			if(!Application.isPlaying) // only change components at edit time.
+			{
+
+			}
+
 			if (boxCollider) // currently, some design mode prototypes of buttons don't have this
 			{
 				boxCollider.center = new Vector3(0, 0, (physAndHoverDepth * 0.5f) - (underFlow * 0.5f));

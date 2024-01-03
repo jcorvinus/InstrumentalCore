@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Instrumental.Space;
+using Instrumental.Interaction;
+using Instrumental.Interaction.Slottables;
 
 namespace Instrumental.Controls
 {
@@ -37,8 +39,8 @@ namespace Instrumental.Controls
         private Panel attachedPanel; // this can be null, we don't have to be attached to a panel,
                                      // but it is significant if we are.
 
-        /*protected AnchorableBehaviour anchorable;
-        protected InteractionBehaviour placementInteraction;*/
+        protected SlottableItem anchorable;
+        protected InteractiveItem placementInteraction;
         private Rigidbody placementRigidbody;
         protected GameObject editSoundEmitterGameObject;
         protected AudioSource placementGrabSource;
@@ -55,8 +57,8 @@ namespace Instrumental.Controls
 
         protected virtual void Awake()
         {
-            /*anchorable = GetComponent<AnchorableBehaviour>();
-            placementInteraction = GetComponent<InteractionBehaviour>();*/
+            anchorable = GetComponent<SlottableItem>();
+            placementInteraction = GetComponent<InteractiveItem>();
             placementRigidbody = GetComponent<Rigidbody>();
             spaceItem = GetComponent<SpaceItem>();
 
@@ -71,9 +73,8 @@ namespace Instrumental.Controls
                     // if InteractionBehavior doesn't exist,
                     // create it. AnchorableBehavior not necessary?
                     // delete it if it exists?
-                    /*if (placementInteraction == null) placementInteraction = gameObject.AddComponent<InteractionBehaviour>();
-                    placementInteraction.allowMultiGrasp = true;
-                    placementInteraction.graspedMovementType = InteractionBehaviour.GraspedMovementType.Kinematic;*/
+                    if (placementInteraction == null) placementInteraction = gameObject.AddComponent<InteractiveItem>();
+                    placementRigidbody.isKinematic = true;
 
                     // if we're in design mode or design palette mode,
                     // create our edit sound emitters
@@ -84,10 +85,9 @@ namespace Instrumental.Controls
                 case ControlMode.Design_Palette:
                     // if anchorable and InteractionBehavior don't exist,
                     // create them
-                    /*if(placementInteraction == null) placementInteraction = gameObject.AddComponent<InteractionBehaviour>();
-                    if (anchorable == null) anchorable = gameObject.AddComponent<AnchorableBehaviour>();
-                    placementInteraction.allowMultiGrasp = true;
-                    placementInteraction.graspedMovementType = InteractionBehaviour.GraspedMovementType.Nonkinematic;*/
+                    if(placementInteraction == null) placementInteraction = gameObject.AddComponent<InteractiveItem>();
+                    if (anchorable == null) anchorable = gameObject.AddComponent<SlottableItem>();
+                    placementRigidbody.isKinematic = false;
 
                     // if we're in design mode or design palette mode,
                     // create our edit sound emitters
