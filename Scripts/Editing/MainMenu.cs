@@ -11,6 +11,10 @@ namespace Instrumental.Editing
         float leftSideBuffer;
         float originalXPosition;
 
+        [SerializeField] string panelName;
+        [SerializeField] bool savePanel;
+        [SerializeField] bool loadPanel;
+
         private void Awake()
         {
             panelEditor = FindObjectOfType<PanelEditor>();
@@ -37,7 +41,35 @@ namespace Instrumental.Editing
                 transform.position = new Vector3(Mathf.Min(originalXPosition, panelLeftPoint.x), transform.position.y,
                     transform.position.z);
             }
+
+            // debug commands
+            if(savePanel)
+			{
+                savePanel = false;
+                SavePanel();
+			}
         }
+
+        void SavePanel()
+		{
+            if(panelName != null && panelName.Length > 0)
+			{
+                string savedPanelPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData);
+                savedPanelPath = System.IO.Path.Combine(savedPanelPath, "Instrumental");
+                savedPanelPath = System.IO.Path.Combine(savedPanelPath, string.Format("{0}.uiPanel", panelName));
+
+                panelEditor.Save(savedPanelPath);
+			}
+            else
+			{
+                Debug.LogError("Cannot save panel, name was not specified");
+			}
+		}
+
+        void LoadPanel()
+		{
+            Debug.LogError("Not yet implemented.");
+		}
 
         Vector3 GetLeftSidePoint()
         {

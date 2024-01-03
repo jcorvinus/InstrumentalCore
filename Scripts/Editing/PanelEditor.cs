@@ -102,9 +102,44 @@ namespace Instrumental.Editing
             }
         }
 
-        public void Save()
-        {
+        // todo: modify this later, adding a salient event tracking
+        // to allow for undo/redo
+        void CommitSchema()
+		{
             uiSchema.Panel = panel.GetSchema();
+        }
+
+        public void Save(string path)
+        {
+            CommitSchema();
+
+            string directory = System.IO.Path.GetDirectoryName(path);
+            
+            if(!System.IO.Directory.Exists(directory))
+			{
+                bool directoryCreateError = false;
+				try
+				{
+                    System.IO.Directory.CreateDirectory(directory);
+				}
+                catch(System.Exception ex)
+				{
+                    directoryCreateError = true;
+                    Debug.LogError("error creating directory while saving UI panel: " + ex.Message + ex.StackTrace);
+				}
+
+                if (directoryCreateError) return;
+			}
+
+            string schemaAsJson = JsonUtility.ToJson(uiSchema);
+            try
+            {
+                System.IO.File.WriteAllText(path, schemaAsJson);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError("Error trying to save UI schema: " + ex.Message + ex.StackTrace);
+            }
         }
 
         private void Update()

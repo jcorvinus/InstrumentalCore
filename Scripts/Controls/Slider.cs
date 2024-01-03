@@ -107,7 +107,7 @@ namespace Instrumental.Controls
 
 		private void OnValidate()
 		{
-            sliderModel.SetNewSliderSchema(sliderSchema);
+            if(sliderModel) sliderModel.SetNewSliderSchema(sliderSchema);
 
             float physDepth = SliderFaceDistance;
             float physAndHoverDepth = physDepth + (hoverHeight);
