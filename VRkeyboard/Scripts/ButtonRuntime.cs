@@ -61,9 +61,9 @@ namespace Instrumental.Controls
 
 		#region Button Variables
 		[Header("Button Variables")]
-		public float ButtonFaceDistance;
-		public float ButtonThrowDistance;
-		public float CurrentThrowValue;
+		public float ButtonFaceDistance = 0.021182f;
+		public float ButtonThrowDistance=0.003247f;
+		public float CurrentThrowValue=0;
 
 		bool isTouching;
 		bool isHovering;
@@ -83,7 +83,7 @@ namespace Instrumental.Controls
 		#region Audio Variables
 		AudioClip hoverClip { get { return GlobalSpace.Instance.UICommon.HoverClip; } }
 		AudioClip activateClip { get { return GlobalSpace.Instance.UICommon.ActivateClip; } }
-		[SerializeField] AudioSource ThrowSource;
+		public AudioSource ThrowSource;
 		[Range(0, 1)]
 		public float VolumeModifier = 1;
 		#endregion

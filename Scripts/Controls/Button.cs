@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using Instrumental.Interaction;
+using Instrumental.Interaction.Slottables;
 using Instrumental.Modeling.ProceduralGraphics;
 using Instrumental.Schema;
 
@@ -10,6 +12,12 @@ namespace Instrumental.Controls
 {
     public class Button : UIControl
     {
+		// events
+		public delegate void ButtonEventHandler(Button sender);
+		public event ButtonEventHandler ButtonActivated;
+		public event ButtonEventHandler ButtonHovered;
+		public event ButtonEventHandler ButtonHoverEnded;
+
 		[SerializeField] ButtonModel buttonModel;
 		[SerializeField] ButtonSchema buttonSchema = ButtonSchema.GetDefault();
 		[SerializeField] BoxCollider boxCollider;
@@ -83,32 +91,157 @@ namespace Instrumental.Controls
 
 		public ButtonRuntime Runtime { get { return buttonRuntimeBehavior; } }
 
-		private void OnValidate()
+		private void EnsureRuntimeComponentExists()
 		{
-			buttonModel.SetNewButtonSchema(buttonSchema);
+			if (!buttonRuntimeBehavior) buttonRuntimeBehavior = GetComponent<ButtonRuntime>();
+			if (!buttonRuntimeBehavior)
+			{
+				buttonRuntimeBehavior = gameObject.AddComponent<ButtonRuntime>();
 
+				float physDepth = (buttonSchema.Depth + (buttonSchema.Depth * buttonSchema.BevelDepth));
+				buttonRuntimeBehavior.ButtonFaceDistance = physDepth;
+				buttonRuntimeBehavior.ButtonFace = buttonRuntimeBehavior.transform.GetChild(0);
+				buttonRuntimeBehavior.ThrowSource = buttonRuntimeBehavior.transform.GetChild(2).GetComponent<AudioSource>();
+			}
+		}
+
+		private void ClearRuntimeComponents()
+		{
+			if (buttonRuntimeBehavior)
+			{
+				if (Application.isPlaying)
+				{
+					Destroy(buttonRuntimeBehavior);
+				}
+				else
+				{
+#if UNITY_EDITOR
+					UnityEditor.EditorApplication.delayCall += () =>
+					{
+						UnityEditor.Undo.DestroyObjectImmediate(buttonRuntimeBehavior);
+					};
+#endif
+				}
+			}
+		}
+
+		private void EnsureBoxColliderExists()
+		{
+			if (!boxCollider) boxCollider = GetComponent<BoxCollider>();
+			if (!boxCollider) boxCollider = gameObject.AddComponent<BoxCollider>();
+		}
+
+		private void SetBoxColliderRuntimeValues()
+		{
 			float physDepth = (buttonSchema.Depth + (buttonSchema.Depth * buttonSchema.BevelDepth));
 			float physAndHoverDepth = physDepth + (hoverHeight);
 			float totalDepth = physAndHoverDepth + underFlow;
 
+			boxCollider.center = new Vector3(0, 0, (physAndHoverDepth * 0.5f) - (underFlow * 0.5f));
+			boxCollider.size = new Vector3(buttonSchema.Width + (buttonSchema.Radius * 2), buttonSchema.Radius * 2,
+				totalDepth);
+			boxCollider.isTrigger = true;
+		}
+
+		private void ClearAnyGraspable()
+		{
+			InteractiveItem placementItem = GetComponent<InteractiveItem>();
+			if (placementItem)
+			{
+				if (Application.isPlaying)
+				{
+					Destroy(placementItem);
+				}
+				else
+				{
+#if UNITY_EDITOR
+					UnityEditor.EditorApplication.delayCall += () =>
+					{
+						UnityEditor.Undo.DestroyObjectImmediate(placementItem);
+					};
+#endif
+				}
+			}
+		}
+
+		private void SetGraspableColliderValues()
+		{
+			float physDepth = (buttonSchema.Depth + (buttonSchema.Depth * buttonSchema.BevelDepth));
+			boxCollider.center = new Vector3(0, 0, physDepth * 0.5f);
+			boxCollider.size = new Vector3(buttonSchema.Width + (buttonSchema.Radius * 2),
+				buttonSchema.Radius * 2, physDepth);
+			boxCollider.isTrigger = false;
+		}
+
+		private void ClearSlottable()
+		{
+			SlottableItem slottableitem = GetComponent<SlottableItem>();
+			if (slottableitem)
+			{
+				if (Application.isPlaying)
+				{
+					Destroy(slottableitem);
+				}
+				else
+				{
+#if UNITY_EDITOR
+					UnityEditor.EditorApplication.delayCall += () =>
+					{
+						UnityEditor.Undo.DestroyObjectImmediate(slottableitem);
+					};
+#endif
+				}
+			}
+		}
+
+		private void OnValidate()
+		{
+#if UNITY_EDITOR
+			buttonModel.SetNewButtonSchema(buttonSchema);
+
 			// handle our component differentiation
 			if(!Application.isPlaying) // only change components at edit time.
 			{
+				switch (Mode)
+				{
+					case ControlMode.Runtime:
 
-			}
+						EnsureBoxColliderExists();
+						EnsureRuntimeComponentExists();
+						SetBoxColliderRuntimeValues();
+						ClearAnyGraspable();
 
-			if (boxCollider) // currently, some design mode prototypes of buttons don't have this
-			{
-				boxCollider.center = new Vector3(0, 0, (physAndHoverDepth * 0.5f) - (underFlow * 0.5f));
-				boxCollider.size = new Vector3(buttonSchema.Width + (buttonSchema.Radius * 2), buttonSchema.Radius * 2,
-					totalDepth);
-			}
+						break;
+					case ControlMode.Design:
+						if (buttonRuntimeBehavior)
+						{
+							UnityEditor.EditorApplication.delayCall += () =>
+							{
+								UnityEditor.Undo.DestroyObjectImmediate(buttonRuntimeBehavior);
+							};
+						}
 
-			if (buttonRuntimeBehavior) // currently, some design mode prototypes of buttons don't have this
-			{
-				buttonRuntimeBehavior.ButtonFaceDistance = physDepth;
-				buttonRuntimeBehavior.ButtonThrowDistance = (buttonSchema.Depth * buttonSchema.RimDepth) * 0.5f; //(buttonSchema.Depth * buttonSchema.RimDepth);
+						// set collider to fit button visual,
+						// do not include extrea hover distance
+						EnsureBoxColliderExists();
+						SetGraspableColliderValues();
+						EnsureGraspableExists();
+						ClearRuntimeComponents();
+						break;
+
+					case ControlMode.Design_Palette:
+						EnsureBoxColliderExists();
+						SetGraspableColliderValues();
+						EnsureGraspableExists();
+						ClearRuntimeComponents();
+						
+						break;
+
+					default:
+						break;
+				}
 			}
+#endif
 		}
 
 		public override void SetSchema(ControlSchema controlSchema)
@@ -128,6 +261,24 @@ namespace Instrumental.Controls
 			buttonRuntimeBehavior = GetComponent<ButtonRuntime>();
 
             base.Awake();
+
+			if(buttonRuntimeBehavior)
+			{
+				buttonRuntimeBehavior.ButtonActivated += (ButtonRuntime sender) =>
+				{
+					if (ButtonActivated != null) ButtonActivated(this);
+				};
+
+				buttonRuntimeBehavior.ButtonHovered += (ButtonRuntime sender) =>
+				{
+					if (ButtonHovered != null) ButtonHovered(this);
+				};
+
+				buttonRuntimeBehavior.ButtonHoverEnded += (ButtonRuntime sender) =>
+				{
+					if (ButtonHoverEnded != null) ButtonHoverEnded(this);
+				};
+			}
         }
 
         protected override void Start()

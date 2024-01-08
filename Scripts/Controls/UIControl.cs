@@ -55,12 +55,30 @@ namespace Instrumental.Controls
         [Range(0, 3)]
         int orientationPreviewID;
 
+        protected void EnsureGraspableExists()
+		{
+            placementInteraction = GetComponent<InteractiveItem>();
+            if (!placementInteraction) placementInteraction = gameObject.AddComponent<InteractiveItem>();
+
+            placementRigidbody = GetComponent<Rigidbody>();
+            if (!placementRigidbody) placementRigidbody = gameObject.AddComponent<Rigidbody>();
+		}
+
+        protected void EnsureSlottableExists()
+		{
+            anchorable = GetComponent<SlottableItem>();
+            if (!anchorable) anchorable = gameObject.AddComponent<SlottableItem>();
+		}
+
+        protected void EnsureSpaceItemExists()
+		{
+            spaceItem = GetComponent<SpaceItem>();
+            if (!spaceItem) spaceItem = gameObject.AddComponent<SpaceItem>();
+		}
+
         protected virtual void Awake()
         {
-            anchorable = GetComponent<SlottableItem>();
-            placementInteraction = GetComponent<InteractiveItem>();
-            placementRigidbody = GetComponent<Rigidbody>();
-            spaceItem = GetComponent<SpaceItem>();
+            EnsureSpaceItemExists();
 
             switch (mode)
             {
@@ -73,7 +91,7 @@ namespace Instrumental.Controls
                     // if InteractionBehavior doesn't exist,
                     // create it. AnchorableBehavior not necessary?
                     // delete it if it exists?
-                    if (placementInteraction == null) placementInteraction = gameObject.AddComponent<InteractiveItem>();
+                    EnsureGraspableExists();
                     placementRigidbody.isKinematic = true;
 
                     // if we're in design mode or design palette mode,
@@ -85,8 +103,8 @@ namespace Instrumental.Controls
                 case ControlMode.Design_Palette:
                     // if anchorable and InteractionBehavior don't exist,
                     // create them
-                    if(placementInteraction == null) placementInteraction = gameObject.AddComponent<InteractiveItem>();
-                    if (anchorable == null) anchorable = gameObject.AddComponent<SlottableItem>();
+                    EnsureGraspableExists();
+                    EnsureSlottableExists();
                     placementRigidbody.isKinematic = false;
 
                     // if we're in design mode or design palette mode,
@@ -152,7 +170,7 @@ namespace Instrumental.Controls
                 placementGrabSource.minDistance = 0.1f;
                 placementGrabSource.maxDistance = 2f;
 
-                //placementInteraction.OnGraspBegin += PlacementGraspBegin;
+                placementInteraction.OnGrasped += PlacementGraspBegin;
             }
 
             if(placementDropSource)
@@ -167,21 +185,21 @@ namespace Instrumental.Controls
                 placementDropSource.maxDistance = 2f;
             }
 
-            /*if (placementInteraction)
+            if (placementInteraction)
             {
-                placementInteraction.allowMultiGrasp = true;
-                placementInteraction.OnGraspedMovement += DoEditorGraspMovement;
-                placementInteraction.OnGraspEnd += PlacementGraspEnd;
-            }*/
+                //placementInteraction.allowMultiGrasp = true;
+                placementInteraction.OnGraspMoved += DoEditorGraspMovement;
+                placementInteraction.OnUngrasped += PlacementGraspEnd;
+            }
         }
 
-        void PlacementGraspBegin()
+        void PlacementGraspBegin(InteractiveItem sender)
         {
             placementGrabSource.Play();
             //if (placementInteraction.graspingControllers.Count > 1) isPrecisionPlacement = true;
         }
 
-        void PlacementGraspEnd()
+        void PlacementGraspEnd(InteractiveItem sender)
         {
             /*if (placementInteraction.graspingControllers.Count == 0)
             {
@@ -247,8 +265,8 @@ namespace Instrumental.Controls
             //placementInteraction.rigidbody.MoveRotation(closestSnap.orientation);
         }
 
-        void DoEditorGraspMovement(Vector3 preSolvedPos, Quaternion preSolvedRot,
-            Vector3 solvedPos, Quaternion solvedRot/*, List<InteractionController> graspingControllers*/)
+        void DoEditorGraspMovement(InteractiveItem sender/*Vector3 preSolvedPos, Quaternion preSolvedRot,
+            Vector3 solvedPos, Quaternion solvedRot*/)
         {
             if (attachedPanel != null)
             {
