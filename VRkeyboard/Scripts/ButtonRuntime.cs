@@ -78,6 +78,10 @@ namespace Instrumental.Controls
 
 		#region Visual Variables
 		public Transform ButtonFace;
+
+		float hoverValue = 0;
+
+		public float HoverValue { get { return hoverValue; } }
 		#endregion
 
 		#region Audio Variables
@@ -200,6 +204,18 @@ namespace Instrumental.Controls
 			{
 				// can we spring this back into position? With overshoot?
 				ButtonFace.transform.localPosition = Vector3.Lerp(ButtonFace.transform.localPosition, Vector3.zero, Time.deltaTime * 5);
+			}
+
+			if(isHovering)
+			{
+				// todo: normalize this (what did I mean by that? lmao)
+				float differenceValue = Mathf.Max(0, FurthestPushPoint - ButtonFaceDistance);
+				hoverValue = Mathf.InverseLerp(ButtonFaceDistance,
+					ButtonFaceDistance + button.HoverHeight, differenceValue);
+			}
+			else
+			{
+				hoverValue = 0;
 			}
 		}
 

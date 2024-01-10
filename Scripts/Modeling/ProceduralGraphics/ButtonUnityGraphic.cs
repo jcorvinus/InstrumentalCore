@@ -74,6 +74,40 @@ namespace Instrumental.Modeling.ProceduralGraphics
             Regenerate();
 		}
 
+        private bool IsHovering()
+		{
+            if (IsRuntime()) return buttonRuntime.IsHovering;
+            else return false;
+		}
+
+        private bool IsTouching()
+		{
+            if (IsRuntime()) return buttonRuntime.IsTouching;
+            else return false;
+		}
+
+        private bool IsRuntime()
+		{
+            return buttonRuntime;
+		}
+
+        private float HoverValue()
+        {
+            if (IsRuntime()) return buttonRuntime.HoverValue;
+            else return 0;
+        }
+
+        private bool IsPressed()
+		{
+            if (IsRuntime())
+            {
+                return buttonRuntime.IsPressed;
+
+            }
+            else return false;
+		}
+
+
         // Update is called once per frame
         void Update()
         {
@@ -84,18 +118,15 @@ namespace Instrumental.Modeling.ProceduralGraphics
             // touchAmount should change to 'effect amount' and change behavior depending on 
             // hover vs touch
             float glowAmount = 0;
-            if(buttonRuntime.IsHovering)
+            if(IsHovering())
 			{
-                if(buttonRuntime.IsTouching)
+                if (IsTouching())
 				{
                     glowAmount = 1 - buttonRuntime.CurrentThrowValue;
 				}
-                else if (buttonRuntime.IsHovering) // not sure if I even wanna mess with this
+                else if (IsHovering()) // not sure if I even wanna mess with this
 				{
-                    // todo: normalize this
-                    float differenceValue = Mathf.Max(0, buttonRuntime.FurthestPushPoint - buttonRuntime.ButtonFaceDistance);
-                    glowAmount = Mathf.InverseLerp(buttonRuntime.ButtonFaceDistance, 
-                        buttonRuntime.ButtonFaceDistance + button.HoverHeight, differenceValue);
+                    float glowValue = HoverValue();
 				}
                 else
 				{
@@ -106,9 +137,9 @@ namespace Instrumental.Modeling.ProceduralGraphics
             // property block versions
             faceMeshPropertyBlock.SetFloat(glowAmountHash, glowAmount);
             faceMeshPropertyBlock.SetInteger(useDistanceGlowHash, 1); // I just realized that if I wanted to get
-            faceMeshPropertyBlock.SetInteger(isPressingHash, buttonRuntime.IsPressed ? 1 : 0); // really crazy
-            faceMeshPropertyBlock.SetInteger(isHoveringHash, buttonRuntime.IsHovering ? 1 : 0); // I could bitpack
-            faceMeshPropertyBlock.SetInteger(isTouchingHash, buttonRuntime.IsTouching ? 1 : 0); // these bools into a single integer
+            faceMeshPropertyBlock.SetInteger(isPressingHash, IsPressed() ? 1 : 0); // really crazy
+            faceMeshPropertyBlock.SetInteger(isHoveringHash, IsHovering() ? 1 : 0); // I could bitpack
+            faceMeshPropertyBlock.SetInteger(isTouchingHash, IsTouching() ? 1 : 0); // these bools into a single integer
 
             faceMeshRenderer.SetPropertyBlock(faceMeshPropertyBlock);
         }
