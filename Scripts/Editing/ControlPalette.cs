@@ -2,19 +2,38 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using Instrumental.Controls;
+using Instrumental.Interaction;
+using Instrumental.Interaction.Slottables;
+
 namespace Instrumental.Editing
 {
     public class ControlPalette : MonoBehaviour
     {
+        [System.Serializable]
+		public struct ControlSlotPairing
+        {
+            public SlottableItem Item;
+            public ItemSlot Slot;
+		}
+
         PanelEditor panelEditor;
         BoxCollider controlZoneCollider;
         float rightSideBuffer;
         float originalXPosition;
 
+        [SerializeField] ControlSlotPairing[] slotPairs;
+
         private void Awake()
         {
             panelEditor = FindObjectOfType<PanelEditor>();
             controlZoneCollider = GetComponent<BoxCollider>();
+
+            // hookup slots
+            for(int i=0; i < slotPairs.Length; i++)
+			{
+                slotPairs[i].Item.Attach(slotPairs[i].Slot);
+			}
         }
 
         // Use this for initialization

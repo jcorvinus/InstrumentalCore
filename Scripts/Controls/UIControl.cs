@@ -64,11 +64,53 @@ namespace Instrumental.Controls
             if (!placementRigidbody) placementRigidbody = gameObject.AddComponent<Rigidbody>();
 		}
 
+        protected void ClearAnyGraspable()
+        {
+            InteractiveItem placementItem = GetComponent<InteractiveItem>();
+            if (placementItem)
+            {
+                if (Application.isPlaying)
+                {
+                    Destroy(placementItem);
+                }
+                else
+                {
+#if UNITY_EDITOR
+                    UnityEditor.EditorApplication.delayCall += () =>
+                    {
+                        UnityEditor.Undo.DestroyObjectImmediate(placementItem);
+                    };
+#endif
+                }
+            }
+        }
+
         protected void EnsureSlottableExists()
 		{
             anchorable = GetComponent<SlottableItem>();
             if (!anchorable) anchorable = gameObject.AddComponent<SlottableItem>();
 		}
+
+        protected void ClearSlottable()
+        {
+            SlottableItem slottableitem = GetComponent<SlottableItem>();
+            if (slottableitem)
+            {
+                if (Application.isPlaying)
+                {
+                    Destroy(slottableitem);
+                }
+                else
+                {
+#if UNITY_EDITOR
+                    UnityEditor.EditorApplication.delayCall += () =>
+                    {
+                        UnityEditor.Undo.DestroyObjectImmediate(slottableitem);
+                    };
+#endif
+                }
+            }
+        }
 
         protected void EnsureSpaceItemExists()
 		{

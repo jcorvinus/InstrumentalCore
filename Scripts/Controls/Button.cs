@@ -143,27 +143,6 @@ namespace Instrumental.Controls
 			boxCollider.isTrigger = true;
 		}
 
-		private void ClearAnyGraspable()
-		{
-			InteractiveItem placementItem = GetComponent<InteractiveItem>();
-			if (placementItem)
-			{
-				if (Application.isPlaying)
-				{
-					Destroy(placementItem);
-				}
-				else
-				{
-#if UNITY_EDITOR
-					UnityEditor.EditorApplication.delayCall += () =>
-					{
-						UnityEditor.Undo.DestroyObjectImmediate(placementItem);
-					};
-#endif
-				}
-			}
-		}
-
 		private void SetGraspableColliderValues()
 		{
 			float physDepth = (buttonSchema.Depth + (buttonSchema.Depth * buttonSchema.BevelDepth));
@@ -171,27 +150,6 @@ namespace Instrumental.Controls
 			boxCollider.size = new Vector3(buttonSchema.Width + (buttonSchema.Radius * 2),
 				buttonSchema.Radius * 2, physDepth);
 			boxCollider.isTrigger = false;
-		}
-
-		private void ClearSlottable()
-		{
-			SlottableItem slottableitem = GetComponent<SlottableItem>();
-			if (slottableitem)
-			{
-				if (Application.isPlaying)
-				{
-					Destroy(slottableitem);
-				}
-				else
-				{
-#if UNITY_EDITOR
-					UnityEditor.EditorApplication.delayCall += () =>
-					{
-						UnityEditor.Undo.DestroyObjectImmediate(slottableitem);
-					};
-#endif
-				}
-			}
 		}
 
 		private void OnValidate()
@@ -210,6 +168,7 @@ namespace Instrumental.Controls
 						EnsureRuntimeComponentExists();
 						SetBoxColliderRuntimeValues();
 						ClearAnyGraspable();
+						ClearSlottable();
 
 						break;
 					case ControlMode.Design:
@@ -227,6 +186,7 @@ namespace Instrumental.Controls
 						SetGraspableColliderValues();
 						EnsureGraspableExists();
 						ClearRuntimeComponents();
+						ClearSlottable();
 						break;
 
 					case ControlMode.Design_Palette:
@@ -234,6 +194,7 @@ namespace Instrumental.Controls
 						SetGraspableColliderValues();
 						EnsureGraspableExists();
 						ClearRuntimeComponents();
+						EnsureSlottableExists();
 						
 						break;
 

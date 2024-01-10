@@ -71,7 +71,7 @@ namespace Instrumental.Interaction.Slottables
 
         }
 
-        void Attach(ItemSlot slot)
+        public void Attach(ItemSlot slot)
 		{
             targetSlot = slot;
 
