@@ -60,9 +60,6 @@ namespace Instrumental.Controls
                     cloneInteraction.OnUngrasped += OnGraspEnd;
                     cloneInteraction.OnGrasped += OnGraspBegin;
 
-                    targetControl.SwitchMode(ControlMode.Design); // might want to do this later, so that
-                                                                  // our elements don't get deleted on switching.
-
                     // enable our anchor
                     anchor.enabled = true;
                     SlottableItem cloneAnchorable = clone.GetComponent<SlottableItem>();
@@ -72,6 +69,10 @@ namespace Instrumental.Controls
 
                     cloneAnchorable.Attach(anchor);
                     anchorTarget = clone.gameObject;
+
+                    // done cloning, switch original mode.
+                    targetControl.SwitchMode(ControlMode.Design); // might want to do this later, so that
+                                                                  // our elements don't get deleted on switching.
                 }
             }
         }
