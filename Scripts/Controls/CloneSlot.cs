@@ -56,6 +56,7 @@ namespace Instrumental.Controls
 
                     // clone stuff, manage attachment
                     GameObject clone = GameObject.Instantiate(anchorTarget, anchorTarget.transform.parent);
+                    clone.name = targetInteraction.name;
                     InteractiveItem cloneInteraction = clone.GetComponent<InteractiveItem>();
                     cloneInteraction.OnUngrasped += OnGraspEnd;
                     cloneInteraction.OnGrasped += OnGraspBegin;
