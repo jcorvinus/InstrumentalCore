@@ -66,6 +66,8 @@ namespace Instrumental.Controls
 
 			placementRigidbody = GetComponent<Rigidbody>();
 			if (!placementRigidbody) placementRigidbody = gameObject.AddComponent<Rigidbody>();
+
+			placementRigidbody.useGravity = false;
 		}
 
 		protected void ClearAnyGraspable()
@@ -274,6 +276,7 @@ namespace Instrumental.Controls
 					else if (newMode == ControlMode.Design)
 					{
 						ClearSlottable();
+						placementRigidbody.isKinematic = true;
 					}
 					break;
 

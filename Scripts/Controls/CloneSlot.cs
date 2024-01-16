@@ -53,7 +53,6 @@ namespace Instrumental.Controls
                     targetInteraction.OnGrasped -= OnGraspBegin;
 
                     UIControl targetControl = targetInteraction.GetComponent<UIControl>();
-                    targetControl.SwitchMode(ControlMode.Design);
 
                     // clone stuff, manage attachment
                     GameObject clone = GameObject.Instantiate(anchorTarget, anchorTarget.transform.parent);
@@ -61,16 +60,17 @@ namespace Instrumental.Controls
                     cloneInteraction.OnUngrasped += OnGraspEnd;
                     cloneInteraction.OnGrasped += OnGraspBegin;
 
+                    targetControl.SwitchMode(ControlMode.Design); // might want to do this later, so that
+                                                                  // our elements don't get deleted on switching.
+
                     // enable our anchor
                     anchor.enabled = true;
-                    InteractiveItem interaction = clone.GetComponent<InteractiveItem>();
-                    SlottableItem anchorable = clone.GetComponent<SlottableItem>();
+                    SlottableItem cloneAnchorable = clone.GetComponent<SlottableItem>();
                     //anchorable.transform.SetPositionAndRotation(anchor.transform.position, anchor.transform.rotation);
-                    interaction.RigidBody.position = transform.position;
-                    interaction.RigidBody.rotation = transform.rotation;
+                    cloneInteraction.RigidBody.position = transform.position;
+                    cloneInteraction.RigidBody.rotation = transform.rotation;
 
-                    //anchorable.anchor = anchor;
-                    //anchorable.TryAttach(true);
+                    cloneAnchorable.Attach(anchor);
                     anchorTarget = clone.gameObject;
                 }
             }
