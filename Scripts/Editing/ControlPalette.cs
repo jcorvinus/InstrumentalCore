@@ -14,7 +14,7 @@ namespace Instrumental.Editing
 		public struct ControlSlotPairing
         {
             public SlottableItem Item;
-            public ItemSlot Slot;
+            public CloneSlot Slot;
 		}
 
         PanelEditor panelEditor;
@@ -32,7 +32,7 @@ namespace Instrumental.Editing
             // hookup slots
             for(int i=0; i < slotPairs.Length; i++)
 			{
-                slotPairs[i].Item.Attach(slotPairs[i].Slot);
+                slotPairs[i].Slot.Attach(slotPairs[i].Item);
 			}
         }
 

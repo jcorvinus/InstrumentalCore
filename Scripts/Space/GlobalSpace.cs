@@ -11,18 +11,33 @@ namespace Instrumental.Space
         public UICommonElements UICommon { get { return uiCommon; } }
 
         private static GlobalSpace instance;
-        public static GlobalSpace Instance { get { return instance; } }
+        public static GlobalSpace Instance { get 
+            {
+                if(!instance)
+				{
+                    instance = FindObjectOfType<GlobalSpace>();
+                    instance.Load();
+				}
 
-        private void Awake()
-        {
+                return instance; 
+            } 
+        }
+
+        void Load()
+		{
             uiCommon = Resources.Load<UICommonElements>("UICommon");
 
-            if(uiCommon == null)
+            if (uiCommon == null)
             {
                 Debug.LogError("could not load UI common");
             }
 
             instance = this;
+        }
+
+        private void Awake()
+        {
+            Load();
         }
     }
 }

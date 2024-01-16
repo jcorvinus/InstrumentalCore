@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Instrumental.Space;
+using Instrumental.Editing;
 using Instrumental.Interaction;
 using Instrumental.Interaction.Slottables;
 
@@ -21,218 +22,378 @@ namespace Instrumental.Controls
         /// Design mode. User can place controls but not activate them.
         /// </summary>
         Design,
-        /// <summary>
-        /// Control belongs to a palette menu - user will grab and pull to 
-        /// instantiate.
-        /// </summary>
-        Design_Palette
-    }
+		/// <summary>
+		/// Control belongs to a palette menu - user will grab and pull to 
+		/// instantiate.
+		/// </summary>
+		Design_Palette
+	}
 
-    public abstract class UIControl : MonoBehaviour
-    {
-        [SerializeField] ControlMode mode = ControlMode.Design_Palette;
+	public abstract class UIControl : MonoBehaviour
+	{
+		[SerializeField] ControlMode mode = ControlMode.Design_Palette;
 
-        // check to see if we're a member of a panel
-        // should we emit events for property changed so that
-        // the panel can update the schema data?
+		// check to see if we're a member of a panel
+		// should we emit events for property changed so that
+		// the panel can update the schema data?
 
-        private Panel attachedPanel; // this can be null, we don't have to be attached to a panel,
-                                     // but it is significant if we are.
+		private Panel attachedPanel; // this can be null, we don't have to be attached to a panel,
+									 // but it is significant if we are.
 
-        protected SlottableItem anchorable;
-        protected InteractiveItem placementInteraction;
-        private Rigidbody placementRigidbody;
-        protected GameObject editSoundEmitterGameObject;
-        protected AudioSource placementGrabSource;
-        protected AudioSource placementDropSource;
-        protected SpaceItem spaceItem;
+		protected SlottableItem anchorable;
+		protected InteractiveItem placementInteraction;
+		private Rigidbody placementRigidbody;
+		protected GameObject editSoundEmitterGameObject;
+		protected AudioSource placementGrabSource;
+		protected AudioSource placementDropSource;
+		protected SpaceItem spaceItem;
+		protected SpaceChangeCollider spaceChangeCollider;
 
-        protected string _name="";
-        private bool isPrecisionPlacement = false;
+		protected string _name = "";
+		private bool isPrecisionPlacement = false;
+		private bool placementGraspEventsSubscribed = false;
+		private bool spaceChangeEventsSubscribed = false;
 
-        [Header("Debug Vars")]
-        [SerializeField]
-        [Range(0, 3)]
-        int orientationPreviewID;
+		[Header("Debug Vars")]
+		[SerializeField]
+		[Range(0, 3)]
+		int orientationPreviewID;
 
-        protected void EnsureGraspableExists()
+		protected void EnsureGraspableExists()
 		{
-            placementInteraction = GetComponent<InteractiveItem>();
-            if (!placementInteraction) placementInteraction = gameObject.AddComponent<InteractiveItem>();
+			placementInteraction = GetComponent<InteractiveItem>();
+			if (!placementInteraction) placementInteraction = gameObject.AddComponent<InteractiveItem>();
 
-            placementRigidbody = GetComponent<Rigidbody>();
-            if (!placementRigidbody) placementRigidbody = gameObject.AddComponent<Rigidbody>();
+			placementRigidbody = GetComponent<Rigidbody>();
+			if (!placementRigidbody) placementRigidbody = gameObject.AddComponent<Rigidbody>();
 		}
 
-        protected void ClearAnyGraspable()
-        {
-            InteractiveItem placementItem = GetComponent<InteractiveItem>();
-            if (placementItem)
-            {
-                if (Application.isPlaying)
-                {
-                    Destroy(placementItem);
-                }
-                else
-                {
+		protected void ClearAnyGraspable()
+		{
+			InteractiveItem placementItem = GetComponent<InteractiveItem>();
+			if (placementItem)
+			{
+				if (Application.isPlaying)
+				{
+					Destroy(placementItem);
+				}
+				else
+				{
 #if UNITY_EDITOR
-                    UnityEditor.EditorApplication.delayCall += () =>
-                    {
-                        UnityEditor.Undo.DestroyObjectImmediate(placementItem);
-                    };
+					UnityEditor.EditorApplication.delayCall += () =>
+					{
+						UnityEditor.Undo.DestroyObjectImmediate(placementItem);
+					};
 #endif
-                }
-            }
-        }
-
-        protected void EnsureSlottableExists()
-		{
-            anchorable = GetComponent<SlottableItem>();
-            if (!anchorable) anchorable = gameObject.AddComponent<SlottableItem>();
+				}
+			}
 		}
 
-        protected void ClearSlottable()
-        {
-            SlottableItem slottableitem = GetComponent<SlottableItem>();
-            if (slottableitem)
-            {
-                if (Application.isPlaying)
-                {
-                    Destroy(slottableitem);
-                }
-                else
-                {
+		protected void EnsureSlottableExists()
+		{
+			anchorable = GetComponent<SlottableItem>();
+			if (!anchorable) anchorable = gameObject.AddComponent<SlottableItem>();
+		}
+
+		protected void ClearSlottable()
+		{
+			SlottableItem slottableitem = GetComponent<SlottableItem>();
+			if (slottableitem)
+			{
+				if (Application.isPlaying)
+				{
+					Destroy(slottableitem);
+				}
+				else
+				{
 #if UNITY_EDITOR
-                    UnityEditor.EditorApplication.delayCall += () =>
-                    {
-                        UnityEditor.Undo.DestroyObjectImmediate(slottableitem);
-                    };
+					UnityEditor.EditorApplication.delayCall += () =>
+					{
+						UnityEditor.Undo.DestroyObjectImmediate(slottableitem);
+					};
 #endif
-                }
-            }
-        }
-
-        protected void EnsureSpaceItemExists()
-		{
-            spaceItem = GetComponent<SpaceItem>();
-            if (!spaceItem) spaceItem = gameObject.AddComponent<SpaceItem>();
+				}
+			}
 		}
 
-        protected virtual void Awake()
-        {
-            EnsureSpaceItemExists();
+		protected void EnsureSpaceItemExists()
+		{
+			spaceItem = GetComponent<SpaceItem>();
+			if (!spaceItem) spaceItem = gameObject.AddComponent<SpaceItem>();
+		}
 
-            switch (mode)
-            {
-                case ControlMode.Runtime:
-                    // look for panel in parent
-                    attachedPanel = GetComponentInParent<Panel>();
-                    break;
+		protected void EnsureSpaceChangeColliderExists(Transform target)
+		{
+			SpaceChangeCollider candidateCollider = target.GetComponent<SpaceChangeCollider>();
 
-                case ControlMode.Design:
-                    // if InteractionBehavior doesn't exist,
-                    // create it. AnchorableBehavior not necessary?
-                    // delete it if it exists?
-                    EnsureGraspableExists();
-                    placementRigidbody.isKinematic = true;
+			if (!candidateCollider)
+			{
+				candidateCollider = target.gameObject.AddComponent<SpaceChangeCollider>();
+			}
 
-                    // if we're in design mode or design palette mode,
-                    // create our edit sound emitters
-                    CreateEditSoundEmitters();
-                    spaceItem.SpaceChanged += SpaceChanger_SpaceChanged;
-                    break;
+			// I think we might need to check to see if the existing space change collider is
+			// different from the candidate one we find.
+			// This would be un-intended usage and I think we should alert and be like 'yo wtf' to the user
+			if (spaceChangeCollider && spaceChangeCollider != candidateCollider)
+			{
+				Debug.LogError(string.Format("Existing space change collider was not the same as one found. Control {0}, previous collider: {1} new collider: {2}",
+					gameObject.name, spaceChangeCollider.name, candidateCollider.name));
+			}
 
-                case ControlMode.Design_Palette:
-                    // if anchorable and InteractionBehavior don't exist,
-                    // create them
-                    EnsureGraspableExists();
-                    EnsureSlottableExists();
-                    placementRigidbody.isKinematic = false;
+			spaceChangeCollider = candidateCollider;
+		}
 
-                    // if we're in design mode or design palette mode,
-                    // create our edit sound emitters
-                    CreateEditSoundEmitters();
-                    spaceItem.SpaceChanged += SpaceChanger_SpaceChanged;
-                    break;
+		protected void ClearSpaceChangeCollider()
+		{
+			if(spaceChangeCollider)
+			{
+				if(Application.isPlaying)
+				{
+					Destroy(spaceChangeCollider);
+				}
+				else
+				{
+#if UNITY_EDITOR
+					UnityEditor.EditorApplication.delayCall += () =>
+					{
+						UnityEditor.Undo.DestroyObjectImmediate(spaceChangeCollider);
+					};
+#endif
+				}
+			}
+		}
 
-                default:
-                    break;
-            }
-        }
+		private void SetupDesignMode()
+		{
+			// if InteractionBehavior doesn't exist,
+			// create it. AnchorableBehavior not necessary?
+			// delete it if it exists?
+			EnsureGraspableExists();
+			placementRigidbody.isKinematic = true;
 
-        private void SpaceChanger_SpaceChanged(SpaceItem sender, TransformSpace oldSpace, 
-            TransformSpace newSpace)
-        {
-            if(attachedPanel)
-            {
-                // we're leaving our current panel, tell it to remove us from its recordkeeping system
-                attachedPanel.RemoveUIControl(this);
-                attachedPanel = null;
-            }
+			// if we're in design mode or design palette mode,
+			// create our edit sound emitters
+			CreateEditSoundEmitters();
+			if(spaceChangeEventsSubscribed) spaceItem.SpaceChanged += SpaceChanger_SpaceChanged;
 
-            Panel panelCandidate = newSpace.GetComponent<Panel>();
-            if (panelCandidate)
-            {
-                attachedPanel = panelCandidate;
+			if (!placementGraspEventsSubscribed) SubscribePlacementGraspEvents();
+		}
 
-                // we're joining this new panel, tell it to add us to its recordkeeping system.
-                string newName = "";
-                if(attachedPanel.MustRenameControl(this._name, out newName))
-                {
-                    this._name = newName;
-                    attachedPanel.AddUIControl(this);
-                }
-            }
-        }
+		private void SetupPaletteMode()
+		{
+			// if anchorable and InteractionBehavior don't exist,
+			// create them
+			EnsureGraspableExists();
+			EnsureSlottableExists();
+			placementRigidbody.isKinematic = false;
 
-        private void CreateEditSoundEmitters()
-        {
-            editSoundEmitterGameObject = new GameObject("EditSoundEmitters", new System.Type[] { typeof(AudioSource),
-            typeof(AudioSource)});
+			// if we're in design mode or design palette mode,
+			// create our edit sound emitters
+			CreateEditSoundEmitters();
+			if (!spaceChangeEventsSubscribed) spaceItem.SpaceChanged += SpaceChanger_SpaceChanged;
 
-            editSoundEmitterGameObject.transform.SetParent(transform);
-            editSoundEmitterGameObject.transform.SetPositionAndRotation(transform.position, transform.rotation);
+			if (!placementGraspEventsSubscribed) SubscribePlacementGraspEvents();
+		}
 
-            AudioSource[] audioSourceComponents = editSoundEmitterGameObject.GetComponents<AudioSource>();
-            placementGrabSource = audioSourceComponents[0];
-            placementDropSource = audioSourceComponents[1];
-        }
+		protected virtual void Awake()
+		{
+			EnsureSpaceItemExists();
+
+			switch (mode)
+			{
+				case ControlMode.Runtime:
+					// look for panel in parent
+					// todo: make sure this control gets added to the panel's control list.
+					attachedPanel = GetComponentInParent<Panel>();
+					break;
+
+				case ControlMode.Design:
+					SetupDesignMode();
+					break;
+
+				case ControlMode.Design_Palette:
+					SetupPaletteMode();
+					break;
+
+				default:
+					break;
+			}
+		}
+
+		public virtual void SwitchMode(ControlMode newMode)
+		{
+			ControlMode oldMode = mode;
+
+			switch (oldMode)
+			{
+				case ControlMode.Runtime:
+					attachedPanel.RemoveUIControl(this);
+					attachedPanel = null;
+
+					if (newMode == ControlMode.Design)
+					{
+						SetupDesignMode();
+					}
+					else if (newMode == ControlMode.Design_Palette)
+					{
+						SetupPaletteMode();
+					}
+					break;
+
+				case ControlMode.Design:
+					if(newMode == ControlMode.Runtime)
+					{
+						// remove old design mode components
+						ClearAnyGraspable();
+						ClearSlottable();
+						ClearEditSoundEmitters();
+
+						// todo: make sure this control gets added to the panel's control list.
+						attachedPanel = GetComponentInParent<Panel>();
+
+						if (placementGraspEventsSubscribed) UnsubscribePlacementGraspEvents();
+					}
+					else if (newMode == ControlMode.Design_Palette)
+					{
+						SetupPaletteMode();
+					}
+					break;
+
+				case ControlMode.Design_Palette:
+					if(newMode == ControlMode.Runtime)
+					{
+						ClearAnyGraspable();
+						ClearSlottable();
+						ClearEditSoundEmitters();
+
+						// todo: make sure this control gets added to the panel's control list.
+						attachedPanel = GetComponentInParent<Panel>();
+
+						if (placementGraspEventsSubscribed) UnsubscribePlacementGraspEvents();
+					}
+					else if (newMode == ControlMode.Design)
+					{
+						ClearSlottable();
+					}
+					break;
+
+				default:
+					break;
+			}
+
+			mode = newMode;
+		}
+
+		string NameOrNull(Object target)
+		{
+			if (!target) return "null";
+			else return target.name;
+		}
+
+		private void SpaceChanger_SpaceChanged(SpaceItem sender, TransformSpace oldSpace,
+			TransformSpace newSpace)
+		{
+			Debug.Log(string.Format("Control {0} changed spaces from {1} to {2}",
+				sender.name, NameOrNull(oldSpace), NameOrNull(newSpace)));
+
+			if (attachedPanel)
+			{
+				// we're leaving our current panel, tell it to remove us from its recordkeeping system
+				attachedPanel.RemoveUIControl(this);
+				attachedPanel = null;
+			}
+
+			if (newSpace)
+			{
+				Panel panelCandidate = newSpace.GetComponent<Panel>();
+				if (panelCandidate)
+				{
+					attachedPanel = panelCandidate;
+
+					// we're joining this new panel, tell it to add us to its recordkeeping system.
+					string newName = "";
+					if (attachedPanel.MustRenameControl(this._name, out newName))
+					{
+						this._name = newName;
+						attachedPanel.AddUIControl(this);
+					}
+				}
+
+				transform.SetParent(newSpace.transform);
+			}
+			else
+			{
+				transform.SetParent(GlobalSpace.Instance.transform);
+			}
+		}
+
+		private void CreateEditSoundEmitters()
+		{
+			if (!editSoundEmitterGameObject)
+			{
+				editSoundEmitterGameObject = new GameObject("EditSoundEmitters", new System.Type[] { typeof(AudioSource),
+					typeof(AudioSource)});
+
+				editSoundEmitterGameObject.transform.SetParent(transform);
+				editSoundEmitterGameObject.transform.SetPositionAndRotation(transform.position, transform.rotation);
+
+				AudioSource[] audioSourceComponents = editSoundEmitterGameObject.GetComponents<AudioSource>();
+				placementGrabSource = audioSourceComponents[0];
+				placementDropSource = audioSourceComponents[1];
+
+				placementGrabSource.playOnAwake = false;
+				placementGrabSource.spatialBlend = 1;
+				placementGrabSource.spatialize = true;
+				placementGrabSource.Stop();
+				placementGrabSource.clip = Instrumental.Space.GlobalSpace.Instance.UICommon.GrabClip;
+				placementGrabSource.outputAudioMixerGroup = Instrumental.Space.GlobalSpace.Instance.UICommon.MasterGroup;
+				placementGrabSource.minDistance = 0.1f;
+				placementGrabSource.maxDistance = 2f;
+
+				placementDropSource.playOnAwake = false;
+				placementDropSource.spatialBlend = 1;
+				placementDropSource.spatialize = true;
+				placementDropSource.Stop();
+				placementDropSource.clip = Instrumental.Space.GlobalSpace.Instance.UICommon.ItemPlaceClip;
+				placementDropSource.outputAudioMixerGroup = Instrumental.Space.GlobalSpace.Instance.UICommon.MasterGroup;
+				placementDropSource.minDistance = 0.1f;
+				placementDropSource.maxDistance = 2f;
+			}
+		}
+
+		private void ClearEditSoundEmitters()
+		{
+			if (editSoundEmitterGameObject)
+			{
+				placementGrabSource = null;
+				placementDropSource = null;
+
+				GameObject.Destroy(editSoundEmitterGameObject);
+			}
+		}
+
+		void SubscribePlacementGraspEvents()
+		{
+			placementInteraction.OnGrasped += PlacementGraspBegin;
+			//placementInteraction.allowMultiGrasp = true;
+			placementInteraction.OnGraspMoved += DoEditorGraspMovement;
+			placementInteraction.OnUngrasped += PlacementGraspEnd;
+
+			placementGraspEventsSubscribed = true;
+		}
+
+		void UnsubscribePlacementGraspEvents()
+		{
+			placementInteraction.OnGrasped -= PlacementGraspBegin;
+			placementInteraction.OnGraspMoved -= DoEditorGraspMovement;
+			placementInteraction.OnUngrasped -= PlacementGraspEnd;
+
+			placementGraspEventsSubscribed = false;
+		}
 
         protected virtual void Start()
         {
-            // if our edit time sources exist, set them up properly.
-            if(placementGrabSource)
-            {
-                placementGrabSource.playOnAwake = false;
-                placementGrabSource.spatialBlend = 1;
-                placementGrabSource.spatialize = true;
-                placementGrabSource.Stop();
-                placementGrabSource.clip = Instrumental.Space.GlobalSpace.Instance.UICommon.GrabClip;
-                placementGrabSource.outputAudioMixerGroup = Instrumental.Space.GlobalSpace.Instance.UICommon.MasterGroup;
-                placementGrabSource.minDistance = 0.1f;
-                placementGrabSource.maxDistance = 2f;
 
-                placementInteraction.OnGrasped += PlacementGraspBegin;
-            }
-
-            if(placementDropSource)
-            {
-                placementDropSource.playOnAwake = false;
-                placementDropSource.spatialBlend = 1;
-                placementDropSource.spatialize = true;
-                placementDropSource.Stop();
-                placementDropSource.clip = Instrumental.Space.GlobalSpace.Instance.UICommon.ItemPlaceClip;
-                placementDropSource.outputAudioMixerGroup = Instrumental.Space.GlobalSpace.Instance.UICommon.MasterGroup;
-                placementDropSource.minDistance = 0.1f;
-                placementDropSource.maxDistance = 2f;
-            }
-
-            if (placementInteraction)
-            {
-                //placementInteraction.allowMultiGrasp = true;
-                placementInteraction.OnGraspMoved += DoEditorGraspMovement;
-                placementInteraction.OnUngrasped += PlacementGraspEnd;
-            }
         }
 
         void PlacementGraspBegin(InteractiveItem sender)

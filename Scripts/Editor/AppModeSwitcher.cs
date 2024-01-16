@@ -16,6 +16,8 @@ namespace Instrumental
 		bool hasSettingsObject = false;
 		SerializedObject settingsObject;
 		SerializedProperty initializationTypeProperty;
+		SerializedProperty mirrorViewProperty; // MirrorView
+		bool hasMirrorViewProperty=false;
 
 		[MenuItem("Instrumental/App Mode Switcher")]
         public static void ShowSwitcher()
@@ -69,6 +71,9 @@ namespace Instrumental
 				settingsObject = new SerializedObject(directInstance);
 				initializationTypeProperty = settingsObject.FindProperty("InitializationType");
 				hasSettingsObject = true;
+
+				mirrorViewProperty = settingsObject.FindProperty("MirrorView");
+				hasMirrorViewProperty = true;
 			}
 		}
 
@@ -82,6 +87,7 @@ namespace Instrumental
 				//initMode = (OpenVRSettings.InitializationTypes)EditorGUILayout.EnumPopup("Mode", initMode);
 
 				EditorGUILayout.PropertyField(initializationTypeProperty);
+				EditorGUILayout.PropertyField(mirrorViewProperty);
 
 				settingsObject.ApplyModifiedProperties();
 			}

@@ -105,10 +105,8 @@ namespace Instrumental.Controls
             designTimeFullCollider = GetComponent<BoxCollider>();
         }
 
-		private void OnValidate()
+        private void SetFaceColliderRuntimeValues()
 		{
-            if(sliderModel) sliderModel.SetNewSliderSchema(sliderSchema);
-
             float physDepth = SliderFaceDistance;
             float physAndHoverDepth = physDepth + (hoverHeight);
             float totalDepth = physAndHoverDepth + underFlow;
@@ -119,14 +117,54 @@ namespace Instrumental.Controls
                 runtimeFaceCollider.size = new Vector3(sliderSchema.Radius * 2, (sliderSchema.Radius * 2),
                     totalDepth);
             }
+        }
 
-            // todo: slider runtime behavior
+        private void SetDesignColliderValues()
+		{
+            float physDepth = SliderFaceDistance;
+            float physAndHoverDepth = physDepth + (hoverHeight);
+
             designTimeFullCollider = GetComponent<BoxCollider>();
             if (designTimeFullCollider)
-			{
+            {
                 designTimeFullCollider.center = new Vector3(0, 0, physDepth * 0.5f);
                 designTimeFullCollider.size = new Vector3(sliderSchema.Width, sliderSchema.Radius * 2, physDepth);
+            }
+        }
+
+		private void OnValidate()
+		{
+#if UNITY_EDITOR
+            if(sliderModel) sliderModel.SetNewSliderSchema(sliderSchema);
+
+			switch (Mode)
+			{
+				case ControlMode.Runtime:
+                    SetFaceColliderRuntimeValues();
+                    designTimeFullCollider = GetComponent<BoxCollider>();
+                    ClearAnyGraspable();
+                    ClearSlottable();
+                    break;
+
+				case ControlMode.Design:
+                    SetDesignColliderValues();
+                    designTimeFullCollider = GetComponent<BoxCollider>();
+                    EnsureGraspableExists();
+                    ClearSlottable();
+                    break;
+
+				case ControlMode.Design_Palette:
+                    SetDesignColliderValues();
+                    designTimeFullCollider = GetComponent<BoxCollider>();
+                    EnsureGraspableExists();
+                    EnsureSlottableExists();
+                    EnsureSpaceChangeColliderExists(transform);
+                    break;
+
+				default:
+					break;
 			}
+#endif
         }
 
 		protected override void Start()

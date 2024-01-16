@@ -152,6 +152,13 @@ namespace Instrumental.Controls
 			boxCollider.isTrigger = false;
 		}
 
+		void SetupRuntimeComponents()
+		{
+			EnsureBoxColliderExists();
+			EnsureRuntimeComponentExists();
+			SetBoxColliderRuntimeValues();
+		}
+
 		private void OnValidate()
 		{
 #if UNITY_EDITOR
@@ -163,10 +170,7 @@ namespace Instrumental.Controls
 				switch (Mode)
 				{
 					case ControlMode.Runtime:
-
-						EnsureBoxColliderExists();
-						EnsureRuntimeComponentExists();
-						SetBoxColliderRuntimeValues();
+						SetupRuntimeComponents();
 						ClearAnyGraspable();
 						ClearSlottable();
 
@@ -195,6 +199,7 @@ namespace Instrumental.Controls
 						EnsureGraspableExists();
 						ClearRuntimeComponents();
 						EnsureSlottableExists();
+						EnsureSpaceChangeColliderExists(transform);
 						
 						break;
 
@@ -203,6 +208,51 @@ namespace Instrumental.Controls
 				}
 			}
 #endif
+		}
+
+		public override void SwitchMode(ControlMode newMode)
+		{
+			ControlMode oldMode = Mode;
+
+			base.SwitchMode(newMode);
+
+			switch (oldMode)
+			{
+				case ControlMode.Runtime:
+					if(newMode == ControlMode.Design)
+					{
+						SetGraspableColliderValues();
+					}
+					else if (newMode == ControlMode.Design_Palette)
+					{
+						SetGraspableColliderValues();
+					}
+					break;
+
+				case ControlMode.Design:
+					if(newMode == ControlMode.Runtime)
+					{
+						SetupRuntimeComponents();
+					}
+					else if (newMode == ControlMode.Design_Palette)
+					{
+						SetGraspableColliderValues();
+					}
+					break;
+
+				case ControlMode.Design_Palette:
+					if(newMode == ControlMode.Runtime)
+					{
+						SetupRuntimeComponents();
+					}	
+					else if (newMode == ControlMode.Design)
+					{
+						SetGraspableColliderValues();
+					}
+					break;
+				default:
+					break;
+			}
 		}
 
 		public override void SetSchema(ControlSchema controlSchema)

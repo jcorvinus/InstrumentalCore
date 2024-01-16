@@ -16,6 +16,11 @@ namespace Instrumental.Controls
         ItemSlot anchor;
         GameObject anchorTarget;
 
+        public void Attach(SlottableItem item)
+		{
+            item.Attach(anchor);
+		}
+
         private void Awake()
         {
             anchor = GetComponent<ItemSlot>();
@@ -46,6 +51,9 @@ namespace Instrumental.Controls
                     InteractiveItem targetInteraction = anchorTarget.GetComponent<InteractiveItem>();
                     targetInteraction.OnUngrasped -= OnGraspEnd;
                     targetInteraction.OnGrasped -= OnGraspBegin;
+
+                    UIControl targetControl = targetInteraction.GetComponent<UIControl>();
+                    targetControl.SwitchMode(ControlMode.Design);
 
                     // clone stuff, manage attachment
                     GameObject clone = GameObject.Instantiate(anchorTarget, anchorTarget.transform.parent);
@@ -80,8 +88,7 @@ namespace Instrumental.Controls
             // return item to slot!
             anchor.enabled = true;
             SlottableItem anchorable = anchorTarget.GetComponent<SlottableItem>();
-            //anchorable.anchor = anchor;
-            //anchorable.TryAttach(true);
+            anchorable.Attach(anchor);
         }
 
         private void AnchorObject(SlottableItem interaction)
