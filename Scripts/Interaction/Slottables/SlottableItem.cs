@@ -178,6 +178,9 @@ namespace Instrumental.Interaction.Slottables
 
                     Vector3 goalPosition = ownerSlot.transform.position + (direction * ((targetDistance < hoverDistance) ? targetDistance : hoverDistance));
                     rigidBody.position = Vector3.Lerp(ownerSlot.transform.position, goalPosition, hoverTValue);
+
+                    rigidBody.angularVelocity = Vector3.zero;
+                    rigidBody.rotation = ownerSlot.transform.rotation;
 				}
             }
             else
