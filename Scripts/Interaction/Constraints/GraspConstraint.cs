@@ -6,7 +6,7 @@ namespace Instrumental.Interaction.Constraints
 {
     public abstract class GraspConstraint : MonoBehaviour
     {
-		InteractiveItem graspItem;
+		protected InteractiveItem graspItem;
 
 		protected virtual void Awake()
 		{

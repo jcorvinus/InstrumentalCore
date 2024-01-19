@@ -45,7 +45,16 @@ namespace Instrumental.Interaction
 	public enum GraspPoseType
 	{ 
         None=0,
+        /// <summary>
+        /// The object will perfectly match the 'grasp pose' as specified by the GraspPose,
+        /// this is useful for very small objects, usually pinchables, where you want the object to fit inside
+        /// of a pinch grasp. This works under the hood by setting the 'grasp pose offset' to a zero value.
+        /// </summary>
         StrictPoseMatch=1,
+        /// <summary>
+        /// The object will, on grasp start, calculate its position relative to the grasp pose, and maintain that
+        /// relative pose throughout the grasp.
+        /// </summary>
         OffsetPoseMatch=2
         //WeightDrag // used for heavy objects that have a sense of heft
         //SnapPoint // used for objects with 'handle' like affordances
@@ -219,6 +228,7 @@ namespace Instrumental.Interaction
         private Vector3 respawnPosition;
         private Quaternion respawnRotation;
 
+        public float ItemRadius { get { return itemRadius; } }
 		public bool IsGrasped { get { return isGrasped; } }
         public bool IsHovering { get { return (leftHoverDist < hoverDistance) || (rightHoverDist < hoverDistance); } }
         public float HoverTValue { get { return hoverTValue; } }
