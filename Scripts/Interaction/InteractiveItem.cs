@@ -223,6 +223,7 @@ namespace Instrumental.Interaction
         MeshRenderer[] constellationRuntimeSpheres;
 
         [SerializeField] bool showConstellationGraspPoints = false;
+        const bool showTipGrab = false;
         #endregion
 
         private Vector3 respawnPosition;
@@ -1294,7 +1295,7 @@ namespace Instrumental.Interaction
         {
             UpdateHover();
 
-            if (graspableHands.Count > 0)
+            if (graspableHands.Count > 0 && showTipGrab)
             {
                 GraspDataVars hand0 = graspableHands[0];
                 for (int i = 0; i < 5; i++)
@@ -1311,7 +1312,7 @@ namespace Instrumental.Interaction
                 }
             }
 
-            if (graspableHands.Count > 1)
+            if (graspableHands.Count > 1 && showTipGrab)
             {
                 for (int i = 0; i < 5; i++)
                 {
