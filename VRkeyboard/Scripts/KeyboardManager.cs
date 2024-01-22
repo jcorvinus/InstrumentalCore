@@ -11,6 +11,11 @@ namespace VRKeyboard
 		private static KeyboardManager instance;
 		public static KeyboardManager Instance { get { return instance; } }
 
+		public bool IsShown()
+		{
+			return keyboards[currentKeboardIndex].Visible;
+		}
+
         int currentKeboardIndex = 0;
         [SerializeField] Keyboard[] keyboards;
         InstrumentalBody body;
@@ -24,7 +29,6 @@ namespace VRKeyboard
 		{
 			body = InstrumentalBody.Instance;
 		}
-
 
 		public void ShowKeyboard()
 		{
@@ -49,6 +53,11 @@ namespace VRKeyboard
 			keyboards[currentKeboardIndex].gameObject.SetActive(true);
 
 			keyboards[currentKeboardIndex].Show();
+		}
+
+		public void HideKeyboard()
+		{
+			keyboards[currentKeboardIndex].Hide();
 		}
     }
 }
