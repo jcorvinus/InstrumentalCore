@@ -19,10 +19,14 @@ namespace Instrumental.Interaction.Constraints
 
 		// all snap vars
 		bool isSnapping = false;
+		const float snapDuration = 0.25f;
+		float snapTimer = 0;
 
 		// surface mode vars
-		const float surfaceSnapDistance = 0.1f;
-		float surfaceSnapDetectRadius = 0.2f;
+		const float surfaceSnapDistance = 0.04f;
+		[Range(0, 0.01f)]
+		[SerializeField] float surfaceAdjustAmt = 0.005f;
+		float surfaceSnapDetectRadius = 0.1f;
 
 		public struct SurfaceSnapInfo
 		{
@@ -40,6 +44,12 @@ namespace Instrumental.Interaction.Constraints
 		// debug vis
 		GameObject debugSphereA;
 		GameObject debugSphereB;
+
+		[SerializeField] bool previewPlacement; // if false, and a preview is present, the preview will go to the
+					// 'base' position and the item will go to the 'placement' position
+		[SerializeField] GameObject placementPreview;
+		[SerializeField] bool clearConstraint;
+		[SerializeField] bool setConstraint;
 
 		protected override void Awake()
 		{
@@ -66,12 +76,35 @@ namespace Instrumental.Interaction.Constraints
 		void Start()
         {
 			graspItem.SetConstraint(this);
+
+			graspItem.OnUngrasped += GraspItem_OnUngrasped;
         }
 
-        // Update is called once per frame
-        void Update()
-        {
+		private void GraspItem_OnUngrasped(InteractiveItem sender)
+		{
+			isSnapping = false;
+			snapTimer = 0;
+		}
 
+		void DoDebugCommands()
+		{
+			if(clearConstraint)
+			{
+				clearConstraint = false;
+				graspItem.SetConstraint(null);
+			}
+
+			if(setConstraint)
+			{
+				setConstraint = false;
+				graspItem.SetConstraint(this);
+			}
+		}
+
+		// Update is called once per frame
+		void Update()
+        {
+			DoDebugCommands();
         }
 
 		Vector3 ItemCenterOfMass()
@@ -85,9 +118,6 @@ namespace Instrumental.Interaction.Constraints
 		{
 			distance = float.PositiveInfinity;
 			SurfaceSnapInfo candidateSnapInfo = new SurfaceSnapInfo();
-
-			// center of mass usage here is wrong
-			// It's in local coordinates iirc, but we're expecting worldspace
 
 			Vector3 candidateSurfaceClosest = candidateCollider.ClosestPoint(centerOfMass);
 			Vector3 candidateObjectClosest = Vector3.zero;
@@ -105,12 +135,6 @@ namespace Instrumental.Interaction.Constraints
 				candidateSnapInfo.SurfaceCollider = candidateCollider;
 				candidateSnapInfo.SurfacePoint = candidateCollider.ClosestPoint(candidateSnapInfo.ObjectPoint);
 
-				debugSphereB.transform.position = candidateSnapInfo.ObjectPoint;
-				debugSphereB.SetActive(true);
-
-				debugSphereA.transform.position = candidateSnapInfo.SurfacePoint;
-				debugSphereA.SetActive(true);
-
 				// raycast for our surface normal
 				RaycastHit objectToSurfaceHit;
 				Vector3 objectToSurfaceDirection = (candidateSnapInfo.SurfacePoint - candidateSnapInfo.ObjectPoint);
@@ -120,6 +144,7 @@ namespace Instrumental.Interaction.Constraints
 				{
 					// our length is zero, because the object is already sitting on the surface,
 					// likely because gravity is on and the object has settled.
+					Debug.Log("object to surface direction changed because of zero length distance");
 					objectToSurfaceDirection = (candidateSnapInfo.SurfacePoint - centerOfMass).normalized;
 				}
 				else
@@ -132,6 +157,9 @@ namespace Instrumental.Interaction.Constraints
 				Debug.DrawRay(candidateSnapInfo.ObjectPoint, objectToSurfaceDirection);
 				candidateCollider.Raycast(objectToSurfaceRay, out objectToSurfaceHit, surfaceSnapDetectRadius);
 				candidateSnapInfo.SurfaceNormal = objectToSurfaceHit.normal;
+
+				candidateSnapInfo.SurfacePoint =
+					candidateSnapInfo.SurfacePoint + (candidateSnapInfo.SurfaceNormal * surfaceAdjustAmt);
 			}
 
 			return candidateSnapInfo;
@@ -170,6 +198,7 @@ namespace Instrumental.Interaction.Constraints
 							{
 								candidateFound = true;
 								closestSnap = candidateSnapInfo;
+								closestDistance = surfaceSnapDistance;
 							}
 						}
 					}
@@ -180,6 +209,7 @@ namespace Instrumental.Interaction.Constraints
 						if (closestDistance < surfaceSnapDistance)
 						{
 							isSnapping = true;
+							Debug.Log(string.Format("Starting snap on object: {0}", closestSnap.SurfaceCollider.name));
 							surfaceSnap = closestSnap;
 						}
 					}
@@ -191,16 +221,24 @@ namespace Instrumental.Interaction.Constraints
 			}
 		}
 
-		Pose GetSurfaceSnapPose(Pose inputPose)
+		Pose GetSurfaceSnapPose(Pose inputPose, bool updateSnap=true)
 		{
 			Pose snappedPose = inputPose;
 
 			// get the most recent 2 points
 			float distance = float.PositiveInfinity;
 			Vector3 centerOfMass = ItemCenterOfMass();
-			SurfaceSnapInfo updatedSnapInfo = GetSnapForCollider(centerOfMass,
-				surfaceSnap.SurfaceCollider, out distance);
+			SurfaceSnapInfo updatedSnapInfo = (updateSnap) ? GetSnapForCollider(centerOfMass,
+				surfaceSnap.SurfaceCollider, out distance) :
+				surfaceSnap;
 
+			// I think you forgot to update surface snap
+			// just sayin
+			surfaceSnap = updatedSnapInfo;
+
+			// get the offset between the object and surface, apply to object
+			Vector3 offset = updatedSnapInfo.SurfacePoint - updatedSnapInfo.ObjectPoint;
+			snappedPose.position = snappedPose.position + offset;
 
 			return snappedPose;
 		}
@@ -209,7 +247,30 @@ namespace Instrumental.Interaction.Constraints
 		{
 			CheckSurfaceSnap();
 
-			return (isSnapping) ? GetSurfaceSnapPose(targetPose) : targetPose;
+			float snapTValue = Mathf.InverseLerp(0, snapDuration, snapTimer);
+
+			// conditional below is for guarding against no recent snaps
+			Pose snapPose = (surfaceSnap.SurfaceCollider) ? GetSurfaceSnapPose(targetPose, true) : targetPose;
+
+			Pose lerpPose = new Pose(Vector3.Lerp(targetPose.position, snapPose.position, snapTValue),
+				Quaternion.Slerp(targetPose.rotation, snapPose.rotation, snapTValue));
+
+			debugSphereB.transform.position = surfaceSnap.ObjectPoint;
+			debugSphereB.SetActive(true);
+
+			debugSphereA.transform.position = surfaceSnap.SurfacePoint;
+			debugSphereA.SetActive(true);
+
+			if (!previewPlacement)
+			{
+				placementPreview.transform.SetPositionAndRotation(targetPose.position, targetPose.rotation);
+				return lerpPose;
+			}
+			else
+			{
+				placementPreview.transform.SetPositionAndRotation(lerpPose.position, lerpPose.rotation);
+				return targetPose;
+			}
 		}
 
 		Pose DoGridPose(Pose targetPose)
@@ -219,6 +280,17 @@ namespace Instrumental.Interaction.Constraints
 
         public override Pose DoConstraint(Pose targetPose)
         {
+			if(isSnapping)
+			{
+				snapTimer += Time.deltaTime;
+				snapTimer = Mathf.Clamp(snapTimer, 0, snapDuration);
+			}
+			else
+			{
+				snapTimer -= Time.deltaTime;
+				snapTimer = Mathf.Clamp(snapTimer, 0, snapDuration);
+			}
+
 			switch (mode)
 			{
 				case AssistMode.None:
@@ -233,6 +305,7 @@ namespace Instrumental.Interaction.Constraints
 				default:
 					return targetPose;
 			}
+
 		}
     }
 }
