@@ -5985,7 +5985,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mode: 1
-  surfaceAdjustAmt: 0.0024
+  surfaceAdjustAmt: 0.00493
   previewPlacement: 0
   placementPreview: {fileID: 1477151522}
   clearConstraint: 0
@@ -7508,7 +7508,7 @@ PrefabInstance:
     - target: {fileID: 2315127150805337353, guid: 9fde6386fcf85d146a21ffeb0bb45d80,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.932
+      value: -1.034
       objectReference: {fileID: 0}
     - target: {fileID: 2315127150805337353, guid: 9fde6386fcf85d146a21ffeb0bb45d80,
         type: 3}

@@ -21,12 +21,14 @@ namespace Instrumental.Interaction.Constraints
 		bool isSnapping = false;
 		const float snapDuration = 0.25f;
 		float snapTimer = 0;
+		bool snapHasReset = true;
 
 		// surface mode vars
 		const float surfaceSnapDistance = 0.04f;
 		[Range(0, 0.01f)]
-		[SerializeField] float surfaceAdjustAmt = 0.005f;
+		[SerializeField] float surfaceAdjustAmt = 0.00493f;
 		float surfaceSnapDetectRadius = 0.1f;
+		float snapBreakStrainAmount = 0.125f;
 
 		public struct SurfaceSnapInfo
 		{
@@ -86,6 +88,7 @@ namespace Instrumental.Interaction.Constraints
 		private void GraspItem_OnUngrasped(InteractiveItem sender)
 		{
 			isSnapping = false;
+			snapHasReset = true;
 			snapTimer = 0;
 		}
 
@@ -146,7 +149,7 @@ namespace Instrumental.Interaction.Constraints
 							float surfaceSnapDistance = float.PositiveInfinity;
 							SurfaceSnapInfo candidateSnapInfo = GetSnapForCollider(centerOfMass, candidateCollider, out surfaceSnapDistance);
 
-							if(surfaceSnapDistance < closestDistance)
+							if (surfaceSnapDistance < closestDistance)
 							{
 								candidateFound = true;
 								closestSnap = candidateSnapInfo;
@@ -157,10 +160,19 @@ namespace Instrumental.Interaction.Constraints
 
 					if (candidateFound)
 					{
+						if(!snapHasReset)
+						{
+							if(closestDistance > (surfaceSnapDistance + 0.05f))
+							{
+								snapHasReset = true;
+							}
+						}
+
 						// check to see if our snap distance passes the check
-						if (closestDistance < surfaceSnapDistance)
+						if (closestDistance < surfaceSnapDistance && snapHasReset)
 						{
 							isSnapping = true;
+							snapHasReset = false;
 							Debug.Log(string.Format("Starting snap on object: {0}", closestSnap.SurfaceCollider.name));
 							surfaceSnap = closestSnap;
 						}
@@ -169,7 +181,12 @@ namespace Instrumental.Interaction.Constraints
 			}
 			else
 			{
-				// todo: should we stop snapping
+				// should we stop snapping?
+				if(graspItem.MaxStrain > snapBreakStrainAmount)
+				{
+					isSnapping = false;
+					surfaceSnap.SurfaceCollider = null;
+				}
 			}
 		}
 
@@ -221,9 +238,9 @@ namespace Instrumental.Interaction.Constraints
 				candidateCollider.Raycast(objectToSurfaceRay, out objectToSurfaceHit, surfaceSnapDetectRadius);
 				candidateSnapInfo.SurfaceNormal = objectToSurfaceHit.normal;
 
-				// not strictly necessary with how soft this snap is being
-				/*candidateSnapInfo.SurfacePoint =
-					candidateSnapInfo.SurfacePoint + (candidateSnapInfo.SurfaceNormal * surfaceAdjustAmt);*/
+				// push our point away from the surface a small amount so that it doesn't freak out
+				candidateSnapInfo.SurfacePoint =
+					candidateSnapInfo.SurfacePoint + (candidateSnapInfo.SurfaceNormal * surfaceAdjustAmt);
 			}
 
 			return candidateSnapInfo;
@@ -239,10 +256,14 @@ namespace Instrumental.Interaction.Constraints
 			surfaceSnap = GetSnapForCollider(centerOfMass,
 				surfaceSnap.SurfaceCollider, out distance);
 
+			// calculate rotation offsets
+			Quaternion fromToRotation = Quaternion.FromToRotation(surfaceSnap.SurfaceNormal, surfaceSnap.ObjectNormal);
+
 			// get the offset between the object and surface, apply to object
 			Vector3 poseOffset = graspItem.RigidBody.position - inputPose.position;
 			Vector3 offset = surfaceSnap.SurfacePoint - surfaceSnap.ObjectPoint;
 			snappedPose.position = snappedPose.position + offset + poseOffset; // undo pose offset to get 'soft snap' back (only for testing tho)
+			//snappedPose.rotation = inputPose.rotation * fromToRotation;
 
 			return snappedPose;
 		}
