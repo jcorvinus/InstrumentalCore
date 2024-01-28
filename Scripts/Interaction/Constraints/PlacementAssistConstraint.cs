@@ -113,16 +113,9 @@ namespace Instrumental.Interaction.Constraints
 			DoDebugCommands();
         }
 
-		Vector3 ItemCenterOfMass()
-		{
-			Matrix4x4 comTransform = Matrix4x4.TRS(graspItem.transform.position,
-				graspItem.transform.rotation, Vector3.one);
-			return comTransform.MultiplyPoint3x4(graspItem.RigidBody.centerOfMass);
-		}
-
 		void CheckSurfaceSnap()
 		{
-			Vector3 centerOfMass = ItemCenterOfMass();
+			Vector3 centerOfMass = graspItem.RigidBody.worldCenterOfMass;
 
 			if (!isSnapping)
 			{
@@ -252,7 +245,7 @@ namespace Instrumental.Interaction.Constraints
 
 			// get the most recent 2 points
 			float distance = float.PositiveInfinity;
-			Vector3 centerOfMass = ItemCenterOfMass();
+			Vector3 centerOfMass = graspItem.RigidBody.worldCenterOfMass;
 			surfaceSnap = GetSnapForCollider(centerOfMass,
 				surfaceSnap.SurfaceCollider, out distance);
 
