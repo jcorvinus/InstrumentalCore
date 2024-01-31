@@ -25,7 +25,7 @@ namespace Instrumental.Interaction.Constraints
 
 		// surface mode vars
 		const float surfaceSnapDistance = 0.04f;
-		[Range(0, 0.01f)]
+		[Range(0, 0.1f)]
 		[SerializeField] float surfaceAdjustAmt = 0.00493f;
 		float surfaceSnapDetectRadius = 0.1f;
 		float snapBreakStrainAmount = 0.125f;
@@ -247,10 +247,8 @@ namespace Instrumental.Interaction.Constraints
 			return candidateSnapInfo;
 		}
 
-		SurfaceSnapInfo GetSnapForCollider(Pose inputPose, Collider surfaceCollider, 
-			out float distance)
+		SurfaceSnapInfo GetSnapForCollider(Pose inputPose, Collider surfaceCollider)
 		{
-			distance = float.PositiveInfinity;
 			SurfaceSnapInfo snapInfo = new SurfaceSnapInfo();
 			snapInfo.SurfaceCollider = surfaceCollider;
 
@@ -282,13 +280,32 @@ namespace Instrumental.Interaction.Constraints
 			snapInfo.ObjectPoint = objectClosest;
 
 			// get our surface normal
-			Vector3 objectToSurfDirection = (surfaceClosest - inputPose.position);
-			snapInfo.SurfaceNormal = objectToSurfDirection;
+			Vector3 objectToSurfaceDirection = (surfaceClosest - objectClosest).normalized;
+			float objectToSurfaceDistance = objectToSurfaceDirection.magnitude;
+			if (objectToSurfaceDistance <= Mathf.Epsilon)
+			{
+				// our length is zero, because the object is already sitting on the surface,
+				// likely because gravity is on and the object has settled.
+				Debug.Log("object to surface direction changed because of zero length distance");
+				objectToSurfaceDirection = (snapInfo.SurfacePoint - graspItem.RigidBody.position).normalized;
+			}
+			else
+			{
+				objectToSurfaceDirection /= objectToSurfaceDistance;
+			}
 
-			snapInfo.SurfacePoint =	snapInfo.SurfacePoint + (snapInfo.SurfaceNormal * surfaceAdjustAmt);
+			RaycastHit surfNormalHit;
+			bool surfDidHit = false;
+			if(snapInfo.SurfaceCollider.Raycast(new Ray(graspItem.RigidBody.position, objectToSurfaceDirection),
+				out surfNormalHit, surfaceSnapDetectRadius))
+			{
+				surfDidHit = true;
+				snapInfo.SurfaceNormal = surfNormalHit.normal;
+			}
 
-			// get offset distance
-			distance = (objectClosest - graspItem.RigidBody.position).magnitude;
+			snapInfo.SurfacePoint += (surfaceSnap.SurfaceNormal * surfaceAdjustAmt);
+
+			Debug.DrawRay(surfaceSnap.SurfacePoint, surfaceSnap.SurfaceNormal, (surfDidHit) ? Color.green : Color.red);
 
 			return snapInfo;
 		}
@@ -298,14 +315,17 @@ namespace Instrumental.Interaction.Constraints
 			Pose snappedPose = inputPose;
 
 			// get the most recent 2 points
-			float distance = float.PositiveInfinity;
-			surfaceSnap = GetSnapForCollider(inputPose,	surfaceSnap.SurfaceCollider, out distance);
+			surfaceSnap = GetSnapForCollider(inputPose,	surfaceSnap.SurfaceCollider);
+
+			Vector3 poseOffset = (graspItem.RigidBody.position - surfaceSnap.ObjectPoint);
+			float distance = poseOffset.magnitude;
 
 			// calculate rotation offsets
 			Quaternion fromToRotation = Quaternion.FromToRotation(surfaceSnap.SurfaceNormal, surfaceSnap.ObjectNormal);
 
 			Vector3 position = surfaceSnap.SurfacePoint + (surfaceSnap.SurfaceNormal * distance);
 			snappedPose.position = position;
+			//snappedPose.rotation = inputPose.rotation * fromToRotation;
 
 			return snappedPose;
 		}

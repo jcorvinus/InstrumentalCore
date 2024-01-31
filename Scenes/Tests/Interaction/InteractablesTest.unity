@@ -5986,7 +5986,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mode: 1
   surfaceAdjustAmt: 0.00493
-  previewPlacement: 0
+  previewPlacement: 1
   placementPreview: {fileID: 1477151522}
   clearConstraint: 0
   setConstraint: 0
