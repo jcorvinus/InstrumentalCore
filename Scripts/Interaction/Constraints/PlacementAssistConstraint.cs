@@ -321,7 +321,7 @@ namespace Instrumental.Interaction.Constraints
 			float distance = poseOffset.magnitude;
 
 			// calculate rotation offsets
-			Quaternion fromToRotation = Quaternion.FromToRotation(surfaceSnap.SurfaceNormal, surfaceSnap.ObjectNormal);
+			Quaternion fromToRotation = Quaternion.FromToRotation(surfaceSnap.SurfaceNormal, surfaceSnap.ObjectNormal * -1);
 
 			Vector3 position = surfaceSnap.SurfacePoint + (surfaceSnap.SurfaceNormal * distance);
 			snappedPose.position = position;
