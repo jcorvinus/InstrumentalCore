@@ -19,8 +19,10 @@ namespace Instrumental.Overlay
 		[SerializeField] Camera screenCamera;
 		Camera centerEyeCamera;
 
-		[Range(1, 1.5f)]
-		[SerializeField] float perCameraFovMultiplier = 1.333f;
+		/*[Range(1.05f, 1.15f)]
+		[SerializeField]*/ float perCameraIPDMultiplier = 1.116f;
+		/*[Range(1.2f, 1.4f)]
+		[SerializeField]*/ float perCameraFovMultiplier = 1.284f;
 		float fieldOfView=90;
 		float aspect=1;
 
@@ -74,6 +76,12 @@ namespace Instrumental.Overlay
 				Mathf.Max(-l_left, l_right, -r_left, r_right),
 				Mathf.Max(-l_top, l_bottom, -r_top, r_bottom));
 
+			float leftTanHalfFov = Mathf.Max(-l_top, l_bottom);
+			float rightTanHalfFov = Mathf.Max(-r_top, r_bottom);
+
+			float leftFieldOfView = 2.0f * Mathf.Atan(leftTanHalfFov) * Mathf.Rad2Deg;
+			float rightfieldOfView = 2.0f * Mathf.Atan(rightTanHalfFov) * Mathf.Rad2Deg;
+
 			fieldOfView = 2.0f * Mathf.Atan(tanHalfFov.y) * Mathf.Rad2Deg;
 			screenCamera.fieldOfView = fieldOfView;
 			aspect = screenCamera.aspect;
@@ -85,12 +93,12 @@ namespace Instrumental.Overlay
 				rightEyeCamera.targetTexture = renderTexture;
 
 				HmdMatrix34_t leftEyeMatrix = hmd.GetEyeToHeadTransform(EVREye.Eye_Left);
-				leftEyeCamera.transform.localPosition = leftEyeMatrix.GetPosition();
-				leftEyeCamera.fieldOfView = fieldOfView * perCameraFovMultiplier;
+				leftEyeCamera.transform.localPosition = leftEyeMatrix.GetPosition() / perCameraIPDMultiplier;
+				leftEyeCamera.fieldOfView = leftFieldOfView * perCameraFovMultiplier;
 
 				HmdMatrix34_t rightEyeMatrix = hmd.GetEyeToHeadTransform(EVREye.Eye_Right);
-				rightEyeCamera.transform.localPosition = rightEyeMatrix.GetPosition();
-				rightEyeCamera.fieldOfView = fieldOfView * perCameraFovMultiplier;
+				rightEyeCamera.transform.localPosition = rightEyeMatrix.GetPosition() / 1.116f;
+				rightEyeCamera.fieldOfView = rightfieldOfView * perCameraFovMultiplier;
 
 				SetUpHiddenAreaMesh();
 			}
@@ -199,8 +207,27 @@ namespace Instrumental.Overlay
 		{
 			if(setFieldOfView)
 			{
-				leftEyeCamera.fieldOfView = fieldOfView * perCameraFovMultiplier;
-				rightEyeCamera.fieldOfView = fieldOfView * perCameraFovMultiplier;
+				CVRSystem hmd = SteamVR.instance.hmd;
+
+				float l_left = 0.0f, l_right = 0.0f, l_top = 0.0f, l_bottom = 0.0f;
+				hmd.GetProjectionRaw(EVREye.Eye_Left, ref l_left, ref l_right, ref l_top, ref l_bottom);
+
+				float r_left = 0.0f, r_right = 0.0f, r_top = 0.0f, r_bottom = 0.0f;
+				hmd.GetProjectionRaw(EVREye.Eye_Right, ref r_left, ref r_right, ref r_top, ref r_bottom);
+
+				float leftTanHalfFov = Mathf.Max(-l_top, l_bottom);
+				float rightTanHalfFov = Mathf.Max(-r_top, r_bottom);
+
+				float leftFieldOfView = 2.0f * Mathf.Atan(leftTanHalfFov) * Mathf.Rad2Deg;
+				float rightfieldOfView = 2.0f * Mathf.Atan(rightTanHalfFov) * Mathf.Rad2Deg;
+
+				HmdMatrix34_t leftEyeMatrix = hmd.GetEyeToHeadTransform(EVREye.Eye_Left);
+				leftEyeCamera.transform.localPosition = leftEyeMatrix.GetPosition() / perCameraIPDMultiplier;
+				leftEyeCamera.fieldOfView = leftFieldOfView * perCameraFovMultiplier;
+
+				HmdMatrix34_t rightEyeMatrix = hmd.GetEyeToHeadTransform(EVREye.Eye_Right);
+				rightEyeCamera.transform.localPosition = rightEyeMatrix.GetPosition() / 1.116f;
+				rightEyeCamera.fieldOfView = rightfieldOfView * perCameraFovMultiplier;
 			}
 		}
 	}
