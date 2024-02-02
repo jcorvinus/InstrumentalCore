@@ -19,10 +19,10 @@ namespace Instrumental.Overlay
 		[SerializeField] Camera screenCamera;
 		Camera centerEyeCamera;
 
-		/*[Range(1, 1.2f)]
+		/*[Range(1.05f, 1.15f)]
 		[SerializeField]*/ float perCameraIPDMultiplier = 1.116f;
-		/*[Range(1, 1.5f)]
-		[SerializeField]*/ float perCameraFovMultiplier = 1.3f;
+		/*[Range(1.2f, 1.4f)]
+		[SerializeField]*/ float perCameraFovMultiplier = 1.284f;
 		float fieldOfView=90;
 		float aspect=1;
 
