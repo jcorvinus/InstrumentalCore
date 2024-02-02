@@ -21,12 +21,14 @@ namespace Instrumental.Interaction.Constraints
 		bool isSnapping = false;
 		const float snapDuration = 0.25f;
 		float snapTimer = 0;
+		bool snapHasReset = true;
 
 		// surface mode vars
 		const float surfaceSnapDistance = 0.04f;
-		[Range(0, 0.01f)]
-		[SerializeField] float surfaceAdjustAmt = 0.005f;
+		[Range(0, 0.1f)]
+		[SerializeField] float surfaceAdjustAmt = 0.00493f;
 		float surfaceSnapDetectRadius = 0.1f;
+		float snapBreakStrainAmount = 0.125f;
 
 		public struct SurfaceSnapInfo
 		{
@@ -50,6 +52,9 @@ namespace Instrumental.Interaction.Constraints
 		[SerializeField] GameObject placementPreview;
 		[SerializeField] bool clearConstraint;
 		[SerializeField] bool setConstraint;
+		[SerializeField] bool useLockPose;
+		[SerializeField] Transform testLockPose;
+
 
 		protected override void Awake()
 		{
@@ -83,6 +88,7 @@ namespace Instrumental.Interaction.Constraints
 		private void GraspItem_OnUngrasped(InteractiveItem sender)
 		{
 			isSnapping = false;
+			snapHasReset = true;
 			snapTimer = 0;
 		}
 
@@ -107,67 +113,9 @@ namespace Instrumental.Interaction.Constraints
 			DoDebugCommands();
         }
 
-		Vector3 ItemCenterOfMass()
-		{
-			Matrix4x4 comTransform = Matrix4x4.TRS(graspItem.transform.position,
-				graspItem.transform.rotation, Vector3.one);
-			return comTransform.MultiplyPoint3x4(graspItem.RigidBody.centerOfMass);
-		}
-
-		SurfaceSnapInfo GetSnapForCollider(Vector3 centerOfMass, Collider candidateCollider, out float distance)
-		{
-			distance = float.PositiveInfinity;
-			SurfaceSnapInfo candidateSnapInfo = new SurfaceSnapInfo();
-
-			Vector3 candidateSurfaceClosest = candidateCollider.ClosestPoint(centerOfMass);
-			Vector3 candidateObjectClosest = Vector3.zero;
-			Vector3 raycastDirection = (centerOfMass - candidateSurfaceClosest).normalized;
-
-			RaycastHit hitInfo;
-
-			if (Physics.Raycast(new Ray(candidateSurfaceClosest, raycastDirection), out hitInfo))
-			{
-				candidateObjectClosest = hitInfo.point;
-
-				distance = Vector3.Distance(candidateSurfaceClosest, candidateObjectClosest);
-				candidateSnapInfo.ObjectPoint = candidateObjectClosest;
-				candidateSnapInfo.ObjectNormal = hitInfo.normal;
-				candidateSnapInfo.SurfaceCollider = candidateCollider;
-				candidateSnapInfo.SurfacePoint = candidateCollider.ClosestPoint(candidateSnapInfo.ObjectPoint);
-
-				// raycast for our surface normal
-				RaycastHit objectToSurfaceHit;
-				Vector3 objectToSurfaceDirection = (candidateSnapInfo.SurfacePoint - candidateSnapInfo.ObjectPoint);
-				float objectToSurfaceDistance = objectToSurfaceDirection.magnitude;
-
-				if(objectToSurfaceDistance <= Mathf.Epsilon)
-				{
-					// our length is zero, because the object is already sitting on the surface,
-					// likely because gravity is on and the object has settled.
-					Debug.Log("object to surface direction changed because of zero length distance");
-					objectToSurfaceDirection = (candidateSnapInfo.SurfacePoint - centerOfMass).normalized;
-				}
-				else
-				{
-					objectToSurfaceDirection /= objectToSurfaceDistance;
-				}
-
-				Ray objectToSurfaceRay = new Ray(candidateSnapInfo.ObjectPoint, 
-					objectToSurfaceDirection);
-				Debug.DrawRay(candidateSnapInfo.ObjectPoint, objectToSurfaceDirection);
-				candidateCollider.Raycast(objectToSurfaceRay, out objectToSurfaceHit, surfaceSnapDetectRadius);
-				candidateSnapInfo.SurfaceNormal = objectToSurfaceHit.normal;
-
-				candidateSnapInfo.SurfacePoint =
-					candidateSnapInfo.SurfacePoint + (candidateSnapInfo.SurfaceNormal * surfaceAdjustAmt);
-			}
-
-			return candidateSnapInfo;
-		}
-
 		void CheckSurfaceSnap()
 		{
-			Vector3 centerOfMass = ItemCenterOfMass();
+			Vector3 centerOfMass = graspItem.RigidBody.worldCenterOfMass;
 
 			if (!isSnapping)
 			{
@@ -192,9 +140,9 @@ namespace Instrumental.Interaction.Constraints
 						{
 							Collider candidateCollider = colliderCheckBuffer[i];
 							float surfaceSnapDistance = float.PositiveInfinity;
-							SurfaceSnapInfo candidateSnapInfo = GetSnapForCollider(centerOfMass, candidateCollider, out surfaceSnapDistance);
+							SurfaceSnapInfo candidateSnapInfo = GetCandidateSnapForCollider(centerOfMass, candidateCollider, out surfaceSnapDistance);
 
-							if(surfaceSnapDistance < closestDistance)
+							if (surfaceSnapDistance < closestDistance)
 							{
 								candidateFound = true;
 								closestSnap = candidateSnapInfo;
@@ -205,10 +153,19 @@ namespace Instrumental.Interaction.Constraints
 
 					if (candidateFound)
 					{
+						if(!snapHasReset)
+						{
+							if(closestDistance > (surfaceSnapDistance + 0.05f))
+							{
+								snapHasReset = true;
+							}
+						}
+
 						// check to see if our snap distance passes the check
-						if (closestDistance < surfaceSnapDistance)
+						if (closestDistance < surfaceSnapDistance && snapHasReset)
 						{
 							isSnapping = true;
+							snapHasReset = false;
 							Debug.Log(string.Format("Starting snap on object: {0}", closestSnap.SurfaceCollider.name));
 							surfaceSnap = closestSnap;
 						}
@@ -217,28 +174,158 @@ namespace Instrumental.Interaction.Constraints
 			}
 			else
 			{
-				// todo: should we stop snapping
+				// should we stop snapping?
+				if(graspItem.MaxStrain > snapBreakStrainAmount)
+				{
+					isSnapping = false;
+					surfaceSnap.SurfaceCollider = null;
+				}
 			}
 		}
 
-		Pose GetSurfaceSnapPose(Pose inputPose, bool updateSnap=true)
+		/// <summary>
+		/// Get point-on-object and point-on-surface, as well as normals,
+		/// for this object, given a center of mass and collider
+		/// </summary>
+		/// <param name="centerOfMass"></param>
+		/// <param name="candidateCollider"></param>
+		/// <param name="distance"></param>
+		/// <returns></returns>
+		SurfaceSnapInfo GetCandidateSnapForCollider(Vector3 centerOfMass, Collider surfaceCollider, out float distance)
+		{
+			distance = float.PositiveInfinity;
+			SurfaceSnapInfo candidateSnapInfo = new SurfaceSnapInfo();
+
+			Vector3 candidateSurfaceClosest = surfaceCollider.ClosestPoint(centerOfMass);
+			Vector3 candidateObjectClosest = Vector3.zero;
+			Vector3 raycastDirection = (centerOfMass - candidateSurfaceClosest).normalized;
+
+			RaycastHit hitInfo;
+
+			if (Physics.Raycast(new Ray(candidateSurfaceClosest, raycastDirection), out hitInfo))
+			{
+				candidateObjectClosest = hitInfo.point;
+
+				distance = Vector3.Distance(candidateSurfaceClosest, candidateObjectClosest);
+				candidateSnapInfo.ObjectPoint = candidateObjectClosest;
+				candidateSnapInfo.ObjectNormal = hitInfo.normal;
+				candidateSnapInfo.SurfaceCollider = surfaceCollider;
+
+				// this will break if candidateSnapInfo.ObjectPoint is touching or inside of
+				// candidate collider. I think this has changed from previous versions of unity
+				// it might now just return the unfiltered point, it used to return 0
+				candidateSnapInfo.SurfacePoint = surfaceCollider.ClosestPoint(candidateSnapInfo.ObjectPoint);
+
+				// raycast for our surface normal
+				RaycastHit objectToSurfaceHit;
+				Vector3 objectToSurfaceDirection = (candidateSnapInfo.SurfacePoint - candidateSnapInfo.ObjectPoint);
+				float objectToSurfaceDistance = objectToSurfaceDirection.magnitude;
+
+				if (objectToSurfaceDistance <= Mathf.Epsilon)
+				{
+					// our length is zero, because the object is already sitting on the surface,
+					// likely because gravity is on and the object has settled.
+					Debug.Log("object to surface direction changed because of zero length distance");
+					objectToSurfaceDirection = (candidateSnapInfo.SurfacePoint - centerOfMass).normalized;
+				}
+				else
+				{
+					objectToSurfaceDirection /= objectToSurfaceDistance;
+				}
+
+				Ray objectToSurfaceRay = new Ray(candidateSnapInfo.ObjectPoint,
+					objectToSurfaceDirection);
+				Debug.DrawRay(candidateSnapInfo.ObjectPoint, objectToSurfaceDirection);
+				surfaceCollider.Raycast(objectToSurfaceRay, out objectToSurfaceHit, surfaceSnapDetectRadius);
+				candidateSnapInfo.SurfaceNormal = objectToSurfaceHit.normal;
+
+				// push our point away from the surface a small amount so that it doesn't freak out
+				candidateSnapInfo.SurfacePoint =
+					candidateSnapInfo.SurfacePoint + (candidateSnapInfo.SurfaceNormal * surfaceAdjustAmt);
+			}
+
+			return candidateSnapInfo;
+		}
+
+		SurfaceSnapInfo GetSnapForCollider(Pose inputPose, Collider surfaceCollider)
+		{
+			SurfaceSnapInfo snapInfo = new SurfaceSnapInfo();
+			snapInfo.SurfaceCollider = surfaceCollider;
+
+			Vector3 surfaceClosest = surfaceCollider.ClosestPoint(inputPose.position);
+			snapInfo.SurfacePoint = surfaceClosest;
+
+			Vector3 objectClosest = Vector3.zero;
+			bool pointIsInside = false;
+			bool foundPoint = graspItem.ClosestPointOnItem(surfaceClosest, out objectClosest, out pointIsInside);
+
+			bool pointValid = (foundPoint && !pointIsInside);
+
+			if(!pointValid)
+			{
+				// use raycast instead of closest point
+				Vector3 surfToObject = (graspItem.RigidBody.worldCenterOfMass - surfaceClosest).normalized;
+				RaycastHit hitInfo;
+				if(Physics.Raycast(new Ray(surfaceClosest, surfToObject), out hitInfo, surfaceSnapDetectRadius))
+				{
+					objectClosest = hitInfo.point;
+					snapInfo.ObjectNormal = hitInfo.normal;
+				}
+				else
+				{
+					// this is weird, what do we do here?
+				}
+			}
+
+			snapInfo.ObjectPoint = objectClosest;
+
+			// get our surface normal
+			Vector3 objectToSurfaceDirection = (surfaceClosest - objectClosest).normalized;
+			float objectToSurfaceDistance = objectToSurfaceDirection.magnitude;
+			if (objectToSurfaceDistance <= Mathf.Epsilon)
+			{
+				// our length is zero, because the object is already sitting on the surface,
+				// likely because gravity is on and the object has settled.
+				Debug.Log("object to surface direction changed because of zero length distance");
+				objectToSurfaceDirection = (snapInfo.SurfacePoint - graspItem.RigidBody.position).normalized;
+			}
+			else
+			{
+				objectToSurfaceDirection /= objectToSurfaceDistance;
+			}
+
+			RaycastHit surfNormalHit;
+			bool surfDidHit = false;
+			if(snapInfo.SurfaceCollider.Raycast(new Ray(graspItem.RigidBody.position, objectToSurfaceDirection),
+				out surfNormalHit, surfaceSnapDetectRadius))
+			{
+				surfDidHit = true;
+				snapInfo.SurfaceNormal = surfNormalHit.normal;
+			}
+
+			snapInfo.SurfacePoint += (surfaceSnap.SurfaceNormal * surfaceAdjustAmt);
+
+			Debug.DrawRay(surfaceSnap.SurfacePoint, surfaceSnap.SurfaceNormal, (surfDidHit) ? Color.green : Color.red);
+
+			return snapInfo;
+		}
+
+		Pose GetSurfaceSnapPose(Pose inputPose)
 		{
 			Pose snappedPose = inputPose;
 
 			// get the most recent 2 points
-			float distance = float.PositiveInfinity;
-			Vector3 centerOfMass = ItemCenterOfMass();
-			SurfaceSnapInfo updatedSnapInfo = (updateSnap) ? GetSnapForCollider(centerOfMass,
-				surfaceSnap.SurfaceCollider, out distance) :
-				surfaceSnap;
+			surfaceSnap = GetSnapForCollider(inputPose,	surfaceSnap.SurfaceCollider);
 
-			// I think you forgot to update surface snap
-			// just sayin
-			surfaceSnap = updatedSnapInfo;
+			Vector3 poseOffset = (graspItem.RigidBody.position - surfaceSnap.ObjectPoint);
+			float distance = poseOffset.magnitude;
 
-			// get the offset between the object and surface, apply to object
-			Vector3 offset = updatedSnapInfo.SurfacePoint - updatedSnapInfo.ObjectPoint;
-			snappedPose.position = snappedPose.position + offset;
+			// calculate rotation offsets
+			Quaternion fromToRotation = Quaternion.FromToRotation(surfaceSnap.SurfaceNormal, surfaceSnap.ObjectNormal);
+
+			Vector3 position = surfaceSnap.SurfacePoint + (surfaceSnap.SurfaceNormal * distance);
+			snappedPose.position = position;
+			//snappedPose.rotation = inputPose.rotation * fromToRotation;
 
 			return snappedPose;
 		}
@@ -250,10 +337,19 @@ namespace Instrumental.Interaction.Constraints
 			float snapTValue = Mathf.InverseLerp(0, snapDuration, snapTimer);
 
 			// conditional below is for guarding against no recent snaps
-			Pose snapPose = (surfaceSnap.SurfaceCollider) ? GetSurfaceSnapPose(targetPose, true) : targetPose;
+			// also important to note that this will not allow for switching surfaces at snap time
+			// with the distances involved in snapping/unsnapping, this could make it hard to handle
+			// scenarios with multiple surfaces in close proximity
+			Pose snapPose = (surfaceSnap.SurfaceCollider) ? GetSurfaceSnapPose(targetPose) : targetPose;
 
 			Pose lerpPose = new Pose(Vector3.Lerp(targetPose.position, snapPose.position, snapTValue),
 				Quaternion.Slerp(targetPose.rotation, snapPose.rotation, snapTValue));
+
+			if (useLockPose)
+			{
+				lerpPose = new Pose(Vector3.Lerp(targetPose.position, testLockPose.position, snapTValue),
+				Quaternion.Slerp(targetPose.rotation, testLockPose.rotation, snapTValue));
+			}
 
 			debugSphereB.transform.position = surfaceSnap.ObjectPoint;
 			debugSphereB.SetActive(true);
@@ -269,7 +365,8 @@ namespace Instrumental.Interaction.Constraints
 			else
 			{
 				placementPreview.transform.SetPositionAndRotation(lerpPose.position, lerpPose.rotation);
-				return targetPose;
+				//return targetPose;
+				return lerpPose;
 			}
 		}
 
@@ -282,12 +379,12 @@ namespace Instrumental.Interaction.Constraints
         {
 			if(isSnapping)
 			{
-				snapTimer += Time.deltaTime;
+				snapTimer += Time.fixedDeltaTime;
 				snapTimer = Mathf.Clamp(snapTimer, 0, snapDuration);
 			}
 			else
 			{
-				snapTimer -= Time.deltaTime;
+				snapTimer -= Time.fixedDeltaTime;
 				snapTimer = Mathf.Clamp(snapTimer, 0, snapDuration);
 			}
 

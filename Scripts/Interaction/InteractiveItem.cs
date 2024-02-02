@@ -215,8 +215,15 @@ namespace Instrumental.Interaction
         [SerializeField] float ungraspCurlVelocity = 25f;
         #endregion
 
-        #region Debug Vars
-        [Range(0.01f, 0.07f)]
+        #region Strain Vars
+        float leftStrain = 0;
+        float rightStrain = 0;
+
+        public float MaxStrain { get { return Mathf.Max(leftStrain, rightStrain); } }
+		#endregion
+
+		#region Debug Vars
+		[Range(0.01f, 0.07f)]
         [SerializeField] float tipRadius=0.01f;
         MeshRenderer[] tipGrabSpheres;
         MeshRenderer[] constellationStartSpheres;
@@ -1219,7 +1226,48 @@ namespace Instrumental.Interaction
                 DoGraspMovement();
 			}
 
+            CalculateStrain();
+
             graspStartedThisFrame = false;
+		}
+
+        float CalculateHandStrain(bool isLeft)
+		{
+            GraspDataVars graspVars = null;
+            bool foundHand = false;
+
+            for(int i=0; i < graspableHands.Count; i++)
+			{
+                if((graspableHands[i].Hand.Hand == Handedness.Left) == isLeft)
+				{
+                    graspVars = graspableHands[i];
+                    foundHand = true;
+                    break;
+				}
+			}
+
+            if (!foundHand)
+            {
+                return 0;
+            }
+
+            bool grasping = graspVars.IsGrasping;
+            
+            if(grasping)
+			{
+                Vector3 graspOffsetObjectToWorldPoint = transform.TransformPoint(graspVars.GraspPositionOffset);
+                return Vector3.Distance(graspVars.GraspCenter, graspOffsetObjectToWorldPoint);
+			}
+            else
+			{
+                return 0;
+            }
+		}
+
+        void CalculateStrain()
+		{
+            leftStrain = CalculateHandStrain(true);
+            rightStrain = CalculateHandStrain(false);
 		}
 
 		void StartHover(InstrumentalHand hand)
