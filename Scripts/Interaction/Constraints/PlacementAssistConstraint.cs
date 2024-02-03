@@ -314,7 +314,7 @@ namespace Instrumental.Interaction.Constraints
 
 			Vector3 position = surfaceSnap.SurfacePoint + (surfaceSnap.SurfaceNormal * distance);
 			snappedPose.position = position;
-			snappedPose.rotation = graspItem.RigidBody.rotation * fromToRotation;
+			snappedPose.rotation = fromToRotation * graspItem.RigidBody.rotation;
 
 			return snappedPose;
 		}

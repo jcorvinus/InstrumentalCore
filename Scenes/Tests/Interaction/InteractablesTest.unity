@@ -891,6 +891,7 @@ GameObject:
   - component: {fileID: 221541502}
   - component: {fileID: 221541501}
   - component: {fileID: 221541503}
+  - component: {fileID: 221541504}
   m_Layer: 0
   m_Name: RotationTestItem
   m_TagString: Untagged
@@ -944,6 +945,22 @@ MonoBehaviour:
   setDefaultPose: 0
   startRotating: 0
   stopRotating: 0
+--- !u!114 &221541504
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 221541500}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d42a9865ce267d94dade7fa9387114fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  surface: {fileID: 551779033}
+  startRotating: 0
+  stopRotating: 0
+  doOffset2: 0
 --- !u!1 &265877174
 GameObject:
   m_ObjectHideFlags: 0

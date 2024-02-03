@@ -75,15 +75,13 @@ public class NormalToFromTest : MonoBehaviour
         }
         else
 		{
-            GetPointsAndSurfaces();
-
             rotationTimer += Time.deltaTime;
             rotationTimer = Mathf.Clamp(rotationTimer, 0, rotationDuration);
             float rotationTValue = Mathf.InverseLerp(0, rotationDuration, rotationTimer);
 
             Quaternion offsetRotation = Quaternion.FromToRotation(objectNormal * -1, surfaceNormal);
-            Quaternion rotation = boxCollider.transform.rotation * offsetRotation;
-            boxCollider.transform.rotation = Quaternion.Slerp(boxCollider.transform.rotation, rotation, rotationTValue);
+            Quaternion rotation = offsetRotation * defaultPose.rotation;
+            boxCollider.transform.rotation = Quaternion.Slerp(defaultPose.rotation, rotation, rotationTValue);
 
             if(stopRotating)
 			{
