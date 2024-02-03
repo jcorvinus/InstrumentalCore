@@ -25,12 +25,33 @@ public class NormalToFromTest : MonoBehaviour
     [SerializeField] bool startRotating = false;
     [SerializeField] bool stopRotating = false;
 
-
 	// Start is called before the first frame update
 	void Start()
     {
         defaultPose = new Pose(boxCollider.transform.position,
             boxCollider.transform.rotation);
+    }
+
+    void GetPointsAndSurfaces()
+	{
+        // get our normals
+        surfacePoint = surfaceCollider.ClosestPoint(boxCollider.transform.position);
+        objectPoint = boxCollider.ClosestPoint(surfacePoint);
+
+        Vector3 objectToSurfaceDirection = (surfacePoint - objectPoint).normalized;
+        Vector3 surfaceToObjectDirection = (objectPoint - surfacePoint).normalized;
+
+        RaycastHit objectToSurfaceHit;
+        surfaceCollider.Raycast(new Ray(objectPoint, objectToSurfaceDirection), out objectToSurfaceHit, 20f);
+        surfaceNormal = objectToSurfaceHit.normal;
+
+        RaycastHit surfaceToObjectHit;
+        boxCollider.Raycast(new Ray(surfacePoint, surfaceNormal), out surfaceToObjectHit, 20f);
+        objectNormal = surfaceToObjectHit.normal;
+        objectPoint = surfaceToObjectHit.point;
+
+        objectPointInverse = boxCollider.transform.InverseTransformPoint(objectPoint);
+        objectNormalInverse = boxCollider.transform.InverseTransformDirection(objectNormal);
     }
 
     // Update is called once per frame
@@ -44,39 +65,25 @@ public class NormalToFromTest : MonoBehaviour
         }
         if(!isRotating)
 		{
-            // get our normals
-            surfacePoint = surfaceCollider.ClosestPoint(boxCollider.transform.position);
-            objectPoint = boxCollider.ClosestPoint(surfacePoint);
-
-            Vector3 objectToSurfaceDirection = (surfacePoint - objectPoint).normalized;
-            Vector3 surfaceToObjectDirection = (objectPoint - surfacePoint).normalized;
-
-            RaycastHit objectToSurfaceHit;
-            surfaceCollider.Raycast(new Ray(objectPoint, objectToSurfaceDirection), out objectToSurfaceHit, 20f);
-            surfaceNormal = objectToSurfaceHit.normal;
-
-            RaycastHit surfaceToObjectHit;
-            boxCollider.Raycast(new Ray(surfacePoint, surfaceToObjectDirection), out surfaceToObjectHit, 20f);
-            objectNormal = surfaceToObjectHit.normal;
+            GetPointsAndSurfaces();
 
             if (startRotating)
             {
                 isRotating = true;
                 startRotating = false;
-
-                objectPointInverse = boxCollider.transform.InverseTransformPoint(objectPoint);
-                objectNormalInverse = boxCollider.transform.InverseTransformDirection(objectNormal);
             }
         }
         else
 		{
+            GetPointsAndSurfaces();
+
             rotationTimer += Time.deltaTime;
             rotationTimer = Mathf.Clamp(rotationTimer, 0, rotationDuration);
             float rotationTValue = Mathf.InverseLerp(0, rotationDuration, rotationTimer);
 
             Quaternion offsetRotation = Quaternion.FromToRotation(objectNormal * -1, surfaceNormal);
-            Quaternion rotation = defaultPose.rotation * offsetRotation;
-            boxCollider.transform.rotation = Quaternion.Slerp(defaultPose.rotation, rotation, rotationTValue);
+            Quaternion rotation = boxCollider.transform.rotation * offsetRotation;
+            boxCollider.transform.rotation = Quaternion.Slerp(boxCollider.transform.rotation, rotation, rotationTValue);
 
             if(stopRotating)
 			{

@@ -890,13 +890,14 @@ GameObject:
   m_Component:
   - component: {fileID: 221541502}
   - component: {fileID: 221541501}
+  - component: {fileID: 221541503}
   m_Layer: 0
   m_Name: RotationTestItem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!65 &221541501
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -917,7 +918,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 221541500}
-  m_LocalRotation: {x: -0.1699282, y: 0.042323228, z: -0.2379472, w: 0.95536083}
+  m_LocalRotation: {x: -0.1650485, y: 0.05853074, z: -0.14460331, w: 0.97387016}
   m_LocalPosition: {x: -0.131, y: 1.0689, z: 0.271}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -925,7 +926,24 @@ Transform:
   - {fileID: 800263004}
   m_Father: {fileID: 0}
   m_RootOrder: 16
-  m_LocalEulerAnglesHint: {x: -17.731, y: 9.776, z: -29.5}
+  m_LocalEulerAnglesHint: {x: -17.731, y: 9.776, z: -18.42}
+--- !u!114 &221541503
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 221541500}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bc9056c96c53d440acc225e8f47410e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  boxCollider: {fileID: 221541501}
+  surfaceCollider: {fileID: 551779033}
+  setDefaultPose: 0
+  startRotating: 0
+  stopRotating: 0
 --- !u!1 &265877174
 GameObject:
   m_ObjectHideFlags: 0
@@ -6022,7 +6040,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1742953787
 MonoBehaviour:
   m_ObjectHideFlags: 0

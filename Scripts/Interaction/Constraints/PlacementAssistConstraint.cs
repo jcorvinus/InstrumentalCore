@@ -30,6 +30,7 @@ namespace Instrumental.Interaction.Constraints
 		float surfaceSnapDetectRadius = 0.1f;
 		float snapBreakStrainAmount = 0.125f;
 
+		[System.Serializable]
 		public struct SurfaceSnapInfo
 		{
 			public Vector3 SurfacePoint;
@@ -235,7 +236,6 @@ namespace Instrumental.Interaction.Constraints
 
 				Ray objectToSurfaceRay = new Ray(candidateSnapInfo.ObjectPoint,
 					objectToSurfaceDirection);
-				Debug.DrawRay(candidateSnapInfo.ObjectPoint, objectToSurfaceDirection);
 				surfaceCollider.Raycast(objectToSurfaceRay, out objectToSurfaceHit, surfaceSnapDetectRadius);
 				candidateSnapInfo.SurfaceNormal = objectToSurfaceHit.normal;
 
@@ -256,25 +256,18 @@ namespace Instrumental.Interaction.Constraints
 			snapInfo.SurfacePoint = surfaceClosest;
 
 			Vector3 objectClosest = Vector3.zero;
-			bool pointIsInside = false;
-			bool foundPoint = graspItem.ClosestPointOnItem(surfaceClosest, out objectClosest, out pointIsInside);
 
-			bool pointValid = (foundPoint && !pointIsInside);
-
-			if(!pointValid)
+			// use raycast
+			Vector3 surfToObject = (graspItem.RigidBody.worldCenterOfMass - surfaceClosest).normalized;
+			RaycastHit hitInfo;
+			if (Physics.Raycast(new Ray(surfaceClosest, surfToObject), out hitInfo, surfaceSnapDetectRadius))
 			{
-				// use raycast instead of closest point
-				Vector3 surfToObject = (graspItem.RigidBody.worldCenterOfMass - surfaceClosest).normalized;
-				RaycastHit hitInfo;
-				if(Physics.Raycast(new Ray(surfaceClosest, surfToObject), out hitInfo, surfaceSnapDetectRadius))
-				{
-					objectClosest = hitInfo.point;
-					snapInfo.ObjectNormal = hitInfo.normal;
-				}
-				else
-				{
-					// this is weird, what do we do here?
-				}
+				objectClosest = hitInfo.point;
+				snapInfo.ObjectNormal = hitInfo.normal;
+			}
+			else
+			{
+				// this is weird, what do we do here?
 			}
 
 			snapInfo.ObjectPoint = objectClosest;
@@ -295,17 +288,13 @@ namespace Instrumental.Interaction.Constraints
 			}
 
 			RaycastHit surfNormalHit;
-			bool surfDidHit = false;
 			if(snapInfo.SurfaceCollider.Raycast(new Ray(graspItem.RigidBody.position, objectToSurfaceDirection),
 				out surfNormalHit, surfaceSnapDetectRadius))
 			{
-				surfDidHit = true;
 				snapInfo.SurfaceNormal = surfNormalHit.normal;
 			}
 
 			snapInfo.SurfacePoint += (surfaceSnap.SurfaceNormal * surfaceAdjustAmt);
-
-			Debug.DrawRay(surfaceSnap.SurfacePoint, surfaceSnap.SurfaceNormal, (surfDidHit) ? Color.green : Color.red);
 
 			return snapInfo;
 		}
@@ -404,5 +393,14 @@ namespace Instrumental.Interaction.Constraints
 			}
 
 		}
-    }
+
+		private void OnDrawGizmos()
+		{
+			Gizmos.color = Color.blue;
+			Gizmos.DrawLine(surfaceSnap.ObjectPoint, surfaceSnap.ObjectPoint + (surfaceSnap.ObjectNormal * 0.01f));
+
+			Gizmos.color = Color.green;
+			Gizmos.DrawLine(surfaceSnap.SurfacePoint, surfaceSnap.SurfacePoint + (surfaceSnap.SurfaceNormal * 0.01f));
+		}
+	}
 }
