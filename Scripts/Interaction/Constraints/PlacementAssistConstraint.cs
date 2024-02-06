@@ -13,6 +13,15 @@ namespace Instrumental.Interaction.Constraints
             Grid=2
         }
 
+		public enum Axis : byte
+		{
+			None = 0,
+			X = 1,
+			Y = 2,
+			Z = 4,
+			All = 7
+		}
+
         [SerializeField] AssistMode mode = AssistMode.Surface;
 		const int colliderCheckCount = 5;
 		Collider[] colliderCheckBuffer;
@@ -299,6 +308,92 @@ namespace Instrumental.Interaction.Constraints
 			return snapInfo;
 		}
 
+		Axis GetSnapAxisForNormal(Vector3 objectNormal, out bool positive)
+		{
+			positive = false;
+
+			Axis returnAxis = Axis.None;
+			Vector3 localNormal = transform.InverseTransformDirection(objectNormal * -1);
+
+			bool xPositive = Vector3.Dot(localNormal, Vector3.right) >= 0;
+			bool yPositive = Vector3.Dot(localNormal, Vector3.up) >= 0;
+			bool zPositive = Vector3.Dot(localNormal, Vector3.right) >= 0;
+			float xAngle = Vector3.Angle(localNormal, Vector3.right);
+			float yAngle = Vector3.Angle(localNormal, Vector3.up);
+			float zAngle = Vector3.Angle(localNormal, Vector3.forward);
+			float minAngle = Mathf.Min(xAngle, yAngle, zAngle); // I think we might want to use mathf.max here
+			// maybe this is a better application for vector3.angle,
+			// then getting our sign via the dot product :think:
+
+			if (minAngle == xAngle)
+			{
+				positive = xPositive;
+				returnAxis = Axis.X;
+			}
+			else if (minAngle == yAngle)
+			{
+				positive = yPositive;
+				returnAxis = Axis.Y;
+			}
+			else
+			{
+				positive = zPositive;
+				returnAxis = Axis.Z;
+			}
+
+			return returnAxis;
+		}
+
+		Axis GetForwardAndRightAxisForNormal(Axis normalAxis, bool normalPositive,
+			out bool forwardPositive, out Axis rightAxis, out bool rightPositive)
+		{
+			switch (normalAxis)
+			{
+				case Axis.X:
+					rightAxis = Axis.Y;
+					rightPositive = normalPositive;
+					forwardPositive = normalPositive;
+					return Axis.Z;
+					
+				case Axis.Y:
+					rightAxis = Axis.X;
+					rightPositive = normalPositive;
+					forwardPositive = normalPositive;
+					return Axis.Z;
+
+				case Axis.Z:
+					forwardPositive = normalPositive;
+					rightPositive = normalPositive;
+					rightAxis = Axis.Y;
+					return Axis.X;
+
+				default:
+					forwardPositive = true;
+					rightAxis = Axis.X;
+					rightPositive = true;
+					return Axis.Z;
+			}
+		}
+
+		Vector3 GetVectorForAxis(Axis axis)
+		{
+			switch (axis)
+			{
+				case Axis.None:
+					return Vector3.zero;
+				case Axis.X:
+					return Vector3.right;
+				case Axis.Y:
+					return Vector3.up;
+				case Axis.Z:
+					return Vector3.forward;
+				case Axis.All:
+					return Vector3.one;
+				default:
+					return Vector3.zero;
+			}
+		}
+
 		Pose GetSurfaceSnapPose(Pose inputPose)
 		{
 			Pose snappedPose = inputPose;
@@ -310,11 +405,33 @@ namespace Instrumental.Interaction.Constraints
 			float distance = poseOffset.magnitude;
 
 			// calculate rotation offsets
+			bool objectNormalPositive = false;
+			Axis objectNormalLocal = GetSnapAxisForNormal(surfaceSnap.ObjectNormal * -1, out objectNormalPositive);
+
+			bool objectForwardPositive, objectRightPositive;
+			Axis objectForwardAxis, objectRightAxis;
+
+			objectForwardAxis = GetForwardAndRightAxisForNormal(objectNormalLocal, objectNormalPositive,
+				out objectForwardPositive, out objectRightAxis, out objectRightPositive);
+
+			Vector3 upVector = inputPose.rotation * (GetVectorForAxis(objectNormalLocal));
+			Vector3 forwardVector = inputPose.rotation * (GetVectorForAxis(objectForwardAxis));
+			//Vector3 rightVector = Vector3.Cross(forwardVector, upVector);
+
+			Quaternion identityInverse = Quaternion.Inverse(Quaternion.identity);
+
+			Plane surfacePlane = new Plane(surfaceSnap.SurfaceNormal, surfaceSnap.SurfacePoint);
+			forwardVector = Vector3.ProjectOnPlane(forwardVector, surfaceSnap.SurfaceNormal);
+
+			Quaternion surfaceRotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(inputPose.forward, surfaceSnap.SurfaceNormal)
+				, surfaceSnap.SurfaceNormal);
+
+
 			Quaternion fromToRotation = Quaternion.FromToRotation(surfaceSnap.ObjectNormal * -1, surfaceSnap.SurfaceNormal);
 
 			Vector3 position = surfaceSnap.SurfacePoint + (surfaceSnap.SurfaceNormal * distance);
 			snappedPose.position = position;
-			snappedPose.rotation = fromToRotation * graspItem.RigidBody.rotation;
+			snappedPose.rotation = surfaceRotation; // if I just do surface rotation it does the normal snapping behavior
 
 			return snappedPose;
 		}
