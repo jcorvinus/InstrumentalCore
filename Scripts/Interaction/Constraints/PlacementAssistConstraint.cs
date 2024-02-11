@@ -53,7 +53,7 @@ namespace Instrumental.Interaction.Constraints
 
 		// grid mode vars
 
-		// debug vis
+		#region Debug Variables
 		GameObject debugSphereA;
 		GameObject debugSphereB;
 
@@ -62,8 +62,11 @@ namespace Instrumental.Interaction.Constraints
 		[SerializeField] GameObject placementPreview;
 		[SerializeField] bool clearConstraint;
 		[SerializeField] bool setConstraint;
-		[SerializeField] bool useLockPose;
-		[SerializeField] Transform testLockPose;
+
+		[SerializeField] bool copyNormalAndPoseToTestBed;
+		[SerializeField] Transform normalTest;
+		[SerializeField] Transform posetest;
+		#endregion
 
 
 		protected override void Awake()
@@ -312,36 +315,29 @@ namespace Instrumental.Interaction.Constraints
 		{
 			positive = false;
 
-			Axis returnAxis = Axis.None;
-			Vector3 localNormal = transform.InverseTransformDirection(objectNormal * -1);
+			Vector3 localNormal = transform.InverseTransformDirection(objectNormal);
 
-			bool xPositive = Vector3.Dot(localNormal, Vector3.right) >= 0;
-			bool yPositive = Vector3.Dot(localNormal, Vector3.up) >= 0;
-			bool zPositive = Vector3.Dot(localNormal, Vector3.right) >= 0;
-			float xAngle = Vector3.Angle(localNormal, Vector3.right);
-			float yAngle = Vector3.Angle(localNormal, Vector3.up);
-			float zAngle = Vector3.Angle(localNormal, Vector3.forward);
-			float minAngle = Mathf.Min(xAngle, yAngle, zAngle); // I think we might want to use mathf.max here
-			// maybe this is a better application for vector3.angle,
-			// then getting our sign via the dot product :think:
+			float maxComponent = Mathf.Max(Mathf.Abs(localNormal.x), Mathf.Abs(localNormal.y), Mathf.Abs(localNormal.z));
 
-			if (minAngle == xAngle)
+			bool xMax = maxComponent == Mathf.Abs(localNormal.x);
+			bool yMax = maxComponent == Mathf.Abs(localNormal.y);
+			bool zMax = maxComponent == Mathf.Abs(localNormal.z);
+
+			if (xMax)
 			{
-				positive = xPositive;
-				returnAxis = Axis.X;
+				positive = (Mathf.Sign(localNormal.x) > 0) ? true : false;
+				return Axis.X;
 			}
-			else if (minAngle == yAngle)
+			else if (yMax)
 			{
-				positive = yPositive;
-				returnAxis = Axis.Y;
+				positive = (Mathf.Sign(localNormal.y) > 0) ? true : false;
+				return Axis.Y;
 			}
 			else
 			{
-				positive = zPositive;
-				returnAxis = Axis.Z;
+				positive = (Mathf.Sign(localNormal.z) > 0) ? true : false;
+				return Axis.Z;
 			}
-
-			return returnAxis;
 		}
 
 		Axis GetForwardAndRightAxisForNormal(Axis normalAxis, bool normalPositive,
@@ -375,24 +371,26 @@ namespace Instrumental.Interaction.Constraints
 			}
 		}
 
-		Vector3 GetVectorForAxis(Axis axis)
+		Vector3 GetVectorForAxis(Axis axis, bool positive)
 		{
 			switch (axis)
 			{
 				case Axis.None:
 					return Vector3.zero;
 				case Axis.X:
-					return Vector3.right;
+					return Vector3.right * ((positive) ? 1 : -1);
 				case Axis.Y:
-					return Vector3.up;
+					return Vector3.up * ((positive) ? 1 : -1);
 				case Axis.Z:
-					return Vector3.forward;
+					return Vector3.forward * ((positive) ? 1 : -1);
 				case Axis.All:
 					return Vector3.one;
 				default:
 					return Vector3.zero;
 			}
 		}
+
+		Quaternion testRotation = Quaternion.identity;
 
 		Pose GetSurfaceSnapPose(Pose inputPose)
 		{
@@ -406,7 +404,8 @@ namespace Instrumental.Interaction.Constraints
 
 			// calculate rotation offsets
 			bool objectNormalPositive = false;
-			Axis objectNormalLocal = GetSnapAxisForNormal(surfaceSnap.ObjectNormal * -1, out objectNormalPositive);
+			Vector3 worldSpaceObjectNormalInverse = surfaceSnap.ObjectNormal * -1;
+			Axis objectNormalLocal = GetSnapAxisForNormal(worldSpaceObjectNormalInverse, out objectNormalPositive);
 
 			bool objectForwardPositive, objectRightPositive;
 			Axis objectForwardAxis, objectRightAxis;
@@ -414,24 +413,46 @@ namespace Instrumental.Interaction.Constraints
 			objectForwardAxis = GetForwardAndRightAxisForNormal(objectNormalLocal, objectNormalPositive,
 				out objectForwardPositive, out objectRightAxis, out objectRightPositive);
 
-			Vector3 upVector = inputPose.rotation * (GetVectorForAxis(objectNormalLocal));
-			Vector3 forwardVector = inputPose.rotation * (GetVectorForAxis(objectForwardAxis));
-			//Vector3 rightVector = Vector3.Cross(forwardVector, upVector);
+			Vector3 upVector = inputPose.rotation * (GetVectorForAxis(objectNormalLocal, objectNormalPositive));
+			Vector3 forwardVector = inputPose.rotation * (GetVectorForAxis(objectForwardAxis, objectForwardPositive));
+			//Vector3 rightVector = Vector3.Cross(upVector, forwardVector);
+
+			testRotation = Quaternion.LookRotation(forwardVector, upVector);
+
+			if(copyNormalAndPoseToTestBed)
+			{
+				normalTest.SetPositionAndRotation(surfaceSnap.ObjectPoint,
+					testRotation);
+
+				posetest.SetPositionAndRotation(transform.position, transform.rotation);
+			}
 
 			Quaternion identityInverse = Quaternion.Inverse(Quaternion.identity);
 
 			Plane surfacePlane = new Plane(surfaceSnap.SurfaceNormal, surfaceSnap.SurfacePoint);
-			forwardVector = Vector3.ProjectOnPlane(forwardVector, surfaceSnap.SurfaceNormal);
+			//forwardVector = Vector3.ProjectOnPlane(forwardVector, surfaceSnap.SurfaceNormal);
 
-			Quaternion surfaceRotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(inputPose.forward, surfaceSnap.SurfaceNormal)
-				, surfaceSnap.SurfaceNormal);
+			Quaternion surfaceRotation = Quaternion.LookRotation(
+				Vector3.ProjectOnPlane(inputPose.forward, surfaceSnap.SurfaceNormal),
+				surfaceSnap.SurfaceNormal);
 
-
-			Quaternion fromToRotation = Quaternion.FromToRotation(surfaceSnap.ObjectNormal * -1, surfaceSnap.SurfaceNormal);
+			Quaternion fromToRotation = Quaternion.FromToRotation(worldSpaceObjectNormalInverse, surfaceSnap.SurfaceNormal);
 
 			Vector3 position = surfaceSnap.SurfacePoint + (surfaceSnap.SurfaceNormal * distance);
 			snappedPose.position = position;
-			snappedPose.rotation = surfaceRotation; // if I just do surface rotation it does the normal snapping behavior
+
+
+			// only use to get a feel for something close to what we need
+			//snappedPose.rotation = fromToRotation * inputPose.rotation; // this results in a 'soft' surface rotation snap.
+																		// because we're applying the offset between the object's normal and surface normal to the input rotation, which is not
+																		// the same as the object's current rotation. If we use the object's rotation, the snap is 'harder' but it completely
+																		// sucks the object in and prevents any further rotation, meaning the user's hand can't rotate the object at all anymore.
+																		// this is what led to the 'attempting to project the input pose basis vectors onto the surface plane' approach that is currently
+																		// failing because I only know how to do it with certain input basis vectors
+
+			// uncomment when we're done validating our surface normal -> local rotation
+			// calculation
+			//snappedPose.rotation = surfaceRotation; // if I just do surface rotation it does the normal snapping behavior
 
 			return snappedPose;
 		}
@@ -450,12 +471,6 @@ namespace Instrumental.Interaction.Constraints
 
 			Pose lerpPose = new Pose(Vector3.Lerp(targetPose.position, snapPose.position, snapTValue),
 				Quaternion.Slerp(targetPose.rotation, snapPose.rotation, snapTValue));
-
-			if (useLockPose)
-			{
-				lerpPose = new Pose(Vector3.Lerp(targetPose.position, testLockPose.position, snapTValue),
-				Quaternion.Slerp(targetPose.rotation, testLockPose.rotation, snapTValue));
-			}
 
 			debugSphereB.transform.position = surfaceSnap.ObjectPoint;
 			debugSphereB.SetActive(true);
@@ -511,6 +526,19 @@ namespace Instrumental.Interaction.Constraints
 
 		}
 
+		void DrawBasis(Vector3 position, Quaternion rotation)
+		{
+			Gizmos.color = Color.blue;
+			Vector3 forward = (testRotation * Vector3.forward);
+			Gizmos.DrawLine(position, position + (forward * 0.1f));
+			Vector3 up = (testRotation * Vector3.up);
+			Gizmos.color = Color.yellow;
+			Gizmos.DrawLine(position, position + (up * 0.1f));
+			Vector3 right = Vector3.Cross(up, forward);
+			Gizmos.color = Color.red;
+			Gizmos.DrawLine(position, position + (right * 0.1f));
+		}
+
 		private void OnDrawGizmos()
 		{
 			Gizmos.color = Color.blue;
@@ -518,6 +546,11 @@ namespace Instrumental.Interaction.Constraints
 
 			Gizmos.color = Color.green;
 			Gizmos.DrawLine(surfaceSnap.SurfacePoint, surfaceSnap.SurfacePoint + (surfaceSnap.SurfaceNormal * 0.01f));
+
+			// draw our test rotation
+			Vector3 position = transform.position;
+
+			DrawBasis(position, testRotation);
 		}
 	}
 }
