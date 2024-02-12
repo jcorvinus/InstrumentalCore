@@ -391,6 +391,7 @@ namespace Instrumental.Interaction.Constraints
 		}
 
 		Quaternion testRotation = Quaternion.identity;
+		Quaternion testLocalRotation = Quaternion.identity;
 
 		Pose GetSurfaceSnapPose(Pose inputPose)
 		{
@@ -413,13 +414,18 @@ namespace Instrumental.Interaction.Constraints
 			objectForwardAxis = GetForwardAndRightAxisForNormal(objectNormalLocal, objectNormalPositive,
 				out objectForwardPositive, out objectRightAxis, out objectRightPositive);
 
-			Vector3 upVector = inputPose.rotation * (GetVectorForAxis(objectNormalLocal, objectNormalPositive));
-			Vector3 forwardVector = inputPose.rotation * (GetVectorForAxis(objectForwardAxis, objectForwardPositive));
-			//Vector3 rightVector = Vector3.Cross(upVector, forwardVector);
+			Vector3 upVectorLocal = GetVectorForAxis(objectNormalLocal, objectNormalPositive),
+				forwardVectorLocal = GetVectorForAxis(objectForwardAxis, objectForwardPositive);
+			Quaternion localRebasedRotation = Quaternion.LookRotation(forwardVectorLocal, upVectorLocal);
+			testLocalRotation = localRebasedRotation; // remove when done testing
 
-			testRotation = Quaternion.LookRotation(forwardVector, upVector);
+			Vector3 upVector = surfaceSnap.SurfaceNormal; //inputPose.rotation * (upVectorLocal);
+			Vector3 forwardVector = inputPose.rotation * (forwardVectorLocal);
 
-			if(copyNormalAndPoseToTestBed)
+			forwardVector = Vector3.ProjectOnPlane(forwardVector, surfaceSnap.SurfaceNormal);
+			testRotation = Quaternion.LookRotation(forwardVector, upVector); // remove when done testing
+
+			if (copyNormalAndPoseToTestBed)
 			{
 				normalTest.SetPositionAndRotation(surfaceSnap.ObjectPoint,
 					testRotation);
@@ -427,32 +433,15 @@ namespace Instrumental.Interaction.Constraints
 				posetest.SetPositionAndRotation(transform.position, transform.rotation);
 			}
 
-			Quaternion identityInverse = Quaternion.Inverse(Quaternion.identity);
+			Quaternion surfaceRotation = Quaternion.LookRotation(forwardVector, upVector);
 
-			Plane surfacePlane = new Plane(surfaceSnap.SurfaceNormal, surfaceSnap.SurfacePoint);
-			//forwardVector = Vector3.ProjectOnPlane(forwardVector, surfaceSnap.SurfaceNormal);
+			Quaternion rotationOffset = Quaternion.Inverse(localRebasedRotation);
 
-			Quaternion surfaceRotation = Quaternion.LookRotation(
-				Vector3.ProjectOnPlane(inputPose.forward, surfaceSnap.SurfaceNormal),
-				surfaceSnap.SurfaceNormal);
-
-			Quaternion fromToRotation = Quaternion.FromToRotation(worldSpaceObjectNormalInverse, surfaceSnap.SurfaceNormal);
+			Quaternion rotation = surfaceRotation * rotationOffset;
 
 			Vector3 position = surfaceSnap.SurfacePoint + (surfaceSnap.SurfaceNormal * distance);
 			snappedPose.position = position;
-
-
-			// only use to get a feel for something close to what we need
-			//snappedPose.rotation = fromToRotation * inputPose.rotation; // this results in a 'soft' surface rotation snap.
-																		// because we're applying the offset between the object's normal and surface normal to the input rotation, which is not
-																		// the same as the object's current rotation. If we use the object's rotation, the snap is 'harder' but it completely
-																		// sucks the object in and prevents any further rotation, meaning the user's hand can't rotate the object at all anymore.
-																		// this is what led to the 'attempting to project the input pose basis vectors onto the surface plane' approach that is currently
-																		// failing because I only know how to do it with certain input basis vectors
-
-			// uncomment when we're done validating our surface normal -> local rotation
-			// calculation
-			//snappedPose.rotation = surfaceRotation; // if I just do surface rotation it does the normal snapping behavior
+			snappedPose.rotation = rotation;
 
 			return snappedPose;
 		}
@@ -550,6 +539,7 @@ namespace Instrumental.Interaction.Constraints
 			// draw our test rotation
 			Vector3 position = transform.position;
 
+			DrawBasis(position, transform.rotation * testLocalRotation);
 			DrawBasis(position, testRotation);
 		}
 	}

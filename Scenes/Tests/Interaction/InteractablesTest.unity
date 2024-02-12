@@ -1097,6 +1097,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   normalRef: {fileID: 2140331930}
+  drawGizmos: 0
 --- !u!1 &265877174
 GameObject:
   m_ObjectHideFlags: 0
@@ -1264,7 +1265,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &284009410
 Transform:
   m_ObjectHideFlags: 0
@@ -1272,7 +1273,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 284009409}
-  m_LocalRotation: {x: -0.010773248, y: 0.14125572, z: -0.0015372874, w: -0.9899134}
+  m_LocalRotation: {x: -0.027907815, y: 0.14120795, z: -0.0039823055, w: -0.98957855}
   m_LocalPosition: {x: -0.19192, y: 0.925805, z: 0.118433}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1280,7 +1281,7 @@ Transform:
   - {fileID: 784015526}
   m_Father: {fileID: 0}
   m_RootOrder: 19
-  m_LocalEulerAnglesHint: {x: 1.247, y: -376.242, z: 0}
+  m_LocalEulerAnglesHint: {x: 3.231, y: -376.242, z: 0}
 --- !u!4 &313423227 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2315127150805337353, guid: 9fde6386fcf85d146a21ffeb0bb45d80,
@@ -2941,7 +2942,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &721826830
 Transform:
   m_ObjectHideFlags: 0
@@ -4287,6 +4288,68 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1053292263}
   m_CullTransparentMesh: 1
+--- !u!1 &1064541449
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1064541450}
+  m_Layer: 0
+  m_Name: BuildPlayspaceRef
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1064541450
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1064541449}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -0.811}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 22
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1069869369
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1069869370}
+  m_Layer: 0
+  m_Name: JCPlayspaceRef
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1069869370
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1069869369}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: 1.066, y: 0, z: -1.034}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 21
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!1 &1082060923
 GameObject:
   m_ObjectHideFlags: 0
@@ -4832,7 +4895,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1262073109
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4846,6 +4909,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   normalRef: {fileID: 284009410}
+  drawGizmos: 1
 --- !u!114 &1262073110
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4900,7 +4964,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1262073108}
   m_LocalRotation: {x: 0.71386486, y: -0.029051827, z: 0.03270681, w: 0.6989158}
-  m_LocalPosition: {x: -0.19197, y: 0.975819, z: 0.118331}
+  m_LocalPosition: {x: -0.1923, y: 1.0233, z: 0.1193}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5906,7 +5970,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1470792996
 Transform:
   m_ObjectHideFlags: 0
