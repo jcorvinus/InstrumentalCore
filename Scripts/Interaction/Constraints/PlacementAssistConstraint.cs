@@ -4,14 +4,14 @@ using UnityEngine;
 
 namespace Instrumental.Interaction.Constraints
 {
-    public class PlacementAssistConstraint : GraspConstraint
+	public class PlacementAssistConstraint : GraspConstraint
 	{
 		public enum AssistMode
-		{ 
-            None=0,
-            Surface=1,
-            Grid=2
-        }
+		{
+			None = 0,
+			Surface = 1,
+			Grid = 2
+		}
 
 		public enum Axis : byte
 		{
@@ -22,7 +22,7 @@ namespace Instrumental.Interaction.Constraints
 			All = 7
 		}
 
-        [SerializeField] AssistMode mode = AssistMode.Surface;
+		[SerializeField] AssistMode mode = AssistMode.Surface;
 		const int colliderCheckCount = 5;
 		Collider[] colliderCheckBuffer;
 
@@ -38,8 +38,9 @@ namespace Instrumental.Interaction.Constraints
 		[SerializeField] float surfaceAdjustAmt = 0.00493f;
 		float surfaceSnapDetectRadius = 0.1f;
 		float snapBreakStrainAmount = 0.125f;
+		[SerializeField] bool angleAroundSurfaceSnap = true;
+		[SerializeField] float aroundNormalAngleSnap = 10;
 
-		[System.Serializable]
 		public struct SurfaceSnapInfo
 		{
 			public Vector3 SurfacePoint;
@@ -50,6 +51,14 @@ namespace Instrumental.Interaction.Constraints
 		}
 
 		SurfaceSnapInfo surfaceSnap;
+
+		public struct SurfaceAngleSnapDirections
+		{
+			public Vector3 Forward;
+			public Vector3 Back;
+			public Vector3 Right;
+			public Vector3 Left;
+		}
 
 		// grid mode vars
 
@@ -350,7 +359,57 @@ namespace Instrumental.Interaction.Constraints
 			}
 		}
 
-		Quaternion testRotation = Quaternion.identity;
+		SurfaceAngleSnapDirections GetAngleSnapDirectionsFromSurface(Vector3 normal, Collider surfaceCollider)
+		{
+			Vector3 normalLocal = surfaceCollider.transform.InverseTransformDirection(normal);
+
+			bool normalLocalPositive;
+			Axis normalAxisLocal = GetSnapAxisForNormal(normalLocal, out normalLocalPositive);
+
+			Axis forwardAxisLocal, rightAxisLocal;
+			bool forwardAxisLocalPositive, rightAxisLocalPositive;
+			forwardAxisLocal = GetForwardAndRightAxisForNormal(normalAxisLocal, normalLocalPositive, out forwardAxisLocalPositive,
+				out rightAxisLocal, out rightAxisLocalPositive);
+
+			Vector3 forward, back, right, left;
+			forward = GetVectorForAxis(forwardAxisLocal, forwardAxisLocalPositive);
+			back = GetVectorForAxis(forwardAxisLocal, !forwardAxisLocalPositive);
+			right = GetVectorForAxis(rightAxisLocal, rightAxisLocalPositive);
+			left = GetVectorForAxis(rightAxisLocal, !rightAxisLocalPositive);
+
+			return new SurfaceAngleSnapDirections()
+			{
+				Forward = surfaceCollider.transform.TransformDirection(forward),
+				Back = surfaceCollider.transform.TransformDirection(back),
+				Right = surfaceCollider.transform.TransformDirection(right),
+				Left = surfaceCollider.transform.TransformDirection(left)
+			};
+		}
+
+		Vector3 SnapInputVector(Vector3 inputVector, SurfaceAngleSnapDirections directions,
+			float threshold)
+		{
+			float forwardDot, backDot, rightDot, leftDot;
+
+			forwardDot = Vector3.Dot(inputVector, directions.Forward);
+			backDot = Vector3.Dot(inputVector, directions.Back);
+			rightDot = Vector3.Dot(inputVector, directions.Right);
+			leftDot = Vector3.Dot(inputVector, directions.Left);
+
+			float maxDot = Mathf.Max(forwardDot, leftDot, rightDot, backDot);
+			Vector3 matchDirection = Vector3.zero;
+
+			if (maxDot == forwardDot) matchDirection = directions.Forward;
+			else if (maxDot == backDot) matchDirection = directions.Back;
+			else if (maxDot == rightDot) matchDirection = directions.Right;
+			else matchDirection = directions.Left;
+
+			Debug.Assert(matchDirection != Vector3.zero, "match direction was zero");
+
+			float angle = Vector3.Angle(inputVector, matchDirection);
+
+			return (angle < threshold) ? matchDirection : inputVector;
+		}
 
 		Pose GetSurfaceSnapPose(Pose inputPose)
 		{
@@ -362,7 +421,8 @@ namespace Instrumental.Interaction.Constraints
 			Vector3 poseOffset = (graspItem.RigidBody.position - surfaceSnap.ObjectPoint);
 			float distance = poseOffset.magnitude;
 
-			// calculate rotation offsets
+			// Start building our rotation
+			// get our surface normal in object local space, then find our local forward and right vectors
 			bool objectNormalPositive = false;
 			Vector3 worldSpaceObjectNormalInverse = surfaceSnap.ObjectNormal * -1;
 			Axis objectNormalLocal = GetSnapAxisForNormal(worldSpaceObjectNormalInverse, out objectNormalPositive);
@@ -377,17 +437,26 @@ namespace Instrumental.Interaction.Constraints
 				forwardVectorLocal = GetVectorForAxis(objectForwardAxis, objectForwardPositive);
 			Quaternion localRebasedRotation = Quaternion.LookRotation(forwardVectorLocal, upVectorLocal);
 
-			Vector3 upVector = surfaceSnap.SurfaceNormal; //inputPose.rotation * (upVectorLocal);
+			// this approach lets us define a regular old rotation,
+			// by using our surface normal as up, a vector from the object as a 'forward',
+			// and project that forward onto the plane of the surface normal to achieve a perfect alignment
+			// to the surface
+			Vector3 upVector = surfaceSnap.SurfaceNormal;
 			Vector3 forwardVector = inputPose.rotation * (forwardVectorLocal);
-
 			forwardVector = Vector3.ProjectOnPlane(forwardVector, surfaceSnap.SurfaceNormal);
-			testRotation = Quaternion.LookRotation(forwardVector, upVector); // remove when done testing
+
+			// to do angle snap, we can use basis vectors from the surface collider to provide snap angles
+			// for the forward vector
+			if(angleAroundSurfaceSnap)
+			{
+				SurfaceAngleSnapDirections directions = GetAngleSnapDirectionsFromSurface(upVector, surfaceSnap.SurfaceCollider);
+				forwardVector = SnapInputVector(forwardVector, directions, aroundNormalAngleSnap);
+			}
 
 			Quaternion surfaceRotation = Quaternion.LookRotation(forwardVector, upVector);
-
-			Quaternion rotationOffset = Quaternion.Inverse(localRebasedRotation);
-
-			Quaternion rotation = surfaceRotation * rotationOffset;
+			Quaternion rotation = surfaceRotation * Quaternion.Inverse(localRebasedRotation); // this operation lets us 'rebase' the simple surface rotation
+																							  // into our object's local coordinates, the object to align
+																							  // to the surface regardless of the object's entry orientation.
 
 			Vector3 position = surfaceSnap.SurfacePoint + (surfaceSnap.SurfaceNormal * distance);
 			snappedPose.position = position;
@@ -449,19 +518,6 @@ namespace Instrumental.Interaction.Constraints
 
 		}
 
-		void DrawBasis(Vector3 position, Quaternion rotation)
-		{
-			Gizmos.color = Color.blue;
-			Vector3 forward = (testRotation * Vector3.forward);
-			Gizmos.DrawLine(position, position + (forward * 0.1f));
-			Vector3 up = (testRotation * Vector3.up);
-			Gizmos.color = Color.yellow;
-			Gizmos.DrawLine(position, position + (up * 0.1f));
-			Vector3 right = Vector3.Cross(up, forward);
-			Gizmos.color = Color.red;
-			Gizmos.DrawLine(position, position + (right * 0.1f));
-		}
-
 		private void OnDrawGizmos()
 		{
 			Gizmos.color = Color.blue;
@@ -469,11 +525,6 @@ namespace Instrumental.Interaction.Constraints
 
 			Gizmos.color = Color.green;
 			Gizmos.DrawLine(surfaceSnap.SurfacePoint, surfaceSnap.SurfacePoint + (surfaceSnap.SurfaceNormal * 0.01f));
-
-			// draw our test rotation
-			Vector3 position = transform.position;
-
-			DrawBasis(position, testRotation);
 		}
 	}
 }

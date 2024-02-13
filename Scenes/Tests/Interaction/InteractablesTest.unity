@@ -6974,13 +6974,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mode: 1
   surfaceAdjustAmt: 0.00493
-  previewPlacement: 1
-  placementPreview: {fileID: 1477151522}
-  clearConstraint: 0
-  setConstraint: 0
-  copyNormalAndPoseToTestBed: 0
-  normalTest: {fileID: 284009410}
-  posetest: {fileID: 1262073113}
+  angleAroundSurfaceSnap: 1
+  aroundNormalAngleSnap: 10
 --- !u!1 &1778161384
 GameObject:
   m_ObjectHideFlags: 0
