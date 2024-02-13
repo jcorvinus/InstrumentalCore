@@ -57,21 +57,6 @@ namespace Instrumental.Interaction.Constraints
 		{
 			base.Awake();
 			colliderCheckBuffer = new Collider[colliderCheckCount];
-
-			debugSphereA = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-			SphereCollider debugSphereACollider = debugSphereA.GetComponent<SphereCollider>();
-			Destroy(debugSphereACollider);
-			debugSphereA.transform.localScale = Vector3.one * 0.02f;
-			debugSphereA.name = "DebugA";
-
-			debugSphereB = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-			SphereCollider debugSphereBCollider = debugSphereB.GetComponent<SphereCollider>();
-			Destroy(debugSphereBCollider);
-			debugSphereB.transform.localScale = Vector3.one * 0.02f;
-			debugSphereB.name = "DebugB";
-
-			debugSphereA.SetActive(false);
-			debugSphereB.SetActive(false);
 		}
 
 		// Start is called before the first frame update
@@ -91,17 +76,7 @@ namespace Instrumental.Interaction.Constraints
 
 		void DoDebugCommands()
 		{
-			if(clearConstraint)
-			{
-				clearConstraint = false;
-				graspItem.SetConstraint(null);
-			}
 
-			if(setConstraint)
-			{
-				setConstraint = false;
-				graspItem.SetConstraint(this);
-			}
 		}
 
 		// Update is called once per frame
