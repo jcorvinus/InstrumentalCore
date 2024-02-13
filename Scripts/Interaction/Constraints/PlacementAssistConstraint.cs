@@ -53,22 +53,6 @@ namespace Instrumental.Interaction.Constraints
 
 		// grid mode vars
 
-		#region Debug Variables
-		GameObject debugSphereA;
-		GameObject debugSphereB;
-
-		[SerializeField] bool previewPlacement; // if false, and a preview is present, the preview will go to the
-					// 'base' position and the item will go to the 'placement' position
-		[SerializeField] GameObject placementPreview;
-		[SerializeField] bool clearConstraint;
-		[SerializeField] bool setConstraint;
-
-		[SerializeField] bool copyNormalAndPoseToTestBed;
-		[SerializeField] Transform normalTest;
-		[SerializeField] Transform posetest;
-		#endregion
-
-
 		protected override void Awake()
 		{
 			base.Awake();
@@ -280,6 +264,7 @@ namespace Instrumental.Interaction.Constraints
 			else
 			{
 				// this is weird, what do we do here?
+				Debug.Log("Hit weird raycast failure in GetSnapForCollider");
 			}
 
 			snapInfo.ObjectPoint = objectClosest;
@@ -391,7 +376,6 @@ namespace Instrumental.Interaction.Constraints
 		}
 
 		Quaternion testRotation = Quaternion.identity;
-		Quaternion testLocalRotation = Quaternion.identity;
 
 		Pose GetSurfaceSnapPose(Pose inputPose)
 		{
@@ -417,21 +401,12 @@ namespace Instrumental.Interaction.Constraints
 			Vector3 upVectorLocal = GetVectorForAxis(objectNormalLocal, objectNormalPositive),
 				forwardVectorLocal = GetVectorForAxis(objectForwardAxis, objectForwardPositive);
 			Quaternion localRebasedRotation = Quaternion.LookRotation(forwardVectorLocal, upVectorLocal);
-			testLocalRotation = localRebasedRotation; // remove when done testing
 
 			Vector3 upVector = surfaceSnap.SurfaceNormal; //inputPose.rotation * (upVectorLocal);
 			Vector3 forwardVector = inputPose.rotation * (forwardVectorLocal);
 
 			forwardVector = Vector3.ProjectOnPlane(forwardVector, surfaceSnap.SurfaceNormal);
 			testRotation = Quaternion.LookRotation(forwardVector, upVector); // remove when done testing
-
-			if (copyNormalAndPoseToTestBed)
-			{
-				normalTest.SetPositionAndRotation(surfaceSnap.ObjectPoint,
-					testRotation);
-
-				posetest.SetPositionAndRotation(transform.position, transform.rotation);
-			}
 
 			Quaternion surfaceRotation = Quaternion.LookRotation(forwardVector, upVector);
 
@@ -461,23 +436,7 @@ namespace Instrumental.Interaction.Constraints
 			Pose lerpPose = new Pose(Vector3.Lerp(targetPose.position, snapPose.position, snapTValue),
 				Quaternion.Slerp(targetPose.rotation, snapPose.rotation, snapTValue));
 
-			debugSphereB.transform.position = surfaceSnap.ObjectPoint;
-			debugSphereB.SetActive(true);
-
-			debugSphereA.transform.position = surfaceSnap.SurfacePoint;
-			debugSphereA.SetActive(true);
-
-			if (!previewPlacement)
-			{
-				placementPreview.transform.SetPositionAndRotation(targetPose.position, targetPose.rotation);
-				return lerpPose;
-			}
-			else
-			{
-				placementPreview.transform.SetPositionAndRotation(lerpPose.position, lerpPose.rotation);
-				//return targetPose;
-				return lerpPose;
-			}
+			return lerpPose;
 		}
 
 		Pose DoGridPose(Pose targetPose)
@@ -539,7 +498,6 @@ namespace Instrumental.Interaction.Constraints
 			// draw our test rotation
 			Vector3 position = transform.position;
 
-			DrawBasis(position, transform.rotation * testLocalRotation);
 			DrawBasis(position, testRotation);
 		}
 	}
