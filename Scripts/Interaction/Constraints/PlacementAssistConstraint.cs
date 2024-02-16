@@ -47,6 +47,7 @@ namespace Instrumental.Interaction.Constraints
 			public Vector3 SurfaceNormal;
 			public Vector3 ObjectPoint;
 			public Vector3 ObjectNormal;
+			public float Distance;
 			public Collider SurfaceCollider;
 		}
 
@@ -120,8 +121,8 @@ namespace Instrumental.Interaction.Constraints
 																		// How do we handle multiple valid candidates?
 						{
 							Collider candidateCollider = colliderCheckBuffer[i];
-							float surfaceSnapDistance = float.PositiveInfinity;
-							SurfaceSnapInfo candidateSnapInfo = GetCandidateSnapForCollider(centerOfMass, candidateCollider, out surfaceSnapDistance);
+							SurfaceSnapInfo candidateSnapInfo = GetCandidateSnapForCollider(centerOfMass, candidateCollider);
+							float surfaceSnapDistance = candidateSnapInfo.Distance;
 
 							if (surfaceSnapDistance < closestDistance)
 							{
@@ -172,9 +173,8 @@ namespace Instrumental.Interaction.Constraints
 		/// <param name="candidateCollider"></param>
 		/// <param name="distance"></param>
 		/// <returns></returns>
-		SurfaceSnapInfo GetCandidateSnapForCollider(Vector3 centerOfMass, Collider surfaceCollider, out float distance)
+		SurfaceSnapInfo GetCandidateSnapForCollider(Vector3 centerOfMass, Collider surfaceCollider)
 		{
-			distance = float.PositiveInfinity;
 			SurfaceSnapInfo candidateSnapInfo = new SurfaceSnapInfo();
 
 			Vector3 candidateSurfaceClosest = surfaceCollider.ClosestPoint(centerOfMass);
@@ -187,7 +187,7 @@ namespace Instrumental.Interaction.Constraints
 			{
 				candidateObjectClosest = hitInfo.point;
 
-				distance = Vector3.Distance(candidateSurfaceClosest, candidateObjectClosest);
+				candidateSnapInfo.Distance = Vector3.Distance(candidateSurfaceClosest, candidateObjectClosest);
 				candidateSnapInfo.ObjectPoint = candidateObjectClosest;
 				candidateSnapInfo.ObjectNormal = hitInfo.normal;
 				candidateSnapInfo.SurfaceCollider = surfaceCollider;
@@ -267,6 +267,7 @@ namespace Instrumental.Interaction.Constraints
 			{
 				objectToSurfaceDirection /= objectToSurfaceDistance;
 			}
+			snapInfo.Distance = objectToSurfaceDistance;
 
 			RaycastHit surfNormalHit;
 			if(snapInfo.SurfaceCollider.Raycast(new Ray(graspItem.RigidBody.position, objectToSurfaceDirection),
