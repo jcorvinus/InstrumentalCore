@@ -173,60 +173,6 @@ namespace Instrumental.Interaction.Constraints
 		/// <param name="candidateCollider"></param>
 		/// <param name="distance"></param>
 		/// <returns></returns>
-		SurfaceSnapInfo GetCandidateSnapForCollider(Vector3 inputPosition, Collider surfaceCollider)
-		{
-			SurfaceSnapInfo candidateSnapInfo = new SurfaceSnapInfo();
-
-			Vector3 candidateSurfaceClosest = surfaceCollider.ClosestPoint(inputPosition);
-			Vector3 candidateObjectClosest = Vector3.zero;
-			Vector3 raycastDirection = (graspItem.RigidBody.worldCenterOfMass - candidateSurfaceClosest).normalized;
-
-			RaycastHit hitInfo;
-
-			if (Physics.Raycast(new Ray(candidateSurfaceClosest, raycastDirection), out hitInfo))
-			{
-				candidateObjectClosest = hitInfo.point;
-
-				candidateSnapInfo.Distance = Vector3.Distance(candidateSurfaceClosest, candidateObjectClosest);
-				candidateSnapInfo.ObjectPoint = candidateObjectClosest;
-				candidateSnapInfo.ObjectNormal = hitInfo.normal;
-				candidateSnapInfo.SurfaceCollider = surfaceCollider;
-
-				// this will break if candidateSnapInfo.ObjectPoint is touching or inside of
-				// candidate collider. I think this has changed from previous versions of unity
-				// it might now just return the unfiltered point, it used to return 0
-				candidateSnapInfo.SurfacePoint = surfaceCollider.ClosestPoint(candidateSnapInfo.ObjectPoint);
-
-				// raycast for our surface normal
-				RaycastHit objectToSurfaceHit;
-				Vector3 objectToSurfaceDirection = (candidateSnapInfo.SurfacePoint - candidateSnapInfo.ObjectPoint);
-				float objectToSurfaceDistance = objectToSurfaceDirection.magnitude;
-
-				if (objectToSurfaceDistance <= Mathf.Epsilon)
-				{
-					// our length is zero, because the object is already sitting on the surface,
-					// likely because gravity is on and the object has settled.
-					Debug.Log("object to surface direction changed because of zero length distance");
-					objectToSurfaceDirection = (candidateSnapInfo.SurfacePoint - graspItem.RigidBody.worldCenterOfMass).normalized;
-				}
-				else
-				{
-					objectToSurfaceDirection /= objectToSurfaceDistance;
-				}
-
-				Ray objectToSurfaceRay = new Ray(candidateSnapInfo.ObjectPoint,
-					objectToSurfaceDirection);
-				surfaceCollider.Raycast(objectToSurfaceRay, out objectToSurfaceHit, surfaceSnapDetectRadius);
-				candidateSnapInfo.SurfaceNormal = objectToSurfaceHit.normal;
-
-				// push our point away from the surface a small amount so that it doesn't freak out
-				candidateSnapInfo.SurfacePoint =
-					candidateSnapInfo.SurfacePoint + (candidateSnapInfo.SurfaceNormal * surfaceAdjustAmt);
-			}
-
-			return candidateSnapInfo;
-		}
-
 		SurfaceSnapInfo GetSnapForCollider(Vector3 inputPosition, Collider surfaceCollider)
 		{
 			SurfaceSnapInfo snapInfo = new SurfaceSnapInfo();
@@ -255,8 +201,10 @@ namespace Instrumental.Interaction.Constraints
 			snapInfo.ObjectPoint = objectClosest;
 
 			// get our surface normal
-			Vector3 objectToSurfaceDirection = (surfaceClosest - objectClosest).normalized;
-			float objectToSurfaceDistance = objectToSurfaceDirection.magnitude;
+			Vector3 objectToSurfaceDirection = (surfaceClosest - objectClosest);
+			float objectToSurfaceDistance = objectToSurfaceDirection.magnitude; // you've screwed this up
+			objectToSurfaceDirection /= objectToSurfaceDistance;
+
 			if (objectToSurfaceDistance <= Mathf.Epsilon)
 			{
 				// our length is zero, because the object is already sitting on the surface,
