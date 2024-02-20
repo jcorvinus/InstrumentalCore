@@ -471,44 +471,6 @@ namespace Instrumental.Interaction.Constraints
 		}
 		#endregion
 
-		GridSnapInfo2D GetGridSnap(Vector3 inputPosition, SnapGrid grid)
-		{
-			GridSnapInfo2D snapInfo = new GridSnapInfo2D();
-
-			Vector3 projectedPointOnPlane = grid.GetSnappedPosition(inputPosition);
-			snapInfo.SurfacePoint = projectedPointOnPlane;
-
-			Vector3 objectClosest = Vector3.zero;
-			Vector3 surfToObject = (graspItem.RigidBody.worldCenterOfMass - projectedPointOnPlane).normalized;
-			RaycastHit hitInfo;
-
-			if(Physics.Raycast(new Ray(projectedPointOnPlane, surfToObject), out hitInfo))
-			{
-				objectClosest = hitInfo.point;
-				snapInfo.ObjectNormal = hitInfo.normal;
-			}
-			else
-			{
-				// this is weird, what do we do here?
-				Debug.Log("Hit weird raycast failure in GetSnapForCollider");
-				//Debug.Break();
-			}
-
-			snapInfo.ObjectPoint = objectClosest;
-
-			snapInfo.Distance = Vector3.Distance(projectedPointOnPlane, objectClosest);
-
-			// get our surface normal
-			snapInfo.SurfaceNormal = grid.transform.up;
-
-			// push our point away from the surface a small amount so that it doesn't freak out
-			snapInfo.SurfacePoint += (surfaceSnap.SurfaceNormal * surfaceAdjustAmt);
-
-			snapInfo.Grid = grid;
-
-			return snapInfo;
-		}
-
 		void CheckGridSnap()
 		{
 			if (SnapGrid.SnapGridCount() > 0)
@@ -594,6 +556,44 @@ namespace Instrumental.Interaction.Constraints
 			}
 		}
 
+		GridSnapInfo2D GetGridSnap(Vector3 inputPosition, SnapGrid grid)
+		{
+			GridSnapInfo2D snapInfo = new GridSnapInfo2D();
+
+			Vector3 projectedPointOnPlane = grid.GetSnappedPosition(inputPosition);
+			snapInfo.SurfacePoint = projectedPointOnPlane;
+
+			Vector3 objectClosest = Vector3.zero;
+			Vector3 surfToObject = (graspItem.RigidBody.worldCenterOfMass - projectedPointOnPlane).normalized;
+			RaycastHit hitInfo;
+
+			if (Physics.Raycast(new Ray(projectedPointOnPlane, surfToObject), out hitInfo))
+			{
+				objectClosest = hitInfo.point;
+				snapInfo.ObjectNormal = hitInfo.normal;
+			}
+			else
+			{
+				// this is weird, what do we do here?
+				Debug.Log("Hit weird raycast failure in GetSnapForCollider");
+				//Debug.Break();
+			}
+
+			snapInfo.ObjectPoint = objectClosest;
+
+			snapInfo.Distance = Vector3.Distance(projectedPointOnPlane, objectClosest);
+
+			// get our surface normal
+			snapInfo.SurfaceNormal = grid.transform.up;
+
+			// push our point away from the surface a small amount so that it doesn't freak out
+			snapInfo.SurfacePoint += (surfaceSnap.SurfaceNormal * surfaceAdjustAmt);
+
+			snapInfo.Grid = grid;
+
+			return snapInfo;
+		}
+
 		Pose GetGridSnapPose(Pose inputPose)
 		{
 			Pose snappedPose = inputPose;
@@ -634,7 +634,7 @@ namespace Instrumental.Interaction.Constraints
 			if (true) // formerly angleAroundSurfaceSnap
 			{
 				SurfaceAngleSnapDirections directions = GetAngleSnapDirectionsFromSurface(upVector, gridSnap.Grid.transform);
-				forwardVector = SnapInputVector(forwardVector, directions, 45);
+				forwardVector = SnapInputVector(forwardVector, directions, 44); // not quite 45 even though it should be because 45 exactly prevents hitting diagonals
 			}
 
 			Quaternion surfaceRotation = Quaternion.LookRotation(forwardVector, upVector);
