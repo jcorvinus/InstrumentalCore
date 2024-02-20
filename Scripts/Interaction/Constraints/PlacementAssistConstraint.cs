@@ -32,7 +32,7 @@ namespace Instrumental.Interaction.Constraints
 		float snapTimer = 0;
 		bool snapHasReset = true;
 
-		// surface mode vars
+		#region Surface Snap Vars
 		const float surfaceSnapDistance = 0.04f;
 		[Range(0, 0.1f)]
 		[SerializeField] float surfaceAdjustAmt = 0.00493f;
@@ -60,13 +60,48 @@ namespace Instrumental.Interaction.Constraints
 			public Vector3 Right;
 			public Vector3 Left;
 		}
+		#endregion
 
 		// grid mode vars
+		public struct GridSnapInfo2D
+		{
+			public Vector3 SurfacePoint;
+			public Vector3 SurfaceNormal;
+			public Vector3 ObjectPoint;
+			public Vector3 ObjectNormal;
+			public float Distance;
+			public SnapGrid Grid;
+		}
+
+		SnapGrid currentGrid;
+
+		// debug vars
+		GameObject debugSphereA;
+		GameObject debugSphereB;
 
 		protected override void Awake()
 		{
 			base.Awake();
 			colliderCheckBuffer = new Collider[colliderCheckCount];
+
+			debugSphereA = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+			SphereCollider debugSphereACollider = debugSphereA.GetComponent<SphereCollider>();
+			Destroy(debugSphereACollider);
+			debugSphereA.transform.localScale = Vector3.one * 0.02f;
+			debugSphereA.name = "DebugA";
+			MeshRenderer debugSphereARenderer = debugSphereA.GetComponent<MeshRenderer>();
+			debugSphereARenderer.material.color = Color.red;
+
+			debugSphereB = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+			SphereCollider debugSphereBCollider = debugSphereB.GetComponent<SphereCollider>();
+			Destroy(debugSphereBCollider);
+			debugSphereB.transform.localScale = Vector3.one * 0.02f;
+			debugSphereB.name = "DebugB";
+			MeshRenderer debugSphereBRenderer = debugSphereB.GetComponent<MeshRenderer>();
+			debugSphereBRenderer.material.color = Color.blue;
+
+			debugSphereA.SetActive(false);
+			debugSphereB.SetActive(false);
 		}
 
 		// Start is called before the first frame update
@@ -95,6 +130,7 @@ namespace Instrumental.Interaction.Constraints
 			DoDebugCommands();
         }
 
+		#region Surface Snap Methods
 		void CheckSurfaceSnap()
 		{
 			Vector3 centerOfMass = graspItem.RigidBody.worldCenterOfMass;
@@ -310,9 +346,9 @@ namespace Instrumental.Interaction.Constraints
 			}
 		}
 
-		SurfaceAngleSnapDirections GetAngleSnapDirectionsFromSurface(Vector3 normal, Collider surfaceCollider)
+		SurfaceAngleSnapDirections GetAngleSnapDirectionsFromSurface(Vector3 normal, Transform surface)
 		{
-			Vector3 normalLocal = surfaceCollider.transform.InverseTransformDirection(normal);
+			Vector3 normalLocal = surface.transform.InverseTransformDirection(normal);
 
 			bool normalLocalPositive;
 			Axis normalAxisLocal = GetSnapAxisForNormal(normalLocal, out normalLocalPositive);
@@ -330,10 +366,10 @@ namespace Instrumental.Interaction.Constraints
 
 			return new SurfaceAngleSnapDirections()
 			{
-				Forward = surfaceCollider.transform.TransformDirection(forward),
-				Back = surfaceCollider.transform.TransformDirection(back),
-				Right = surfaceCollider.transform.TransformDirection(right),
-				Left = surfaceCollider.transform.TransformDirection(left)
+				Forward = surface.transform.TransformDirection(forward),
+				Back = surface.transform.TransformDirection(back),
+				Right = surface.transform.TransformDirection(right),
+				Left = surface.transform.TransformDirection(left)
 			};
 		}
 
@@ -400,7 +436,7 @@ namespace Instrumental.Interaction.Constraints
 			// for the forward vector
 			if(angleAroundSurfaceSnap)
 			{
-				SurfaceAngleSnapDirections directions = GetAngleSnapDirectionsFromSurface(upVector, surfaceSnap.SurfaceCollider);
+				SurfaceAngleSnapDirections directions = GetAngleSnapDirectionsFromSurface(upVector, surfaceSnap.SurfaceCollider.transform);
 				forwardVector = SnapInputVector(forwardVector, directions, aroundNormalAngleSnap);
 			}
 
@@ -433,10 +469,211 @@ namespace Instrumental.Interaction.Constraints
 
 			return lerpPose;
 		}
+		#endregion
+
+		GridSnapInfo2D GetGridSnap(Vector3 inputPosition, SnapGrid grid)
+		{
+			GridSnapInfo2D snapInfo = new GridSnapInfo2D();
+
+			Vector3 projectedPointOnPlane = grid.GetSnappedPosition(inputPosition);
+			snapInfo.SurfacePoint = projectedPointOnPlane;
+
+			Vector3 objectClosest = Vector3.zero;
+			Vector3 surfToObject = (graspItem.RigidBody.worldCenterOfMass - projectedPointOnPlane).normalized;
+			RaycastHit hitInfo;
+
+			if(Physics.Raycast(new Ray(projectedPointOnPlane, surfToObject), out hitInfo))
+			{
+				objectClosest = hitInfo.point;
+				snapInfo.ObjectNormal = hitInfo.normal;
+			}
+			else
+			{
+				// this is weird, what do we do here?
+				Debug.Log("Hit weird raycast failure in GetSnapForCollider");
+				//Debug.Break();
+			}
+
+			snapInfo.ObjectPoint = objectClosest;
+
+			snapInfo.Distance = Vector3.Distance(projectedPointOnPlane, objectClosest);
+
+			// get our surface normal
+			snapInfo.SurfaceNormal = grid.transform.up;
+
+			// push our point away from the surface a small amount so that it doesn't freak out
+			snapInfo.SurfacePoint += (surfaceSnap.SurfaceNormal * surfaceAdjustAmt);
+
+			snapInfo.Grid = grid;
+
+			return snapInfo;
+		}
+
+		void CheckGridSnap()
+		{
+			if (SnapGrid.SnapGridCount() > 0)
+			{
+				Vector3 centerOfMass = graspItem.RigidBody.worldCenterOfMass;
+
+				if (!isSnapping)
+				{
+					// should we start snapping?
+					// check to see if any of our grid snaps are within the distance threshold
+
+					surfaceSnapDetectRadius = surfaceSnapDistance * 2f; // why are we modifying surface snap detect radius?
+					/*int hits = Physics.OverlapSphereNonAlloc(centerOfMass,
+						graspItem.ItemRadius + surfaceSnapDetectRadius, colliderCheckBuffer);*/
+
+					float closestDistance = float.PositiveInfinity;
+					int closestIndex = -1;
+
+					for(int gridIndx=0; gridIndx < SnapGrid.SnapGridCount(); gridIndx++)
+					{
+						SnapGrid grid = SnapGrid.GetGridForIndex(gridIndx);
+
+						// get closest point on grid
+						Vector3 pointInGridLocal = grid.transform.InverseTransformPoint(centerOfMass);
+
+						// are we on the correct side of the grid?
+						bool correctSide = pointInGridLocal.y > 0;
+						bool isInBounds = grid.IsInBounds(new Vector3(pointInGridLocal.x, 0, pointInGridLocal.z));
+
+						if(correctSide && isInBounds)
+						{
+							if(grid.Type == SnapGrid.GridType.TwoDimensional) // no clue what to do with 3d grids yet
+							{
+								float distance = pointInGridLocal.y;
+
+								if(distance < closestDistance && 
+									distance < 
+									(surfaceSnapDetectRadius + graspItem.ItemRadius)) // if greater than the surface snap detect radius, don't bother
+								{
+									closestDistance = distance;
+									closestIndex = gridIndx;
+								}
+							}
+						}
+					}
+
+					// we've got a grid. Let's see if we should snap to it
+					if(closestIndex >= 0)
+					{
+						if (!snapHasReset)
+						{
+							if (closestDistance > (surfaceSnapDistance + 0.05f))
+							{
+								snapHasReset = true;
+							}
+						}
+
+						SnapGrid grid = SnapGrid.GetGridForIndex(closestIndex);
+						GridSnapInfo2D snapInfo = GetGridSnap(centerOfMass, grid);
+
+						if(snapInfo.Distance < surfaceSnapDistance && snapHasReset)
+						{
+							isSnapping = true;
+							snapHasReset = false;
+							Debug.Log("Grid snap start on grid: " + grid.name);
+							currentGrid = grid;
+						}
+					}
+				}
+				else
+				{
+					// should we stop snapping?
+					if (graspItem.MaxStrain > snapBreakStrainAmount)
+					{
+						isSnapping = false;
+						currentGrid = null;
+					}
+				}
+			}
+			else
+			{
+				isSnapping = false;
+			}
+		}
+
+		Pose GetGridSnapPose(Pose inputPose)
+		{
+			Pose snappedPose = inputPose;
+
+			GridSnapInfo2D gridSnap = GetGridSnap(snappedPose.position, currentGrid);
+
+			SetDebugPointsToGridSnap(gridSnap);
+
+			Vector3 poseOffset = (graspItem.RigidBody.position - gridSnap.ObjectPoint);
+			float distance = poseOffset.magnitude;
+
+			// Start building our rotation
+			// get our surface normal in object local space, then find our local forward and right vectors
+			bool objectNormalPositive = false;
+			Vector3 worldSpaceObjectNormalInverse = gridSnap.ObjectNormal * -1;
+			Axis objectNormalLocal = GetSnapAxisForNormal(worldSpaceObjectNormalInverse, out objectNormalPositive);
+
+			bool objectForwardPositive, objectRightPositive;
+			Axis objectForwardAxis, objectRightAxis;
+
+			objectForwardAxis = GetForwardAndRightAxisForNormal(objectNormalLocal, objectNormalPositive,
+				out objectForwardPositive, out objectRightAxis, out objectRightPositive);
+
+			Vector3 upVectorLocal = GetVectorForAxis(objectNormalLocal, objectNormalPositive),
+				forwardVectorLocal = GetVectorForAxis(objectForwardAxis, objectForwardPositive);
+			Quaternion localRebasedRotation = Quaternion.LookRotation(forwardVectorLocal, upVectorLocal);
+
+			// this approach lets us define a regular old rotation,
+			// by using our surface normal as up, a vector from the object as a 'forward',
+			// and project that forward onto the plane of the surface normal to achieve a perfect alignment
+			// to the surface
+			Vector3 upVector = gridSnap.SurfaceNormal;
+			Vector3 forwardVector = inputPose.rotation * (forwardVectorLocal);
+			forwardVector = Vector3.ProjectOnPlane(forwardVector, gridSnap.SurfaceNormal);
+
+			// to do angle snap, we can use basis vectors from the surface collider to provide snap angles
+			// for the forward vector
+			if (true) // formerly angleAroundSurfaceSnap
+			{
+				SurfaceAngleSnapDirections directions = GetAngleSnapDirectionsFromSurface(upVector, gridSnap.Grid.transform);
+				forwardVector = SnapInputVector(forwardVector, directions, 45);
+			}
+
+			Quaternion surfaceRotation = Quaternion.LookRotation(forwardVector, upVector);
+			Quaternion rotation = surfaceRotation * Quaternion.Inverse(localRebasedRotation); // this operation lets us 'rebase' the simple surface rotation
+																							  // into our object's local coordinates, the object to align
+																							  // to the surface regardless of the object's entry orientation.
+
+			Vector3 position = gridSnap.SurfacePoint + (gridSnap.SurfaceNormal * distance);
+			snappedPose.position = position;
+			snappedPose.rotation = rotation;
+
+			return snappedPose;
+		}
+
+		void SetDebugPointsToGridSnap(GridSnapInfo2D snapInfo)
+		{
+			debugSphereA.transform.position = snapInfo.ObjectPoint;
+			debugSphereB.transform.position = snapInfo.SurfacePoint;
+
+			debugSphereA.SetActive(true);
+			debugSphereB.SetActive(true);
+		}
 
 		Pose DoGridPose(Pose targetPose)
 		{
-			return targetPose;
+			CheckGridSnap();
+
+			float snapTValue = Mathf.InverseLerp(0, snapDuration, snapTimer);
+
+			// conditional below is for guarding against no recent snaps
+			// also important to note that this will not allow for switching surfaces at snap time
+			// with the distances involved in snapping/unsnapping, this could make it hard to handle
+			// scenarios with multiple surfaces in close proximity
+			Pose snapPose = (currentGrid) ? GetGridSnapPose(targetPose) : targetPose;
+
+			Pose lerpPose = new Pose(Vector3.Lerp(targetPose.position, snapPose.position, snapTValue),
+				Quaternion.Slerp(targetPose.rotation, snapPose.rotation, snapTValue));
+
+			return lerpPose;
 		}
 
         public override Pose DoConstraint(Pose targetPose)
