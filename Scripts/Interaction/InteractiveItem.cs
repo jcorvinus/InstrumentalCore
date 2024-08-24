@@ -231,6 +231,8 @@ namespace Instrumental.Interaction
 
         [SerializeField] bool showConstellationGraspPoints = false;
         const bool showTipGrab = false;
+
+        [SerializeField] bool drawGizmos = false;
         #endregion
 
         private Vector3 respawnPosition;
@@ -1380,7 +1382,7 @@ namespace Instrumental.Interaction
 		}
 		private void OnDrawGizmos()
 		{
-            if(rigidBody)
+            if(rigidBody && drawGizmos)
 			{
                 Gizmos.color = Color.blue;
                 Gizmos.DrawWireSphere(transform.position, ungraspRadius); // this is an old visualization from when we were only doing sphere colliders

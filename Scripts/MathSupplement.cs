@@ -271,7 +271,8 @@ namespace Instrumental
 
             deltaRotation.ToAngleAxis(out deltaAngle, out deltaAxis);
 
-            if (float.IsInfinity(deltaAxis.x))
+            if (float.IsInfinity(deltaAxis.x) || float.IsInfinity(deltaAxis.y) ||
+                float.IsNaN(deltaAxis.x) || float.IsNaN(deltaAxis.y) || float.IsNaN(deltaAxis.z))
             {
                 deltaAxis = Vector3.zero;
                 deltaAngle = 0;
