@@ -7051,7 +7051,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d09961634bf4e594eb80ab0300b3167e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mode: 1
+  mode: 2
   surfaceAdjustAmt: 0.00493
   angleAroundSurfaceSnap: 1
   aroundNormalAngleSnap: 10
