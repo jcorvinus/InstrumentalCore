@@ -84,6 +84,7 @@ namespace Instrumental.Overlay
 
 			fieldOfView = 2.0f * Mathf.Atan(tanHalfFov.y) * Mathf.Rad2Deg;
 			screenCamera.fieldOfView = fieldOfView;
+			screenCamera.aspect = 2.358722f; // maybe 2.245614?
 			aspect = screenCamera.aspect;
 			Debug.Log("Starting fov: " + fieldOfView);
 
@@ -95,9 +96,10 @@ namespace Instrumental.Overlay
 				HmdMatrix34_t leftEyeMatrix = hmd.GetEyeToHeadTransform(EVREye.Eye_Left);
 				leftEyeCamera.transform.localPosition = leftEyeMatrix.GetPosition() / perCameraIPDMultiplier;
 				leftEyeCamera.fieldOfView = leftFieldOfView * perCameraFovMultiplier;
+				float leftEyeAspect = leftEyeCamera.aspect;
 
 				HmdMatrix34_t rightEyeMatrix = hmd.GetEyeToHeadTransform(EVREye.Eye_Right);
-				rightEyeCamera.transform.localPosition = rightEyeMatrix.GetPosition() / 1.116f;
+				rightEyeCamera.transform.localPosition = rightEyeMatrix.GetPosition() / perCameraIPDMultiplier;
 				rightEyeCamera.fieldOfView = rightfieldOfView * perCameraFovMultiplier;
 
 				SetUpHiddenAreaMesh();

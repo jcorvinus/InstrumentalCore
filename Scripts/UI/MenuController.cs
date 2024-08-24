@@ -108,6 +108,24 @@ namespace Instrumental.UI
             return menuCollection.Length;
 		}
 
+        public void ShowMenu(string menuName, bool doPlacement, bool closeExisting)
+		{
+            // find our menu
+            Menu menuToOpen = FindMenuForName(menuName);
+
+            if(doPlacement)
+			{
+                Pose placementPose = GetPlacementPose();
+                menuToOpen.transform.SetPositionAndRotation(placementPose.position, placementPose.rotation);
+			}
+
+            // find any menus that should be closed.
+            if(closeExisting)
+			{
+
+			}
+		}
+
         public static Pose GetPlacementPose()
 		{
             InstrumentalBody body = InstrumentalBody.Instance;
