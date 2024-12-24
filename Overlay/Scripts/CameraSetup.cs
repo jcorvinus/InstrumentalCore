@@ -19,12 +19,24 @@ namespace Instrumental.Overlay
 		[SerializeField] Camera screenCamera;
 		Camera centerEyeCamera;
 
-		/*[Range(1.05f, 1.15f)]
-		[SerializeField]*/ float perCameraIPDMultiplier = 1.116f;
-		/*[Range(1.2f, 1.4f)]
-		[SerializeField]*/ float perCameraFovMultiplier = 1.284f;
+		[Range(0, 2)]
+		[SerializeField]
+		float perCameraIPDMultiplier = 1.0f; // 1.116f
+		[Range(0, 2)]
+		[SerializeField]
+		float perCameraFovMultiplier = 1.0f; //1.284f
+		[Range(0, 2)]
+		[SerializeField] float viewportHeight=1;
 		float fieldOfView=90;
 		float aspect=1;
+
+		[Range(0,10)]
+		[SerializeField] float steamVRNearPlane = 0.11f;
+		public float SteamVRNearPlane { get { return steamVRNearPlane; } }
+		float combinedWidth = 0.1f;
+		public float CombinedWidth { get { return combinedWidth; } }
+
+		[SerializeField] bool useFixedDimensions = false;
 
 		[SerializeField] SteamVR_Overlay debugOverlay;
 
@@ -48,20 +60,6 @@ namespace Instrumental.Overlay
 				else if (cameras[i].stereoTargetEye == StereoTargetEyeMask.Right) rightEyeCamera = cameras[i];
 				else if (screenCamera == null && cameras[i].stereoTargetEye == StereoTargetEyeMask.None) screenCamera = cameras[i];
 			}
-
-			// get our target resolution
-			int textureWidth = (int)SteamVR.instance.sceneWidth;
-			int textureHeight = (int)SteamVR.instance.sceneHeight;
-
-			float multiplier = 1f; // adding the hidden area mesh has made rendering at 1x reasonable.
-
-			renderTexture = new RenderTexture((int)(textureWidth * multiplier), 
-				(int)(textureHeight * multiplier),
-				renderTextureFormat,
-				depthStencilFormat, 
-				0);
-
-			Debug.Log("Creating render texture of resolution:" + textureWidth + " x " + textureHeight);
 
 			Vector2 tanHalfFov;
 			CVRSystem hmd = SteamVR.instance.hmd;
@@ -88,6 +86,44 @@ namespace Instrumental.Overlay
 			aspect = screenCamera.aspect;
 			Debug.Log("Starting fov: " + fieldOfView);
 
+			// get our target resolution
+			int textureWidth = (int)SteamVR.instance.sceneWidth;
+			int textureHeight = (int)SteamVR.instance.sceneHeight;
+			
+			VRTextureBounds_t[] textureBounds = new VRTextureBounds_t[2];
+
+			textureBounds[0].uMin = 0.5f + 0.5f * l_left / tanHalfFov.x;
+			textureBounds[0].uMax = 0.5f + 0.5f * l_right / tanHalfFov.x;
+			textureBounds[0].vMin = 0.5f - 0.5f * l_bottom / tanHalfFov.y;
+			textureBounds[0].vMax = 0.5f - 0.5f * l_top / tanHalfFov.y;
+
+			textureBounds[1].uMin = 0.5f + 0.5f * r_left / tanHalfFov.x;
+			textureBounds[1].uMax = 0.5f + 0.5f * r_right / tanHalfFov.x;
+			textureBounds[1].vMin = 0.5f - 0.5f * r_bottom / tanHalfFov.y;
+			textureBounds[1].vMax = 0.5f - 0.5f * r_top / tanHalfFov.y;
+
+			// Grow the recommended size to account for the overlapping fov
+			textureWidth = (int)((float)textureWidth / Mathf.Max(textureBounds[0].uMax - textureBounds[0].uMin, textureBounds[1].uMax - textureBounds[1].uMin));
+			textureHeight = (int)((float)textureHeight / Mathf.Max(textureBounds[0].vMax - textureBounds[0].vMin, textureBounds[1].vMax - textureBounds[1].vMin));
+
+			float multiplier = 0.5f; // adding the hidden area mesh has made rendering at 1x reasonable.
+			textureWidth = (int)(textureWidth * 2 * multiplier);
+			textureHeight = (int)(textureHeight * multiplier);
+
+			if (useFixedDimensions)
+			{
+				textureWidth = 5786;
+				textureHeight = 2869;
+			}
+
+			Debug.Log("Creating render texture of resolution:" + textureWidth + " x " + textureHeight);
+
+			renderTexture = new RenderTexture(textureWidth,
+				textureHeight,
+				renderTextureFormat,
+				depthStencilFormat,
+				0);
+
 			if (leftEyeCamera && rightEyeCamera)
 			{
 				leftEyeCamera.targetTexture = renderTexture;
@@ -96,13 +132,14 @@ namespace Instrumental.Overlay
 				HmdMatrix34_t leftEyeMatrix = hmd.GetEyeToHeadTransform(EVREye.Eye_Left);
 				leftEyeCamera.transform.localPosition = leftEyeMatrix.GetPosition() / perCameraIPDMultiplier;
 				leftEyeCamera.fieldOfView = leftFieldOfView * perCameraFovMultiplier;
-				float leftEyeAspect = leftEyeCamera.aspect;
 
 				HmdMatrix34_t rightEyeMatrix = hmd.GetEyeToHeadTransform(EVREye.Eye_Right);
 				rightEyeCamera.transform.localPosition = rightEyeMatrix.GetPosition() / perCameraIPDMultiplier;
 				rightEyeCamera.fieldOfView = rightfieldOfView * perCameraFovMultiplier;
 
 				SetUpHiddenAreaMesh();
+
+				combinedWidth = GetCombinedWidth(steamVRNearPlane, out var height); // used to be left cam near plane
 			}
 			else
 			{
@@ -204,6 +241,21 @@ namespace Instrumental.Overlay
 			rightHiddenAreaMeshFilter.mesh = rightMesh;
 		}
 
+		float GetCombinedWidth(float distance, out float height)
+		{
+			float leftHeight = 2.0f * distance * Mathf.Tan(leftEyeCamera.fieldOfView * 0.5f * Mathf.Deg2Rad);
+			float leftWidth = leftHeight * leftEyeCamera.aspect;
+			float rightHeight = 2.0f * distance * Mathf.Tan(rightEyeCamera.fieldOfView * 0.5f * Mathf.Deg2Rad);
+			float rightWidth = rightHeight * rightEyeCamera.aspect;
+			height = rightHeight;
+
+			// might have to update this for canted displays
+			float width = ((leftWidth * 0.5f) + (rightWidth * 0.5f)) +
+				(rightEyeCamera.transform.localPosition.x + -leftEyeCamera.transform.localPosition.x);
+
+			return width;
+		}
+
 		[SerializeField] bool setFieldOfView;
 		private void Update()
 		{
@@ -231,6 +283,44 @@ namespace Instrumental.Overlay
 				rightEyeCamera.transform.localPosition = rightEyeMatrix.GetPosition() / 1.116f;
 				rightEyeCamera.fieldOfView = rightfieldOfView * perCameraFovMultiplier;
 			}
+
+			// set camera viewport
+			leftEyeCamera.rect = new Rect(leftEyeCamera.rect.x,
+				((1 - viewportHeight) * 0.5f), leftEyeCamera.rect.width, viewportHeight);
+			rightEyeCamera.rect = new Rect(rightEyeCamera.rect.x,
+				((1 - viewportHeight) * 0.5f), rightEyeCamera.rect.width, viewportHeight);
+
+			combinedWidth = GetCombinedWidth(steamVRNearPlane, out var height); // used to be left cam near plane
+		}
+
+		void OnDrawGizmos()
+		{
+			if (!leftEyeCamera || !rightEyeCamera)
+			{
+				Camera[] cameras = GetComponentsInChildren<Camera>();
+
+				for (int i = 0; i < cameras.Length; i++)
+				{
+					if (cameras[i].stereoTargetEye == StereoTargetEyeMask.Left) leftEyeCamera = cameras[i];
+					else if (cameras[i].stereoTargetEye == StereoTargetEyeMask.Right) rightEyeCamera = cameras[i];
+					else if (screenCamera == null && cameras[i].stereoTargetEye == StereoTargetEyeMask.None) screenCamera = cameras[i];
+				}
+			}
+
+			float width, height, distance;
+			distance = steamVRNearPlane; //leftEyeCamera.nearClipPlane;
+			width = GetCombinedWidth(distance, out height);
+
+			Gizmos.color = Color.red;
+			Gizmos.matrix = Matrix4x4.TRS(transform.position +
+				(transform.forward * distance),
+				transform.rotation,
+				Vector3.one);
+
+			Gizmos.DrawWireCube(Vector3.zero, new Vector3(width, height, 0));
+
+			Gizmos.matrix = Matrix4x4.identity;
+			Gizmos.color = Color.white;
 		}
 	}
 }

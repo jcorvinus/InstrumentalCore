@@ -14,10 +14,12 @@ namespace Instrumental.Overlay
         [SerializeField] Transform targetReference; // this represents our quad
 
         [Range(0.001f, 1f)]
-        [SerializeField] float widthMultiplier = 1;
+        [SerializeField] float widthMultiplier = 1; // used to be 0.384f
 
-        [SerializeField] bool useFixedWidth = true;
+		[SerializeField] bool useFixedWidth = true;
         [SerializeField] float fixedWidth = 3f;
+        [Range(0,1)]
+        [SerializeField] float vStretch = 0;
 
         static public string key { get { return "unity:" + Application.companyName + "." + Application.productName; } }
 
@@ -119,7 +121,8 @@ namespace Instrumental.Overlay
 
                 if (!useFixedWidth)
                 {
-                    overlay.SetOverlayWidthInMeters(handle, frustumWidth * widthMultiplier);
+					//overlay.SetOverlayWidthInMeters(handle, frustumWidth * widthMultiplier);
+					overlay.SetOverlayWidthInMeters(handle, cameraSetup.CombinedWidth);
                 }
                 else
 				{
@@ -131,7 +134,7 @@ namespace Instrumental.Overlay
 				textureBounds.uMin = (0); // these are the way they are
 				textureBounds.vMin = (1); // because otherwise the image will flip
 				textureBounds.uMax = (1); // upside down and left/right
-				textureBounds.vMax = (0);
+				textureBounds.vMax = (0); // vstretch doesn't work, I think steamVR is clamping internally
 				overlay.SetOverlayTextureBounds(handle, ref textureBounds);
 
                 HmdVector2_t vecMouseScale = new HmdVector2_t();
@@ -139,6 +142,7 @@ namespace Instrumental.Overlay
                 vecMouseScale.v1 = 1;
                 overlay.SetOverlayMouseScale(handle, ref vecMouseScale);
 
+				targetReference.transform.localPosition = Vector3.forward * cameraSetup.SteamVRNearPlane;
                 SteamVR_Utils.RigidTransform offset = new SteamVR_Utils.RigidTransform(targetReference);
                 //offset.pos.z += viewCamera.nearClipPlane;
 
