@@ -309,7 +309,7 @@ namespace Instrumental.Controls
 			{
                 // spring back to the original position
                 faceObject.transform.localPosition = Vector3.Lerp(faceObject.transform.localPosition,
-                    new Vector3(faceObject.transform.localPosition.x, 0, SliderFaceDistance), 5 * Time.deltaTime);
+                    new Vector3(faceObject.transform.localPosition.x, 0, SliderFaceDistance), 5 * Core.Time.deltaTime);
 			}
         }
 

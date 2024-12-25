@@ -680,12 +680,12 @@ namespace Instrumental.Interaction.Constraints
         {
 			if(isSnapping)
 			{
-				snapTimer += Time.fixedDeltaTime;
+				snapTimer += Core.Time.fixedDeltaTime;
 				snapTimer = Mathf.Clamp(snapTimer, 0, snapDuration);
 			}
 			else
 			{
-				snapTimer -= Time.fixedDeltaTime;
+				snapTimer -= Core.Time.fixedDeltaTime;
 				snapTimer = Mathf.Clamp(snapTimer, 0, snapDuration);
 			}
 

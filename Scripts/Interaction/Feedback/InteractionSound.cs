@@ -60,7 +60,7 @@ namespace Instrumental.Feedback
 
         private void Update()
         {
-            clashTimer -= Time.deltaTime;
+            clashTimer -= Core.Time.deltaTime;
             clashTimer = (clashTimer < 0) ? 0 : clashTimer;
         }
 
@@ -85,7 +85,8 @@ namespace Instrumental.Feedback
         {
             if (hasThrowSource)
             {
-                throwSource.volume = MathSupplement.Exerp(0, 1, Mathf.InverseLerp(0.06f, 8, rigidBody.velocity.sqrMagnitude));
+                throwSource.volume = Core.Math.Math.Exerp(0, 1, 
+					Core.Math.Math.InverseLerp(0.06f, 8, rigidBody.velocity.sqrMagnitude));
                 throwSource.Play();
             }
         }

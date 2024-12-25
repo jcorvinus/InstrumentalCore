@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Instrumental.Core.Math;
 
 namespace Instrumental.Modeling
 {
@@ -25,7 +26,7 @@ namespace Instrumental.Modeling
 		/// If it doesn't have what you expect, try calling RenderVerts().
 		/// </summary>
 		public List<Vector3> VertexList	{ get { return vertexList; } }
-		public Vector3 CenterOfPoints { get { return MathSupplement.CenterOfPoints(vertexList.ToArray()); } }
+		public Vector3 CenterOfPoints { get { return Math.CenterOfPoints(vertexList.ToArray()); } }
 		public int SegmentCount { get { return knots.Count - ((closeShape) ? 0 : 1); } }
 
 		// Use this for initialization

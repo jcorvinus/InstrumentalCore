@@ -42,7 +42,7 @@ namespace Instrumental
 				}
 				else
 				{
-					timer += Time.deltaTime;
+					timer += Core.Time.deltaTime;
 				}
 			}
             else

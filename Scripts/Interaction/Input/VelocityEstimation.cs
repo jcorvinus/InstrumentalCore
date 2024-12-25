@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using Instrumental;
+
 namespace Instrumental.Interaction.Input
 {
     [System.Serializable]
@@ -109,13 +111,13 @@ namespace Instrumental.Interaction.Input
 
         Vector3 CalculateSingleShotVelocity(Vector3 position, Vector3 previousPosition)
 		{
-            float velocityFactor = 1.0f / Time.deltaTime;
+            float velocityFactor = 1.0f / Core.Time.deltaTime;
             return velocityFactor * (position - previousPosition);
 		}
 
         Vector3 CalculateSingleShotAngularVelocity(Quaternion rotation, Quaternion previousRotation)
 		{
-            float velocityFactor = 1.0f / Time.deltaTime;
+            float velocityFactor = 1.0f / Core.Time.deltaTime;
 
             Quaternion offsetRotation = rotation * Quaternion.Inverse(previousRotation);
             float theta = 2.0f * Mathf.Acos(Mathf.Clamp(offsetRotation.w, -1.0f, 1.0f));

@@ -101,10 +101,10 @@ namespace Instrumental.Interaction.VirtualJoystick
 
             if (enabledTime < introAnimDuration)
 			{
-                enabledTime += Time.deltaTime;
+                enabledTime += Core.Time.deltaTime;
 
-                float outerTValue = Mathf.InverseLerp(0, introAnimDuration, enabledTime);
-                float innerTValue = Mathf.InverseLerp(innerRingTimeOffset, introAnimDuration, enabledTime);
+                float outerTValue = Core.Math.Math.InverseLerp(0, introAnimDuration, enabledTime);
+                float innerTValue = Core.Math.Math.InverseLerp(innerRingTimeOffset, introAnimDuration, enabledTime);
 
                 outerRing.transform.position = transform.TransformPoint(Vector3.Lerp(Vector3.zero, outerRingPoint, outerTValue));
                 outerRing.transform.localScale = Vector3.Lerp(Vector3.zero, Vector3.one * scale, scaleCurve.Evaluate(outerTValue));

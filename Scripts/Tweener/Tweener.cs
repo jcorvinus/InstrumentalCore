@@ -126,7 +126,7 @@ namespace Instrumental.Tweening
 			{
 				if (Style != TweenPlayStyle.Switch)
 				{
-					timeRemaining -= Time.deltaTime;
+					timeRemaining -= Instrumental.Core.Time.deltaTime;
 					//tValue = (!pingPongReflection) ? MathSupplement.UnitReciprocal(Mathf.InverseLerp(0, Duration, timeRemaining)) : Mathf.InverseLerp(0, Duration, timeRemaining);
                     tValue = 1 - Mathf.InverseLerp(0, Duration, timeRemaining);
 
@@ -156,7 +156,7 @@ namespace Instrumental.Tweening
 				}
 				else
 				{
-                    float increment = Mathf.InverseLerp(0, Duration, Time.deltaTime);
+                    float increment = Mathf.InverseLerp(0, Duration, Instrumental.Core.Time.deltaTime);
 					tValue = Mathf.Clamp01(tValue + (increment * ((forward) ? 1 : -1)));
 
                     if(previousTValue != tValue) // we may have a state change on our hands

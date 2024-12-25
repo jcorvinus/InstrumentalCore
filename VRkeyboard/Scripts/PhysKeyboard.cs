@@ -92,7 +92,7 @@ namespace VRKeyboard
 
 				transform.localScale = newScale;
 
-				time += Time.deltaTime;
+				time += Instrumental.Core.Time.deltaTime;
 				yield return null;
 			}
 
@@ -165,7 +165,7 @@ namespace VRKeyboard
 
 				transform.localScale = newScale;
 
-				time += Time.deltaTime;
+				time += Instrumental.Core.Time.deltaTime;
 				yield return null;
 			}
 

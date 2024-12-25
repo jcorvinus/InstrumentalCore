@@ -42,7 +42,7 @@ namespace VRKeyboard
 		{
 			if(isAnimating)
 			{
-				animTimer += (isShowing) ?  Time.deltaTime : -Time.deltaTime;
+				animTimer += (isShowing) ?  Instrumental.Core.Time.deltaTime : -Instrumental.Core.Time.deltaTime;
 				animTimer = Mathf.Clamp(animTimer, 0, duration);
 				float tValue = Mathf.InverseLerp(0, duration, animTimer);
 

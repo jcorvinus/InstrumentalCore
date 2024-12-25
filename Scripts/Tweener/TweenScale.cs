@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+using Instrumental.Core.Math;
+
 namespace Instrumental.Tweening
 {
 	[AddComponentMenu("Instrumental/Tweening/Tween Scale")]
@@ -23,7 +25,7 @@ namespace Instrumental.Tweening
 			base.Update();
             if (TweenerState == TweenState.Play || RunWhileNotPlay)
             {
-                if (Unclamped) transform.localScale = MathSupplement.UnclampedLerp(StartScale, GoalScale, TValue);
+                if (Unclamped) transform.localScale = Math.UnclampedLerp(StartScale, GoalScale, TValue);
                 else transform.localScale = Vector3.Lerp(StartScale, GoalScale, TValue);
             }
 		}

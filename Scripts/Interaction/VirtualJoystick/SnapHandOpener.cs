@@ -68,7 +68,7 @@ namespace Instrumental.Interaction.VirtualJoystick
                 projectedTarget.transform.localScale = Vector3.Lerp(Vector3.one * minScale,
                     Vector3.one, distTValue);
 
-                facingTime += Time.deltaTime;
+                facingTime += Core.Time.deltaTime;
                 float facingTValue = Mathf.InverseLerp(0, facingAnimDuration, facingTime);
 
                 // send our points to the line renderer

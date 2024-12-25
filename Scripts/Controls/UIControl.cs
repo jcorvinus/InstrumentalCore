@@ -447,7 +447,7 @@ namespace Instrumental.Controls
 
             AngleSnap closestSnap = angleSnap.First(item => item.angleDist == angleSnap.Min(subItem => subItem.angleDist));
 
-            //placementInteraction.rigidbody.MoveRotation(Quaternion.Slerp(placementRigidbody.rotation, closestSnap.orientation, Time.deltaTime * 6f));
+            //placementInteraction.rigidbody.MoveRotation(Quaternion.Slerp(placementRigidbody.rotation, closestSnap.orientation, Core.Time.deltaTime * 6f));
             //placementInteraction.rigidbody.MoveRotation(closestSnap.orientation);
         }
 

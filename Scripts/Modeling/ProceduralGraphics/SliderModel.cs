@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using Instrumental.Core.Math;
 using Instrumental.Space;
 using Instrumental.Schema;
 
@@ -175,7 +176,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 				int startIndex = faceBevelLoops[i].VertexBaseID;
 
 
-				float sliceRadius = MathSupplement.Sinerp(innerRadius, radius, 1 - depthTValue);
+				float sliceRadius = Math.Sinerp(innerRadius, radius, 1 - depthTValue);
 				float sliceDepth = (i == faceBevelSliceCount - 1) ? 
 					Mathf.Lerp(0, totalExtrudeDepth, ((tValue) + (depthTValue)) * 0.5f) : 
 					Mathf.Lerp(0, totalExtrudeDepth, depthTValue);

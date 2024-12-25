@@ -73,7 +73,7 @@ public class ToFromRotationTest : MonoBehaviour
 		}
 		else
 		{
-            rotationTimer += Time.deltaTime;
+            rotationTimer += Instrumental.Core.Time.deltaTime;
             rotationTimer = Mathf.Clamp(rotationTimer, 0, rotationDuration);
             float rotationTValue = Mathf.InverseLerp(0, rotationDuration, rotationTimer);
 

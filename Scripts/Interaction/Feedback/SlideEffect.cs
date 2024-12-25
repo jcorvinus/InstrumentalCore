@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using Instrumental.Core.Math;
+
 namespace Instrumental.Feedback
 {
     public class SlideEffect : MonoBehaviour
@@ -101,7 +103,7 @@ namespace Instrumental.Feedback
 				bool isRightGrabbing = false;
 
 
-				float hapticTValue = MathSupplement.Coserp(0, 1, Mathf.InverseLerp(minHapticMagnitude, maxHapticMagnitude, rigidBody.velocity.magnitude));
+				float hapticTValue = Math.Coserp(0, 1, Mathf.InverseLerp(minHapticMagnitude, maxHapticMagnitude, rigidBody.velocity.magnitude));
 
 				GetGrabbingControllers(out grabbedByLeft, out grabbedByRight);
 

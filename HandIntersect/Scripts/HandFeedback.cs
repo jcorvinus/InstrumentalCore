@@ -142,15 +142,15 @@ namespace Instrumental
 			{
 				if (IsGraspingObject())
 				{
-					currentColor = Color.Lerp(currentColor, grabIntersectColor, Time.deltaTime * 6f);
+					currentColor = Color.Lerp(currentColor, grabIntersectColor, Core.Time.deltaTime * 6f);
 				}
 				else if (IsPrimaryHovering())
 				{
-					currentColor = Color.Lerp(currentColor, hoverIntersectColor, Time.deltaTime * 6f);
+					currentColor = Color.Lerp(currentColor, hoverIntersectColor, Core.Time.deltaTime * 6f);
 				}
 				else
 				{
-					currentColor = Color.Lerp(currentColor, staticIntersectColor, Time.deltaTime * 6f);
+					currentColor = Color.Lerp(currentColor, staticIntersectColor, Core.Time.deltaTime * 6f);
 				}
 
 				handMesh.material.SetColor(intersectColorHash, currentColor);
@@ -188,12 +188,12 @@ namespace Instrumental
 
 				if (IsGraspingObject())
 				{
-					isGrabbingTime += Time.deltaTime;
+					isGrabbingTime += Core.Time.deltaTime;
 					isGrabbingTime = Mathf.Min(isGrabbingTime, grabFadeDuration);
 				}
 				else
 				{
-					isGrabbingTime -= Time.deltaTime;
+					isGrabbingTime -= Core.Time.deltaTime;
 					isGrabbingTime = Mathf.Max(isGrabbingTime, 0);
 				}
 
@@ -221,7 +221,7 @@ namespace Instrumental
 
 		private void HapticUpdate()
 		{
-			timeTillNextPulse -= Time.fixedDeltaTime;
+			timeTillNextPulse -= Core.Time.fixedDeltaTime;
 
 			if (frequency == 0)
 			{
@@ -243,8 +243,8 @@ namespace Instrumental
 
 			if(timeTillNextPulse <= 0)
 			{
-				//vibration.Execute(0, Time.fixedDeltaTime, frequency, amplitude, inputSource);
-				//PlatformManager.Instance.DoHapticsForCurrentPlatform(frequency, amplitude, Time.fixedDeltaTime, rigidHand.Handedness == Chirality.Left);
+				//vibration.Execute(0, Core.Time.fixedDeltaTime, frequency, amplitude, inputSource);
+				//PlatformManager.Instance.DoHapticsForCurrentPlatform(frequency, amplitude, Core.Time.fixedDeltaTime, rigidHand.Handedness == Chirality.Left);
 				timeTillNextPulse = period;
 			}
 

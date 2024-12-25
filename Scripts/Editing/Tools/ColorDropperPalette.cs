@@ -87,7 +87,7 @@ namespace Instrumental.Editing.Tools
 
                         // do our slider return to center
                         bool increase = slider.HorizontalSliderPercent > 0.6f; // increase means return to 'closed' position
-                        float sliderAdjustValue = slider.HorizontalSliderPercent + sliderReturnSpeed * Time.deltaTime * ((increase) ? 1 : -1);
+                        float sliderAdjustValue = slider.HorizontalSliderPercent + sliderReturnSpeed * Core.Time.deltaTime * ((increase) ? 1 : -1);
                         slider.HorizontalSliderPercent = slider.HorizontalSliderPercent = Mathf.Clamp01(sliderAdjustValue);
                     }
                     else
@@ -132,7 +132,7 @@ namespace Instrumental.Editing.Tools
                     // return to full open position
                     if(slider.HorizontalSliderPercent > 0.01f)
                     {
-                        slider.HorizontalSliderPercent -= sliderReturnSpeed * Time.deltaTime;
+                        slider.HorizontalSliderPercent -= sliderReturnSpeed * Core.Time.deltaTime;
                     }
                 }
             }*/

@@ -120,7 +120,7 @@ namespace Instrumental.Interaction.VirtualJoystick
                 // if no, we should also check for un-usable states,
                 // such as being un-grasped already, and the shrinking state of the joystick
 
-                deployedTime += Time.deltaTime;
+                deployedTime += Core.Time.deltaTime;
 
                 if(handle.IsGrasped)
 				{

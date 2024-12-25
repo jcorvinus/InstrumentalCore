@@ -128,7 +128,7 @@ namespace Instrumental.Editing.Tools
 
         void DoColorZoneUpdate()
         {
-            checkTimer -= Time.deltaTime;
+            checkTimer -= Core.Time.deltaTime;
 
             if(checkTimer <= 0)
             {

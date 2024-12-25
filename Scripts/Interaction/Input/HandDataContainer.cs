@@ -267,7 +267,7 @@ namespace Instrumental.Interaction.Input
 			Data.IsTracking = isTracked;
 			if (isTracked)
 			{
-				Data.TrackedForTime += Time.deltaTime;
+				Data.TrackedForTime += Core.Time.deltaTime;
 			}
 			else Data.TrackedForTime = 0;
 

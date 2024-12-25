@@ -301,7 +301,7 @@ namespace Instrumental.Interaction.Input
             {
                 if(currentState == PointerState.OnCanvas && previousState != PointerState.OffCanvas)
 				{
-                    enteredCanvasTime = Time.time;
+                    enteredCanvasTime = Core.Time.time;
 				}
 
                 // todo: dispatch pointer state change event
@@ -349,7 +349,7 @@ namespace Instrumental.Interaction.Input
                 previousPinching = true;
 
                 // If we just entered this canvas
-                if(Time.time - enteredCanvasTime >= Time.deltaTime)
+                if(Core.Time.time - enteredCanvasTime >= Core.Time.deltaTime)
 				{
                     if(eventSystem.currentSelectedGameObject)
 					{

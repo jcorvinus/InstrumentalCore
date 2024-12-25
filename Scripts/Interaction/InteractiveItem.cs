@@ -1075,10 +1075,10 @@ namespace Instrumental.Interaction
                     //Vector3 solvedCenterOfMass = destinationPose.rotation * rigidBody.centerOfMass + destinationPose.position;
                     //Vector3 currentCenterOfMass = rigidBody.rotation * rigidBody.centerOfMass + rigidBody.position;
 
-                    Vector3 targetVelocity = MathSupplement.CalculateSingleShotVelocity(destinationPose.position, 
-                         rigidBody.position, Time.fixedDeltaTime);
-                    Vector3 targetAngularVelocity = MathSupplement.CalculateSingleShotAngularVelocity(destinationPose.rotation, 
-                        rigidBody.rotation, Time.fixedDeltaTime);
+                    Vector3 targetVelocity = Core.Math.Math.CalculateSingleShotVelocity(destinationPose.position, 
+                         rigidBody.position, Core.Time.fixedDeltaTime);
+                    Vector3 targetAngularVelocity = Core.Math.Math.CalculateSingleShotAngularVelocity(destinationPose.rotation, 
+                        rigidBody.rotation, Core.Time.fixedDeltaTime);
 
                     float targetSpeedSquared = targetVelocity.sqrMagnitude;
                     if(targetSpeedSquared > maxMovementSpeed)
@@ -1176,7 +1176,7 @@ namespace Instrumental.Interaction
 				}
                 else
 				{
-                    graspData.RegraspTimer -= Time.fixedDeltaTime;
+                    graspData.RegraspTimer -= Core.Time.fixedDeltaTime;
                     graspData.RegraspTimer = Mathf.Max(graspData.RegraspTimer, 0);
                     bool shouldGrasp = CheckHandGrasp(graspData) && graspData.RegraspTimer == 0;
                     if (shouldGrasp) PerHandGrasp(ref graspData);

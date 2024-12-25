@@ -8,6 +8,7 @@ using UnityEngine.UI;
 
 using CatchCo;
 
+using Instrumental;
 using Instrumental.Controls;
 
 namespace VRKeyboard
@@ -411,9 +412,9 @@ namespace VRKeyboard
 
         void DoVolumeAdjustments()
         {
-            if (timeSinceLastKey != float.PositiveInfinity) timeSinceLastKey += Time.deltaTime;
+            if (timeSinceLastKey != float.PositiveInfinity) timeSinceLastKey += Instrumental.Core.Time.deltaTime;
 
-            timeSinceLastReset += Time.deltaTime;
+			timeSinceLastReset += Instrumental.Core.Time.deltaTime;
 
             if (timeSinceLastKey > volumeKeyTimeReset)
             {

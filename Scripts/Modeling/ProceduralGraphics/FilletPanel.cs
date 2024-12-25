@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Instrumental.Modeling;
+using Instrumental.Core.Math;
 
 namespace Instrumental.Modeling.ProceduralGraphics
 {
@@ -1185,10 +1186,10 @@ namespace Instrumental.Modeling.ProceduralGraphics
             for (int i = 0; i < heightSegments + 1; i++)
             {
                 int upperLeft = vertInfo.LeftEdgeBaseID + i;
-                int upperRight = innerGridBase + MathSupplement.GetLeftEdgeForHeightIndex(0, i, widthSegments + 2);
+                int upperRight = innerGridBase + Math.GetLeftEdgeForHeightIndex(0, i, widthSegments + 2);
 
                 int lowerLeft = upperLeft + 1;
-                int lowerRight = innerGridBase + MathSupplement.GetLeftEdgeForHeightIndex(0, i + 1, widthSegments + 2);
+                int lowerRight = innerGridBase + Math.GetLeftEdgeForHeightIndex(0, i + 1, widthSegments + 2);
 
                 triangles[trackID] = (flip) ? lowerLeft : upperRight;
                 triangles[trackID + 1] = upperLeft;
@@ -1205,10 +1206,10 @@ namespace Instrumental.Modeling.ProceduralGraphics
             for (int i = 0; i < heightSegments + 1; i++)
             {
                 int upperLeft = vertInfo.RightEdgeBaseID + i;
-                int upperRight = innerGridBase + MathSupplement.GetRightEdgeForHeightIndex(0, i, widthSegments + 2);
+                int upperRight = innerGridBase + Math.GetRightEdgeForHeightIndex(0, i, widthSegments + 2);
 
                 int lowerLeft = upperLeft + 1;
-                int lowerRight = innerGridBase + MathSupplement.GetRightEdgeForHeightIndex(0, i + 1, widthSegments + 2);
+                int lowerRight = innerGridBase + Math.GetRightEdgeForHeightIndex(0, i + 1, widthSegments + 2);
 
                 triangles[trackID] = (flip) ? upperRight : lowerLeft;
                 triangles[trackID + 1] = upperLeft;
@@ -1231,7 +1232,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
             TriangulateFan(
                 vertInfo.LeftEdgeBaseID + heightSegments + 1,
                 vertInfo.LowerEdgeBaseID,
-                innerGridBase + MathSupplement.GetLeftEdgeForHeightIndex(0, heightSegments + 1, widthSegments + 2),
+                innerGridBase + Math.GetLeftEdgeForHeightIndex(0, heightSegments + 1, widthSegments + 2),
                 vertInfo.LowerLeftCornerBaseID,
                 flip,
                 ref trackID,
@@ -1241,7 +1242,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
             TriangulateFan(
                 vertInfo.RightEdgeBaseID,
                 vertInfo.UpperEdgeBaseID + widthSegments + 1,
-                innerGridBase + MathSupplement.GetRightEdgeForHeightIndex(0, 0, widthSegments + 2),
+                innerGridBase + Math.GetRightEdgeForHeightIndex(0, 0, widthSegments + 2),
                 vertInfo.UpperRightCornerBaseID,
                 flip,
                 ref trackID,
@@ -1251,7 +1252,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
             TriangulateFan(
                 vertInfo.LowerEdgeBaseID + widthSegments + 1,
                 vertInfo.RightEdgeBaseID + heightSegments + 1,
-                innerGridBase + MathSupplement.GetRightEdgeForHeightIndex(0, heightSegments + 1, widthSegments + 2),
+                innerGridBase + Math.GetRightEdgeForHeightIndex(0, heightSegments + 1, widthSegments + 2),
                 vertInfo.LowerRightCornerBaseID,
                 flip,
                 ref trackID,

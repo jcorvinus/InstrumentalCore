@@ -74,10 +74,10 @@ namespace Instrumental.Interaction.VirtualJoystick
             if (!bulb.IsGrasped)
             {
                 //bulb.RigidBody.position = transform.position;
-                ungraspTime += Time.fixedDeltaTime;
+                ungraspTime += Core.Time.fixedDeltaTime;
                 ungraspTime = Mathf.Clamp(ungraspTime, 0, returnToCenterDuration);
 
-                float returnTValue = Mathf.InverseLerp(0, returnToCenterDuration,
+                float returnTValue = Core.Math.Math.InverseLerp(0, returnToCenterDuration,
                     ungraspTime);
                 //bulb.transform.localPosition = Vector3.Lerp(ungraspStartLocation, Vector3.zero, returnTValue); // uncomment if we ever want to do our ungrasp return-to-center
                 bulb.transform.localPosition = Vector3.zero;
@@ -99,7 +99,7 @@ namespace Instrumental.Interaction.VirtualJoystick
                 float distance = rawDirection.magnitude;
                 rawDirection /= distance;
 
-                float normalizedDistance = Mathf.InverseLerp(0, joystickMasterControl.GetInnerRadius(),
+                float normalizedDistance = Core.Math.Math.InverseLerp(0, joystickMasterControl.GetInnerRadius(),
                     distance);
 
                 Vector3 forward = Vector3.forward;

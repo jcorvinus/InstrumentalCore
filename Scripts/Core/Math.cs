@@ -1,14 +1,17 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿#if UNITY
+using UnityEngine;
+#elif STEREOKIT
+using StereoKit;
+#endif
 
-namespace Instrumental
+namespace Instrumental.Core.Math
 {
     /// <summary>
-    /// Anything involving math that isn't covered by Unity's Mathf class gets put here.
+    /// Anything involving math that we want to be available in any engine gets put here.
     /// Contains neat features such as linear interpolation, cartesian->spherical projection,
     /// Vector averaging, and more.
     /// </summary>
-	public static class MathSupplement
+	public static class Math
 	{
         /// <summary>
         /// Simple integer 2d array.
@@ -39,7 +42,7 @@ namespace Instrumental
 			return Mathf.Abs(((tValue * 100) - 100) * 0.01f);
 		}
 
-		#region Linear Interpolation Functions
+#region Linear Interpolation Functions
 		/// <summary>
 		/// Lerp with a sine tvalue
 		/// </summary>
@@ -88,11 +91,11 @@ namespace Instrumental
 		{
 			return A + (B - A) * t;
 		}
-		#endregion
+#endregion
 
 		// The vector3 interpolators below are basically the same as using some of NGUI's tweeners with preset animation
 		// curve values. Still useful though.
-		#region Vector3 Interpolation Functions
+#region Vector3 Interpolation Functions
 		public static Vector3 Sinerp(Vector3 to, Vector3 from, float tValue)
 		{
 			return new Vector3(Sinerp(to.x, from.x, tValue),
@@ -126,9 +129,9 @@ namespace Instrumental
                UnclampedLerp(to.y, from.y, tValue),
                UnclampedLerp(to.z, from.z, tValue));
         }
-		#endregion
+#endregion
 
-		#region Spherical Coordinates
+#region Spherical Coordinates
 		public static void SphericalToCartesian(float radius, float polar, float elevation, out Vector3 outCart)
 		{
 			float a = radius * Mathf.Cos(elevation);
@@ -149,9 +152,9 @@ namespace Instrumental
 				outPolar += Mathf.PI;
 			outElevation = Mathf.Asin(cartCoords.y / outRadius);
 		}
-		#endregion
+#endregion
 
-		#region Spatial Relationships
+#region Spatial Relationships
 		/// <summary>
 		/// Gets a normalized direction from one point to another.
 		/// </summary>
@@ -252,7 +255,7 @@ namespace Instrumental
         //        return A + AB * distance;
         //    }
         //}
-        #endregion
+#endregion
 
         public static Vector3 CalculateSingleShotVelocity(Vector3 position, Vector3 previousPosition,
             float deltaTime)

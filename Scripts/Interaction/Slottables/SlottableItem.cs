@@ -135,10 +135,10 @@ namespace Instrumental.Interaction.Slottables
 
                 if (!hasSettled)
                 {
-                    Vector3 targetVelocity = MathSupplement.CalculateSingleShotVelocity(ownerSlot.transform.position,
-                        rigidBody.position, Time.fixedDeltaTime);
-                    Vector3 targetAngularVelocity = MathSupplement.CalculateSingleShotAngularVelocity(ownerSlot.transform.rotation,
-                        rigidBody.rotation, Time.fixedDeltaTime);
+                    Vector3 targetVelocity = Core.Math.Math.CalculateSingleShotVelocity(ownerSlot.transform.position,
+                        rigidBody.position, Core.Time.fixedDeltaTime);
+                    Vector3 targetAngularVelocity = Core.Math.Math.CalculateSingleShotAngularVelocity(ownerSlot.transform.rotation,
+                        rigidBody.rotation, Core.Time.fixedDeltaTime);
 
                     float targetSpeedSquared = targetVelocity.sqrMagnitude;
                     if (targetSpeedSquared > maxMovementSpeed)
@@ -165,7 +165,7 @@ namespace Instrumental.Interaction.Slottables
                 else
 				{
                     // get our hover distance and nudge towards the hand
-                    hoverTimer += (interactiveItem.IsHovering) ? Time.fixedDeltaTime : -Time.fixedDeltaTime;
+                    hoverTimer += (interactiveItem.IsHovering) ? Core.Time.fixedDeltaTime : -Core.Time.fixedDeltaTime;
                     hoverTimer = Mathf.Clamp(hoverTimer, 0, hoverDuration);
                     float hoverTValue = Mathf.InverseLerp(0, hoverDuration, hoverTimer);
                     Vector3 direction = interactiveItem.HoverPoint - ownerSlot.transform.position;

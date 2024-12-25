@@ -55,7 +55,7 @@ public class TweenMaterialColor : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
     {
-        totalElapsedTime += Time.deltaTime;
+        totalElapsedTime += Instrumental.Core.Time.deltaTime;
 
         switch (Wrap)
         {

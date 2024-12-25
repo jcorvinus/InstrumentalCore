@@ -172,7 +172,7 @@ namespace Instrumental.Interaction
             }
             else
 			{
-                torsoSmoothTime += Time.deltaTime;
+                torsoSmoothTime += Core.Time.deltaTime;
                 float tValue = Mathf.InverseLerp(0, torsoSmoothDuration, torsoSmoothTime);
 
                 torsoRotation = Quaternion.Slerp(torsoRotation, flattenedNeckRotation, tValue);
@@ -218,11 +218,11 @@ namespace Instrumental.Interaction
                 leftWristOffset += leftWrist.position;
 
                 Vector3 leftOrigin = Vector3.Lerp(leftShoulder, leftWristOffset, 0.532f);
-                leftOrigin = leftRayOriginFilter.Filter(leftOrigin, Time.time);
+                leftOrigin = leftRayOriginFilter.Filter(leftOrigin, Core.Time.time);
 
                 Vector3 leftKnucklePos = leftHandData.IndexJoints[(int)JointType.Proximal].Pose.position +
                     (leftHand.GetAnchorPose(AnchorPoint.Palm).rotation * knuckleOffset);
-                leftKnucklePos = leftAimPosFilter.Filter(leftKnucklePos, Time.time);
+                leftKnucklePos = leftAimPosFilter.Filter(leftKnucklePos, Core.Time.time);
                 leftAimPosition = leftKnucklePos;
 
                 Vector3 leftDirection = (leftKnucklePos - leftOrigin).normalized;
@@ -254,11 +254,11 @@ namespace Instrumental.Interaction
                 rightWristOffset += rightWrist.position;
 
                 Vector3 rightOrigin = Vector3.Lerp(rightShoulder, rightWristOffset, 0.532f);
-                rightOrigin = rightRayOriginFilter.Filter(rightOrigin, Time.time);
+                rightOrigin = rightRayOriginFilter.Filter(rightOrigin, Core.Time.time);
 
                 Vector3 rightKnucklePos = rightHandData.IndexJoints[(int)JointType.Proximal].Pose.position + 
                     (rightHand.GetAnchorPose(AnchorPoint.Palm).rotation * knuckleOffset);
-                rightAimPosFilter.Filter(rightKnucklePos, Time.time);
+                rightAimPosFilter.Filter(rightKnucklePos, Core.Time.time);
                 rightAimPosition = rightKnucklePos;
 
                 Vector3 rightDirection = (rightKnucklePos - rightOrigin).normalized;
