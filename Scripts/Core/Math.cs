@@ -96,23 +96,23 @@ namespace Instrumental.Core.Math
 		// The vector3 interpolators below are basically the same as using some of NGUI's tweeners with preset animation
 		// curve values. Still useful though.
 #region Vector3 Interpolation Functions
-		public static Vector3 Sinerp(Vector3 to, Vector3 from, float tValue)
+		public static Vect3 Sinerp(Vect3 to, Vect3 from, float tValue)
 		{
-			return new Vector3(Sinerp(to.x, from.x, tValue),
+			return new Vect3(Sinerp(to.x, from.x, tValue),
 				Sinerp(to.y, from.y, tValue),
 				Sinerp(to.z, from.z, tValue));
 		}
 
-		public static Vector3 Coserp(Vector3 to, Vector3 from, float tValue)
+		public static Vect3 Coserp(Vect3 to, Vect3 from, float tValue)
 		{
-			return new Vector3(Coserp(to.x, from.x, tValue),
+			return new Vect3(Coserp(to.x, from.x, tValue),
 				Coserp(to.y, from.y, tValue),
 				Coserp(to.z, from.z, tValue));
 		}
 
-		public static Vector3 Exerp(Vector3 to, Vector3 from, float tValue)
+		public static Vect3 Exerp(Vect3 to, Vect3 from, float tValue)
 		{
-			return new Vector3(Exerp(to.x, from.x, tValue),
+			return new Vect3(Exerp(to.x, from.x, tValue),
 				Exerp(to.y, from.y, tValue),
 				Exerp(to.z, from.z, tValue));
 		}
@@ -122,9 +122,9 @@ namespace Instrumental.Core.Math
             return t * b + (1 - t) * a;
         }
 
-        public static Vector3 UnclampedLerp(Vector3 to, Vector3 from, float tValue)
+        public static Vect3 UnclampedLerp(Vect3 to, Vect3 from, float tValue)
         {
-            return new Vector3(
+            return new Vect3(
                UnclampedLerp(to.x, from.x, tValue),
                UnclampedLerp(to.y, from.y, tValue),
                UnclampedLerp(to.z, from.z, tValue));
@@ -132,15 +132,13 @@ namespace Instrumental.Core.Math
 #endregion
 
 #region Spherical Coordinates
-		public static void SphericalToCartesian(float radius, float polar, float elevation, out Vector3 outCart)
+		public static void SphericalToCartesian(float radius, float polar, float elevation, out Vect3 outCart)
 		{
 			float a = radius * Mathf.Cos(elevation);
-			outCart.x = a * Mathf.Cos(polar);
-			outCart.y = radius * Mathf.Sin(elevation);
-			outCart.z = a * Mathf.Sin(polar);
+			outCart = new Vect3(a * Mathf.Cos(polar), radius * Mathf.Sin(elevation), a * Mathf.Sin(polar));
 		}
 
-		public static void CartesianToSpherical(Vector3 cartCoords, out float outRadius, out float outPolar, out float outElevation)
+		public static void CartesianToSpherical(Vect3 cartCoords, out float outRadius, out float outPolar, out float outElevation)
 		{
 			if (cartCoords.x == 0)
 				cartCoords.x = Mathf.Epsilon;
@@ -161,27 +159,27 @@ namespace Instrumental.Core.Math
 		/// <param name="to">Destination</param>
 		/// <param name="from">source</param>
 		/// <returns>A normalized direction from the source to the destination</returns>
-		public static Vector3 Direction(Vector3 to, Vector3 from)
+		public static Vect3 Direction(Vect3 to, Vect3 from)
 		{
 			return (to - from).normalized; // dono why but this is backwards?
 		}
 
-		public static Vector3 CenterOfPoints(Vector3[] points)
+		public static Vect3 CenterOfPoints(Vect3[] points)
 		{
-			Vector3 average = new Vector3();
+			Vect3 average = new Vect3();
 
-			foreach (Vector3 target in points) average += target;
+			foreach (Vect3 target in points) average += target;
 
 			average /= points.Length;
 
 			return average;
 		}
 
-		public static Vector3 CenterOfGameObjects(GameObject[] objects)
+		public static Vect3 CenterOfGameObjects(GameObject[] objects)
 		{
-			Vector3 average = new Vector3();
+			Vect3 average = new Vect3();
 
-			foreach (GameObject target in objects) average += target.transform.position;
+			foreach (GameObject target in objects) average += (Vect3)target.transform.position;
 
 			average /= objects.Length;
 
@@ -193,29 +191,29 @@ namespace Instrumental.Core.Math
 		/// </summary>
 		/// <param name="points">Input vector 3 array.</param>
 		/// <returns>The distance from the center to the furthest point.</returns>
-		public static float DistanceOfPoints(Vector3[] points)
+		public static float DistanceOfPoints(Vect3[] points)
 		{
-			Vector3 center = CenterOfPoints(points);
+			Vect3 center = CenterOfPoints(points);
 
 			float dist = 0;
 
-			foreach (Vector3 point in points)
+			foreach (Vect3 point in points)
 			{
-				float newDist = Vector3.Distance(point, center);
+				float newDist = Vect3.Distance(point, center);
 				if (newDist > dist) dist = newDist;
 			}
 
 			return dist;
 		}
 
-        public static Vector3 GetClosestPointOnLineSegment(Vector3 A, Vector3 B, Vector3 P)
+        public static Vect3 GetClosestPointOnLineSegment(Vect3 A, Vect3 B, Vect3 P)
         {
-            Vector3 AP = P - A;       //Vector from A to P   
-            Vector3 AB = B - A;       //Vector from A to B  
+            Vect3 AP = P - A;       //Vector from A to P   
+            Vect3 AB = B - A;       //Vector from A to B  
 
             float magnitudeAB = AB.sqrMagnitude;    //Magnitude of AB vector (it's length squared)
                                 // NOTE: sqrMag above might just be mag.
-            float ABAPproduct = Vector2.Dot(AP, AB);    //The DOT product of a_to_p and a_to_b     
+            float ABAPproduct = Vect2.Dot(AP, AB);    //The DOT product of a_to_p and a_to_b     
             float distance = ABAPproduct / magnitudeAB; //The normalized "distance" from a to your closest point  
 
             if (distance < 0)     //Check if P projection is over vectorAB     
@@ -232,44 +230,44 @@ namespace Instrumental.Core.Math
             }
         }
 
-        //public static Vector2 GetClosestPointOnLineSegment(Vector2 A, Vector2 B, Vector2 P)
-        //{
-        //    Vector2 AP = P - A;       //Vector from A to P   
-        //    Vector2 AB = B - A;       //Vector from A to B  
+		//public static Vect2 GetClosestPointOnLineSegment(Vect2 A, Vect2 B, Vect2 P)
+		//{
+		//	Vect2 AP = P - A;       //Vector from A to P   
+		//	Vect2 AB = B - A;       //Vector from A to B  
 
-        //    float magnitudeAB = AB.LengthSquared();     //Magnitude of AB vector (it's length squared)     
-        //    float ABAPproduct = Vector2.Dot(AP, AB);    //The DOT product of a_to_p and a_to_b     
-        //    float distance = ABAPproduct / magnitudeAB; //The normalized "distance" from a to your closest point  
+		//	float magnitudeAB = AB.LengthSquared();     //Magnitude of AB vector (it's length squared)     
+		//	float ABAPproduct = Vect2.Dot(AP, AB);    //The DOT product of a_to_p and a_to_b     
+		//	float distance = ABAPproduct / magnitudeAB; //The normalized "distance" from a to your closest point  
 
-        //    if (distance < 0)     //Check if P projection is over vectorAB     
-        //    {
-        //        return A;
+		//	if (distance < 0)     //Check if P projection is over vectorAB     
+		//	{
+		//		return A;
 
-        //    }
-        //    else if (distance > 1)
-        //    {
-        //        return B;
-        //    }
-        //    else
-        //    {
-        //        return A + AB * distance;
-        //    }
-        //}
-#endregion
+		//	}
+		//	else if (distance > 1)
+		//	{
+		//		return B;
+		//	}
+		//	else
+		//	{
+		//		return A + AB * distance;
+		//	}
+		//}
+		#endregion
 
-        public static Vector3 CalculateSingleShotVelocity(Vector3 position, Vector3 previousPosition,
+		public static Vect3 CalculateSingleShotVelocity(Vect3 position, Vect3 previousPosition,
             float deltaTime)
         {
             float velocityFactor = 1.0f / deltaTime;
             return velocityFactor * (position - previousPosition);
         }
 
-        public static Vector3 CalculateSingleShotAngularVelocity(Quaternion rotation, Quaternion previousRotation,
+        public static Vect3 CalculateSingleShotAngularVelocity(Quaternion rotation, Quaternion previousRotation,
             float deltaTime)
         {
             Quaternion deltaRotation = rotation * Quaternion.Inverse(previousRotation);
 
-            Vector3 deltaAxis;
+            Vect3 deltaAxis;
             float deltaAngle;
 
             deltaRotation.ToAngleAxis(out deltaAngle, out deltaAxis);
@@ -277,7 +275,7 @@ namespace Instrumental.Core.Math
             if (float.IsInfinity(deltaAxis.x) || float.IsInfinity(deltaAxis.y) ||
                 float.IsNaN(deltaAxis.x) || float.IsNaN(deltaAxis.y) || float.IsNaN(deltaAxis.z))
             {
-                deltaAxis = Vector3.zero;
+                deltaAxis = Vect3.zero;
                 deltaAngle = 0;
             }
 
@@ -286,7 +284,7 @@ namespace Instrumental.Core.Math
                 deltaAngle -= 360.0f;
             }
 
-            Vector3 angularVelocity = deltaAxis * deltaAngle * Mathf.Deg2Rad / deltaTime;
+            Vect3 angularVelocity = deltaAxis * deltaAngle * Mathf.Deg2Rad / deltaTime;
 
             return angularVelocity;
         }
@@ -361,7 +359,7 @@ namespace Instrumental.Core.Math
 
         public static Vector2 GetNormal(Vector2 a, Vector2 b)
         {
-            Vector3 v = b - a;
+            Vect3 v = b - a;
 
             return new Vector2(-v.y, v.x) / Mathf.Sqrt((v.x * v.x) + (v.y * v.y));
         }
