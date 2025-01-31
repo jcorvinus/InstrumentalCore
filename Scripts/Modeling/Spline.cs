@@ -15,7 +15,7 @@ namespace Instrumental.Modeling
 		[SerializeField]
 		private bool closeShape = false;
 		[SerializeField]
-		private List<Vector3> vertexList;
+		private List<Vect3> vertexList;
 
 		public List<SplineKnot> Knots { get { return knots; } set { knots = value; } }
 		public int LineDetail { get { return lineDetail; } set { lineDetail = value; } }
@@ -25,8 +25,8 @@ namespace Instrumental.Modeling
 		/// Vertex list from the last available render. This is the entire spline, not just the anchor/control points.
 		/// If it doesn't have what you expect, try calling RenderVerts().
 		/// </summary>
-		public List<Vector3> VertexList	{ get { return vertexList; } }
-		public Vector3 CenterOfPoints { get { return Math.CenterOfPoints(vertexList.ToArray()); } }
+		public List<Vect3> VertexList	{ get { return vertexList; } }
+		public Vect3 CenterOfPoints { get { return Math.CenterOfPoints(vertexList.ToArray()); } }
 		public int SegmentCount { get { return knots.Count - ((closeShape) ? 0 : 1); } }
 
 		// Use this for initialization
@@ -54,7 +54,7 @@ namespace Instrumental.Modeling
 			if (knots == null) knots = new List<SplineKnot>();
 			else knots.Clear();
 
-			if (vertexList == null) vertexList = new List<Vector3>();
+			if (vertexList == null) vertexList = new List<Vect3>();
 
 			knots.AddRange(GetComponentsInChildren<SplineKnot>());
 		}
@@ -65,9 +65,9 @@ namespace Instrumental.Modeling
 		/// </summary>
 		/// <param name="tValue">0-1 value that determines how far between points to go.</param>
 		/// <returns>linear interpolation between the two points</returns>
-		public Vector3 GetLinear(float tValue, Vector3 point1, Vector3 point2)
+		public Vect3 GetLinear(float tValue, Vect3 point1, Vect3 point2)
 		{
-			return Vector3.Lerp(point1, point2, tValue);
+			return Vect3.Lerp(point1, point2, tValue);
 		}
 
 		/// <summary>
@@ -78,9 +78,9 @@ namespace Instrumental.Modeling
 		/// <param name="point2"></param>
 		/// <param name="point3"></param>
 		/// <returns>the result of the interpolation</returns>
-		public Vector3 GetQuadratic(float tValue, Vector3 point1, Vector3 point2, Vector3 point3)
+		public Vect3 GetQuadratic(float tValue, Vect3 point1, Vect3 point2, Vect3 point3)
 		{
-			return new Vector3(Mathf.Pow((1 - tValue), 2) * point1.x + 2 * (1 - tValue) * tValue * point2.x + Mathf.Pow(tValue, 2) * point3.x,
+			return new Vect3(Mathf.Pow((1 - tValue), 2) * point1.x + 2 * (1 - tValue) * tValue * point2.x + Mathf.Pow(tValue, 2) * point3.x,
 				Mathf.Pow((1 - tValue), 2) * point1.y + 2 * (1 - tValue) * tValue * point2.y + Mathf.Pow(tValue, 2) * point3.y,
 				Mathf.Pow((1 - tValue), 2) * point1.z + 2 * (1 - tValue) * tValue * point2.z + Mathf.Pow(tValue, 2) * point3.z);
 		}
@@ -94,7 +94,7 @@ namespace Instrumental.Modeling
 		/// <param name="point3"></param>
 		/// <param name="point4"></param>
 		/// <returns>the result of the interpolation</returns>
-		public Vector3 GetCubic(float tValue, Vector3 point1, Vector3 point2, Vector3 point3, Vector3 point4)
+		public Vect3 GetCubic(float tValue, Vect3 point1, Vect3 point2, Vect3 point3, Vect3 point4)
 		{
 			float u = 1 - tValue;
 			float tt = tValue * tValue;
@@ -102,7 +102,7 @@ namespace Instrumental.Modeling
 			float uuu = uu * u;
 			float ttt = tt * tValue;
 
-			Vector3 p = uuu * point1; //first term
+			Vect3 p = uuu * point1; //first term
 
 			p += 3 * uu * tValue * point2; //second term
 			p += 3 * u * tt * point3; //third term
@@ -111,13 +111,13 @@ namespace Instrumental.Modeling
 			return p;
 		}
 
-        public Vector3 GetCubicTangent(float tValue, Vector3 point1, Vector3 point2, Vector3 point3, Vector3 point4)
+        public Vect3 GetCubicTangent(float tValue, Vect3 point1, Vect3 point2, Vect3 point3, Vect3 point4)
         {
             float omt = 1f - tValue;
             float omt2 = omt * omt;
             float t2 = tValue * tValue;
 
-            Vector3 tangent =
+			Vect3 tangent =
                 point1 * (-omt2) +
                 point2 * (3 * omt2 - 2 * omt) +
                 point3 * (-3 * t2 + 2 * tValue) +
@@ -126,27 +126,27 @@ namespace Instrumental.Modeling
             return tangent.normalized;
         }
 
-        public Vector3 GetCubicNormal(float tValue, Vector3 point1, Vector3 point2, Vector3 point3, Vector3 point4,
-            Vector3 up)
+        public Vect3 GetCubicNormal(float tValue, Vect3 point1, Vect3 point2, Vect3 point3, Vect3 point4,
+			Vect3 up)
         {
-            Vector3 tangent = GetCubicTangent(tValue, point1, point2, point3, point4);
-            Vector3 binormal = Vector3.Cross(up, tangent);
+			Vect3 tangent = GetCubicTangent(tValue, point1, point2, point3, point4);
+            Vect3 binormal = Vect3.Cross(up, tangent);
 
-            return Vector3.Cross(tangent, binormal);
+            return Vect3.Cross(tangent, binormal);
         }
 		#endregion
 
-		private List<Vector3> segList;
+		private List<Vect3> segList;
 		private void FillSegBuffer(SplineKnot segBegin, SplineKnot segEnd)
 		{
-			if (segList == null) segList = new List<Vector3>();
+			if (segList == null) segList = new List<Vect3>();
 			segList.Clear();
 
-			segList.Add(segBegin.transform.position);
-			if (segBegin.Type != SplineKnot.KnotType.Corner) segList.Add(segBegin.transform.TransformPoint(segBegin.LocalB));
+			segList.Add((Vect3)segBegin.transform.position);
+			if (segBegin.Type != SplineKnot.KnotType.Corner) segList.Add((Vect3)segBegin.transform.TransformPoint(segBegin.LocalB));
 
-			if(segEnd.Type != SplineKnot.KnotType.Corner) segList.Add(segEnd.transform.TransformPoint(segEnd.LocalA));
-			segList.Add(segEnd.transform.position);
+			if(segEnd.Type != SplineKnot.KnotType.Corner) segList.Add((Vect3)segEnd.transform.TransformPoint(segEnd.LocalA));
+			segList.Add((Vect3)segEnd.transform.position);
 		}
 
         private void GetKnotsForSeg(int segIndx, out SplineKnot segBegin, out SplineKnot segEnd)
@@ -202,12 +202,12 @@ namespace Instrumental.Modeling
 			Gizmos.color = Color.grey;
 			for(int i=0; i < vertexList.Count - 1; i++)
 			{
-				Gizmos.DrawLine(vertexList[i], vertexList[i + 1]);
+				Gizmos.DrawLine((Vector3)vertexList[i], (Vector3)vertexList[i + 1]);
 			}
 
 			if(closeShape)
 			{
-				Gizmos.DrawLine(vertexList[vertexList.Count - 1], vertexList[0]);
+				Gizmos.DrawLine((Vector3)vertexList[vertexList.Count - 1], (Vector3)vertexList[0]);
 			}
 		}
 	}

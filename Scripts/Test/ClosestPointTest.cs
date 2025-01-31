@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using Instrumental.Core.Math;
+
 namespace Instrumental.Interaction
 {
     public class ClosestPointTest : MonoBehaviour
@@ -244,14 +246,14 @@ namespace Instrumental.Interaction
 
             return new BoundsVertices()
             {
-                v1 = v1,
-                v2 = v2,
-                v3 = v3,
-                v4 = v4,
-                v5 = v5,
-                v6 = v6,
-                v7 = v7,
-                v8 = v8
+                v1 = (Vect3)v1,
+                v2 = (Vect3)v2,
+                v3 = (Vect3)v3,
+                v4 = (Vect3)v4,
+                v5 = (Vect3)v5,
+                v6 = (Vect3)v6,
+                v7 = (Vect3)v7,
+                v8 = (Vect3)v8
             };
         }
 
@@ -267,7 +269,7 @@ namespace Instrumental.Interaction
 
                 for (int v = 0; v < 8; v++)
                 {
-                    Vector3 vertex = boundsVertices.GetVertex(v);
+                    Vector3 vertex = (Vector3)boundsVertices.GetVertex(v);
                     Vector3 offset = vertex - rigidBody.centerOfMass;
                     float sqrMag = offset.sqrMagnitude;
 
@@ -308,14 +310,14 @@ namespace Instrumental.Interaction
                 Gizmos.matrix = rigidBody.transform.localToWorldMatrix;
 
                 // then draw the vertices
-                Gizmos.DrawWireSphere(stackWalkColliderVertices.v1, 0.01f);
-                Gizmos.DrawWireSphere(stackWalkColliderVertices.v2, 0.01f);
-                Gizmos.DrawWireSphere(stackWalkColliderVertices.v3, 0.01f);
-                Gizmos.DrawWireSphere(stackWalkColliderVertices.v4, 0.01f);
-                Gizmos.DrawWireSphere(stackWalkColliderVertices.v5, 0.01f);
-                Gizmos.DrawWireSphere(stackWalkColliderVertices.v6, 0.01f);
-                Gizmos.DrawWireSphere(stackWalkColliderVertices.v7, 0.01f);
-                Gizmos.DrawWireSphere(stackWalkColliderVertices.v8, 0.01f);
+                Gizmos.DrawWireSphere((Vector3)stackWalkColliderVertices.v1, 0.01f);
+                Gizmos.DrawWireSphere((Vector3)stackWalkColliderVertices.v2, 0.01f);
+                Gizmos.DrawWireSphere((Vector3)stackWalkColliderVertices.v3, 0.01f);
+                Gizmos.DrawWireSphere((Vector3)stackWalkColliderVertices.v4, 0.01f);
+                Gizmos.DrawWireSphere((Vector3)stackWalkColliderVertices.v5, 0.01f);
+                Gizmos.DrawWireSphere((Vector3)stackWalkColliderVertices.v6, 0.01f);
+                Gizmos.DrawWireSphere((Vector3)stackWalkColliderVertices.v7, 0.01f);
+                Gizmos.DrawWireSphere((Vector3)stackWalkColliderVertices.v8, 0.01f);
             }
 
             if (rigidBody)

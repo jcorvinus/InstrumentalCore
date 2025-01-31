@@ -10,6 +10,9 @@ using StereoKit;
 
 namespace Instrumental.Core.Math
 {
+#if UNITY
+	[System.Serializable]
+#endif
 	public struct Vect2
 	{
 #if UNITY
@@ -204,6 +207,9 @@ namespace Instrumental.Core.Math
 		#endregion
 	}
 
+#if UNITY
+	[System.Serializable]
+#endif
 	public struct Vect3
 	{
 #if UNITY

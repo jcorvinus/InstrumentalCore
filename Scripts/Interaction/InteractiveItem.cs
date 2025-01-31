@@ -5,13 +5,14 @@ using UnityEngine;
 using Instrumental.Space;
 using Instrumental.Interaction.Constraints;
 using Instrumental.Interaction.Solvers;
+using Instrumental.Core.Math;
 
 namespace Instrumental.Interaction
 {
     public struct BoundsVertices
     {
-        public Vector3 v1, v2, v3, v4, v5, v6, v7, v8;
-        public Vector3 GetVertex(int index)
+        public Vect3 v1, v2, v3, v4, v5, v6, v7, v8;
+        public Vect3 GetVertex(int index)
         {
             switch (index)
             {
@@ -32,7 +33,7 @@ namespace Instrumental.Interaction
                 case (7):
                     return v8;
                 default:
-                    return Vector3.zero;
+                    return Vect3.zero;
             }
         }
     }
@@ -549,91 +550,95 @@ namespace Instrumental.Interaction
 
             // in a bounds configuration:
             // v1 is down front left, v2 is down front right, v3 is down back left, v4 is down back right
-            Vector3 v1 = bounds.center, v2 = bounds.center, v3 = bounds.center, v4 = bounds.center,
+            Vect3 v1 = (Vect3)bounds.center, v2 = (Vect3)bounds.center, v3 = (Vect3)bounds.center, v4 = (Vect3)bounds.center,
                 // v5 is up front left, v6 is up front right, v7 is up back left, v8 is up back right
-                v5 = bounds.center, v6 = bounds.center, v7 = bounds.center, v8 = bounds.center;
+                v5 = (Vect3)bounds.center, v6 = (Vect3)bounds.center, v7 = (Vect3)bounds.center, v8 = (Vect3)bounds.center;
 
             if (_collider is SphereCollider)
             {
                 SphereCollider sphereCollider = (SphereCollider)_collider;
-                v1 = sphereCollider.center + (Vector3.up * sphereCollider.radius);
-                v2 = sphereCollider.center + (Vector3.down * sphereCollider.radius);
-                v3 = sphereCollider.center + (Vector3.forward * sphereCollider.radius);
-                v4 = sphereCollider.center + (Vector3.back * sphereCollider.radius);
-                v5 = sphereCollider.center + (Vector3.left * sphereCollider.radius);
-                v6 = sphereCollider.center + (Vector3.right * sphereCollider.radius);
-                v7 = sphereCollider.center;
-                v8 = sphereCollider.center;
+				Vect3 center = (Vect3)sphereCollider.center;
+
+				v1 = center + (Vect3.up * sphereCollider.radius);
+                v2 = center + (Vect3.down * sphereCollider.radius);
+                v3 = center + (Vect3.forward * sphereCollider.radius);
+                v4 = center + (Vect3.back * sphereCollider.radius);
+                v5 = center + (Vect3.left * sphereCollider.radius);
+                v6 = center + (Vect3.right * sphereCollider.radius);
+                v7 = center;
+                v8 = center;
             }
             else if (_collider is CapsuleCollider)
             {
                 CapsuleCollider capsuleCollider = (CapsuleCollider)_collider;
 
-                Vector3 direction = Vector3.zero;
-                Vector3 radiusDirA = Vector3.zero, radiusDirB = Vector3.zero;
+				Vect3 direction = Vect3.zero;
+				Vect3 radiusDirA = Vect3.zero, radiusDirB = Vect3.zero;
                 switch (capsuleCollider.direction)
                 {
                     case (0):
-                        direction = Vector3.right;
-                        radiusDirA = Vector3.forward;
-                        radiusDirB = Vector3.up;
+                        direction = Vect3.right;
+                        radiusDirA = Vect3.forward;
+                        radiusDirB = Vect3.up;
                         break;
 
                     case (1):
-                        direction = Vector3.up;
-                        radiusDirA = Vector3.right;
-                        radiusDirB = Vector3.forward;
+                        direction = Vect3.up;
+                        radiusDirA = Vect3.right;
+                        radiusDirB = Vect3.forward;
                         break;
 
                     case (2):
-                        direction = Vector3.right;
-                        radiusDirA = Vector3.forward;
-                        radiusDirB = Vector3.up;
+                        direction = Vect3.right;
+                        radiusDirA = Vect3.forward;
+                        radiusDirB = Vect3.up;
                         break;
 
                     default:
                         break;
                 }
 
-                v1 = capsuleCollider.center + (direction * capsuleCollider.height * 0.5f);
-                v2 = capsuleCollider.center - (direction * capsuleCollider.height * 0.5f);
-                v3 = capsuleCollider.center + (radiusDirA * capsuleCollider.radius);
-                v4 = capsuleCollider.center - (radiusDirA * capsuleCollider.radius);
-                v5 = capsuleCollider.center + (radiusDirB * capsuleCollider.radius);
-                v6 = capsuleCollider.center - (radiusDirB * capsuleCollider.radius);
-                v7 = capsuleCollider.center;
-                v8 = capsuleCollider.center;
+				Vect3 center = (Vect3)capsuleCollider.center;
+				v1 = center + (direction * capsuleCollider.height * 0.5f);
+                v2 = center - (direction * capsuleCollider.height * 0.5f);
+                v3 = center + (radiusDirA * capsuleCollider.radius);
+                v4 = center - (radiusDirA * capsuleCollider.radius);
+                v5 = center + (radiusDirB * capsuleCollider.radius);
+                v6 = center - (radiusDirB * capsuleCollider.radius);
+                v7 = center;
+                v8 = center;
             }
             else
             {
-                // if mesh collider
-                // todo: in the future what we can do is calculate this by making a cage around the mesh, then
-                // fitting those points to the closest point on mesh.
-                // we can then store this for a given collider so that we never have to re-calculate this 
-                // fitted sparse collection of points for a given mesh collider.
-                v1 = bounds.center + (Vector3.down * bounds.size.y * 0.5f) + (Vector3.forward * bounds.size.z * 0.5f) + (Vector3.left * bounds.size.x * 0.5f);
-                v2 = bounds.center + (Vector3.down * bounds.size.y * 0.5f) + (Vector3.forward * bounds.size.z * 0.5f) + (Vector3.right * bounds.size.x * 0.5f);
-                v3 = bounds.center + (Vector3.down * bounds.size.y * 0.5f) + (Vector3.back * bounds.size.z * 0.5f) + (Vector3.left * bounds.size.x * 0.5f);
-                v4 = bounds.center + (Vector3.down * bounds.size.y * 0.5f) + (Vector3.back * bounds.size.z * 0.5f) + (Vector3.right * bounds.size.x * 0.5f);
+				// if mesh collider
+				// todo: in the future what we can do is calculate this by making a cage around the mesh, then
+				// fitting those points to the closest point on mesh.
+				// we can then store this for a given collider so that we never have to re-calculate this 
+				// fitted sparse collection of points for a given mesh collider.
+				Vect3 center = (Vect3)bounds.center;
+                v1 = center + (Vect3.down * bounds.size.y * 0.5f) + (Vect3.forward * bounds.size.z * 0.5f) + (Vect3.left * bounds.size.x * 0.5f);
+                v2 = center + (Vect3.down * bounds.size.y * 0.5f) + (Vect3.forward * bounds.size.z * 0.5f) + (Vect3.right * bounds.size.x * 0.5f);
+                v3 = center + (Vect3.down * bounds.size.y * 0.5f) + (Vect3.back * bounds.size.z * 0.5f) + (Vect3.left * bounds.size.x * 0.5f);
+                v4 = center + (Vect3.down * bounds.size.y * 0.5f) + (Vect3.back * bounds.size.z * 0.5f) + (Vect3.right * bounds.size.x * 0.5f);
 
-                v5 = bounds.center + (Vector3.up * bounds.size.y * 0.5f) + (Vector3.forward * bounds.size.z * 0.5f) + (Vector3.left * bounds.size.x * 0.5f);
-                v6 = bounds.center + (Vector3.up * bounds.size.y * 0.5f) + (Vector3.forward * bounds.size.z * 0.5f) + (Vector3.right * bounds.size.x * 0.5f);
-                v7 = bounds.center + (Vector3.up * bounds.size.y * 0.5f) + (Vector3.back * bounds.size.z * 0.5f) + (Vector3.left * bounds.size.x * 0.5f);
-                v8 = bounds.center + (Vector3.up * bounds.size.y * 0.5f) + (Vector3.back * bounds.size.z * 0.5f) + (Vector3.right * bounds.size.x * 0.5f);
+                v5 = center + (Vect3.up * bounds.size.y * 0.5f) + (Vect3.forward * bounds.size.z * 0.5f) + (Vect3.left * bounds.size.x * 0.5f);
+                v6 = center + (Vect3.up * bounds.size.y * 0.5f) + (Vect3.forward * bounds.size.z * 0.5f) + (Vect3.right * bounds.size.x * 0.5f);
+                v7 = center + (Vect3.up * bounds.size.y * 0.5f) + (Vect3.back * bounds.size.z * 0.5f) + (Vect3.left * bounds.size.x * 0.5f);
+                v8 = center + (Vect3.up * bounds.size.y * 0.5f) + (Vect3.back * bounds.size.z * 0.5f) + (Vect3.right * bounds.size.x * 0.5f);
             }
 
             for (int i = 0; i < transformStack.Count; i++)
             {
                 Transform currentTransform = transformStack[i];
                 Matrix4x4 trs = Matrix4x4.TRS(currentTransform.localPosition, currentTransform.localRotation, currentTransform.localScale);
-                v1 = trs.MultiplyPoint3x4(v1);
-                v2 = trs.MultiplyPoint3x4(v2);
-                v3 = trs.MultiplyPoint3x4(v3);
-                v4 = trs.MultiplyPoint3x4(v4);
-                v5 = trs.MultiplyPoint3x4(v5);
-                v6 = trs.MultiplyPoint3x4(v6);
-                v7 = trs.MultiplyPoint3x4(v7);
-                v8 = trs.MultiplyPoint3x4(v8);
+                v1 = (Vect3)trs.MultiplyPoint3x4((Vector3)v1);
+                v2 = (Vect3)trs.MultiplyPoint3x4((Vector3)v2);
+                v3 = (Vect3)trs.MultiplyPoint3x4((Vector3)v3);
+                v4 = (Vect3)trs.MultiplyPoint3x4((Vector3)v4);
+                v5 = (Vect3)trs.MultiplyPoint3x4((Vector3)v5);
+                v6 = (Vect3)trs.MultiplyPoint3x4((Vector3)v6);
+                v7 = (Vect3)trs.MultiplyPoint3x4((Vector3)v7);
+                v8 = (Vect3)trs.MultiplyPoint3x4((Vector3)v8);
             }
 
             return new BoundsVertices()
@@ -651,7 +656,8 @@ namespace Instrumental.Interaction
 
         void CalculateRadius(Collider[] colliders)
         {
-            Vector3 furthestPoint = rigidBody.centerOfMass;
+			Vect3 rigidBodyCenterOfMass = (Vect3)rigidBody.centerOfMass;
+			Vect3 furthestPoint = rigidBodyCenterOfMass;
             float furthestSqrDist = 0;
 
             for (int i = 0; i < colliders.Length; i++)
@@ -661,8 +667,8 @@ namespace Instrumental.Interaction
 
                 for (int v = 0; v < 8; v++)
                 {
-                    Vector3 vertex = boundsVertices.GetVertex(v);
-                    Vector3 offset = vertex - rigidBody.centerOfMass;
+                    Vect3 vertex = boundsVertices.GetVertex(v);
+					Vect3 offset = vertex - rigidBodyCenterOfMass;
                     float sqrMag = offset.sqrMagnitude;
 
                     if (sqrMag > furthestSqrDist)
@@ -1071,13 +1077,16 @@ namespace Instrumental.Interaction
                 }
                 else
 				{
-                    // calculate our center of mass, target velocity, angular velocity, etc
-                    //Vector3 solvedCenterOfMass = destinationPose.rotation * rigidBody.centerOfMass + destinationPose.position;
-                    //Vector3 currentCenterOfMass = rigidBody.rotation * rigidBody.centerOfMass + rigidBody.position;
+					// calculate our center of mass, target velocity, angular velocity, etc
+					//Vector3 solvedCenterOfMass = destinationPose.rotation * rigidBody.centerOfMass + destinationPose.position;
+					//Vector3 currentCenterOfMass = rigidBody.rotation * rigidBody.centerOfMass + rigidBody.position;
 
-                    Vector3 targetVelocity = Core.Math.Math.CalculateSingleShotVelocity(destinationPose.position, 
-                         rigidBody.position, Core.Time.fixedDeltaTime);
-                    Vector3 targetAngularVelocity = Core.Math.Math.CalculateSingleShotAngularVelocity(destinationPose.rotation, 
+					Vect3 destinationPosition = (Vect3)destinationPose.position;
+					Vect3 rigidbodyPosition = (Vect3)rigidBody.position;
+					//Quatn destinationRotation = (Quatn)destinationPose.rotation;
+					Vect3 targetVelocity = Core.Math.Math.CalculateSingleShotVelocity(destinationPosition, 
+                         rigidbodyPosition, Core.Time.fixedDeltaTime);
+                    Vect3 targetAngularVelocity = Core.Math.Math.CalculateSingleShotAngularVelocity(destinationPose.rotation, 
                         rigidBody.rotation, Core.Time.fixedDeltaTime);
 
                     float targetSpeedSquared = targetVelocity.sqrMagnitude;
@@ -1095,11 +1104,13 @@ namespace Instrumental.Interaction
                         strength = distanceMotionCurve.Evaluate(remainingDistance);
 					}
 
-                    Vector3 lerpedVelocity = Vector3.Lerp(rigidBody.velocity, targetVelocity, strength);
-                    Vector3 lerpedAngularVelocity = Vector3.Lerp(rigidBody.angularVelocity, targetAngularVelocity, strength);
+					Vect3 rigidBodyVelocity = (Vect3)rigidBody.velocity;
+					Vect3 rigidBodyAngularVelocity = (Vect3)rigidBody.angularVelocity;
+					Vect3 lerpedVelocity = Vect3.Lerp(rigidBodyVelocity, targetVelocity, strength);
+                    Vect3 lerpedAngularVelocity = Vect3.Lerp(rigidBodyAngularVelocity, targetAngularVelocity, strength);
 
-                    rigidBody.velocity = lerpedVelocity;
-                    rigidBody.angularVelocity = lerpedAngularVelocity;
+                    rigidBody.velocity = (Vector3)lerpedVelocity;
+                    rigidBody.angularVelocity = (Vector3)lerpedAngularVelocity;
 
                     //previousCenterOfMass = solvedCenterOfMass;
 				}

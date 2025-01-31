@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Instrumental.Interaction;
+using Instrumental.Core.Math;
 
 namespace Instrumental.Interaction.Slottables
 {
@@ -106,9 +107,12 @@ namespace Instrumental.Interaction.Slottables
 			{
                 if(!currentSlot.AttachedItem)
 				{
-                    // this technique won't work on some sizes of objects - we might want to replace with distance
-                    // to the closest point on the object, but that's more computation. Figure this tradeoff later
-                    Vector3 offset = currentSlot.transform.position - interactiveItem.RigidBody.position;
+					// this technique won't work on some sizes of objects - we might want to replace with distance
+					// to the closest point on the object, but that's more computation. Figure this tradeoff later
+					Vect3 slotPosition = (Vect3)currentSlot.transform.position;
+					Vect3 itemCenter = (Vect3)interactiveItem.RigidBody.position;
+
+					Vect3 offset = slotPosition - itemCenter;
                     float currentSqrDistance = offset.sqrMagnitude;
 
                     if(currentSqrDistance < sqrDistance)
@@ -135,9 +139,12 @@ namespace Instrumental.Interaction.Slottables
 
                 if (!hasSettled)
                 {
-                    Vector3 targetVelocity = Core.Math.Math.CalculateSingleShotVelocity(ownerSlot.transform.position,
-                        rigidBody.position, Core.Time.fixedDeltaTime);
-                    Vector3 targetAngularVelocity = Core.Math.Math.CalculateSingleShotAngularVelocity(ownerSlot.transform.rotation,
+					Vect3 ownerSlotPosition = (Vect3)ownerSlot.transform.position;
+					Vect3 rigidBodyPosition = (Vect3)rigidBody.position;
+
+					Vect3 targetVelocity = Core.Math.Math.CalculateSingleShotVelocity(ownerSlotPosition,
+                        rigidBodyPosition, Core.Time.fixedDeltaTime);
+					Vect3 targetAngularVelocity = Core.Math.Math.CalculateSingleShotAngularVelocity(ownerSlot.transform.rotation,
                         rigidBody.rotation, Core.Time.fixedDeltaTime);
 
                     float targetSpeedSquared = targetVelocity.sqrMagnitude;
@@ -151,11 +158,13 @@ namespace Instrumental.Interaction.Slottables
                     float remainingDistance = Vector3.Distance(rigidBody.position, ownerSlot.transform.position);
                     float strength = distanceMotionCurve.Evaluate(remainingDistance);
 
-                    Vector3 lerpedVelocity = Vector3.Lerp(rigidBody.velocity, targetVelocity, strength);
-                    Vector3 lerpedAngularVelocity = Vector3.Lerp(rigidBody.angularVelocity, targetAngularVelocity, strength);
+					Vect3 rigidBodyVelocity = (Vect3)rigidBody.velocity;
+					Vect3 rigidBodyAngularVelocity = (Vect3)rigidBody.angularVelocity;
+					Vect3 lerpedVelocity = Vect3.Lerp(rigidBodyVelocity, targetVelocity, strength);
+                    Vect3 lerpedAngularVelocity = Vect3.Lerp(rigidBodyAngularVelocity, targetAngularVelocity, strength);
 
-                    rigidBody.velocity = lerpedVelocity;
-                    rigidBody.angularVelocity = lerpedAngularVelocity;
+                    rigidBody.velocity = (Vector3)lerpedVelocity;
+                    rigidBody.angularVelocity = (Vector3)lerpedAngularVelocity;
 
                     if (remainingDistance <= Mathf.Epsilon)
                     {

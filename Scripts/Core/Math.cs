@@ -267,10 +267,12 @@ namespace Instrumental.Core.Math
         {
             Quaternion deltaRotation = rotation * Quaternion.Inverse(previousRotation);
 
+            Vector3 _deltaAxis;
             Vect3 deltaAxis;
             float deltaAngle;
 
-            deltaRotation.ToAngleAxis(out deltaAngle, out deltaAxis);
+            deltaRotation.ToAngleAxis(out deltaAngle, out _deltaAxis);
+			deltaAxis = (Vect3)_deltaAxis;
 
             if (float.IsInfinity(deltaAxis.x) || float.IsInfinity(deltaAxis.y) ||
                 float.IsNaN(deltaAxis.x) || float.IsNaN(deltaAxis.y) || float.IsNaN(deltaAxis.z))
@@ -357,11 +359,11 @@ namespace Instrumental.Core.Math
 			return (index > -1 && index < length);
 		}
 
-        public static Vector2 GetNormal(Vector2 a, Vector2 b)
+        public static Vect2 GetNormal(Vect2 a, Vect2 b)
         {
-            Vect3 v = b - a;
+            Vect3 v = b - a; // why is this a vect3? It was a vector3 before?
 
-            return new Vector2(-v.y, v.x) / Mathf.Sqrt((v.x * v.x) + (v.y * v.y));
+            return new Vect2(-v.y, v.x) / Mathf.Sqrt((v.x * v.x) + (v.y * v.y));
         }
 
         public static float Repeat(float t, float length)
