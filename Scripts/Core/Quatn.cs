@@ -128,5 +128,40 @@ namespace Instrumental.Core.Math
 			throw new System.NotImplementedException(); // going to have to implement angle difference between two quaternions
 #endif
 		}
+
+		// get back to the other methods later, I was having problems with 
+		// feature parity between unity and stereokit.
+		// for now I need operator overloads so I can do multiplications
+
+		public static Vect3 operator *(Quatn rotation, Vect3 point)
+		{
+#if UNITY
+			Quaternion uRotation = (Quaternion)rotation;
+			Vector3 uPoint = (Vector3)point;
+
+			return (Vect3)(uRotation * uPoint);
+#elif STEREOKIT
+			Quat skRotation = (Quat)rotation;
+			Vec3 skPoint = (Vec3)point;
+			return (Vect3)(skRotation * skPoint);
+#endif
+		}
+
+		public static Quatn operator *(Quatn lhs, Quatn rhs)
+		{
+#if UNITY
+			Quaternion uLhs, uRhs;
+			uLhs = (Quaternion)lhs;
+			uRhs = (Quaternion)rhs;
+
+			return (Quatn)(uLhs * uRhs);
+#elif STEREOKIT
+			Quat skLhs, skRhs;
+			skLhs = (Quat)lhs;
+			skRhs = (Quat)rhs;
+
+			return (Quatn)(skLhs * skRhs);
+#endif
+		}
 	}
 }
