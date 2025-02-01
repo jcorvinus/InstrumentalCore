@@ -39,6 +39,22 @@ namespace Instrumental.Core.Math
 			v.y = y;
 		}
 
+		public float this[int index]
+		{
+			get
+			{
+				if (index == 0) return x;
+				else if (index == 1) return y;
+				else throw new System.IndexOutOfRangeException();
+			}
+			set
+			{
+				if (index == 0) x = value;
+				else if (index == 1) y = value;
+				else throw new System.IndexOutOfRangeException();
+			}
+		}
+
 #if UNITY
 		public static explicit operator Vect2(UnityEngine.Vector2 v2) =>
 			new Vect2(v2.x, v2.y);
@@ -210,7 +226,7 @@ namespace Instrumental.Core.Math
 #if UNITY
 	[System.Serializable]
 #endif
-	public struct Vect3
+	public struct Vect3 /*: System.IConvertible*/
 	{
 #if UNITY
 		private UnityEngine.Vector3 v;
@@ -234,6 +250,24 @@ namespace Instrumental.Core.Math
 		{
 			get { return v.z; }
 			set { v.z = value; }
+		}
+
+		public float this[int index]
+		{
+			get
+			{
+				if (index == 0) return x;
+				else if (index == 1) return y;
+				else if (index == 2) return z;
+				else throw new System.IndexOutOfRangeException();
+			}
+			set
+			{
+				if (index == 0) x = value;
+				else if (index == 1) y = value;
+				else if (index == 2) z = value;
+				else throw new System.IndexOutOfRangeException();
+			}
 		}
 
 		public Vect3(float x, float y, float z)

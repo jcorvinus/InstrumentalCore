@@ -7,9 +7,15 @@
  *
  */
 
+ #if UNITY
 using UnityEngine;
+#elif STEREOKIT
+using StereoKit;
+#endif
 using System;
 using System.Collections.Generic;
+
+using Instrumental.Core.Math;
 
 class LowPassFilter 
 {
@@ -201,10 +207,10 @@ public class OneEuroFilter<T> where T : struct
 		beta = _beta;
 		dcutoff = _dcutoff;
 
-		if(type == typeof(Vector2))
+		if(type == typeof(Vect2))
 			oneEuroFilters = new OneEuroFilter[2];
 
-		else if(type == typeof(Vector3))
+		else if(type == typeof(Vect3))
 			oneEuroFilters = new OneEuroFilter[3];
 
 		else if(type == typeof(Vector4) || type == typeof(Quaternion))
@@ -246,10 +252,10 @@ public class OneEuroFilter<T> where T : struct
 			return (T) Convert.ChangeType(currValue, typeof(T));
 		}
 
-		if(type == typeof(Vector2))
+		if(type == typeof(Vect2))
 		{
-			Vector2 output = Vector2.zero;
-			Vector2 input = (Vector2) Convert.ChangeType(_value, typeof(Vector2));
+			Vect2 output = Vect2.zero;
+			Vect2 input = (Vect2) Convert.ChangeType(_value, typeof(Vect2));
 
 			for(int i = 0; i < oneEuroFilters.Length; i++)
 				output[i] = oneEuroFilters[i].Filter(input[i], timestamp);
@@ -257,10 +263,10 @@ public class OneEuroFilter<T> where T : struct
 			currValue = (T) Convert.ChangeType(output, typeof(T));
 		}
 
-		else if(type == typeof(Vector3))
+		else if(type == typeof(Vect3))
 		{
-			Vector3 output = Vector3.zero;
-			Vector3 input = (Vector3) Convert.ChangeType(_value, typeof(Vector3));
+			Vect3 output = Vect3.zero;
+			Vect3 input = (Vect3) Convert.ChangeType(_value, typeof(Vect3));
 
 			for(int i = 0; i < oneEuroFilters.Length; i++)
 				output[i] = oneEuroFilters[i].Filter(input[i], timestamp);
