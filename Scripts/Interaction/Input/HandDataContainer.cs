@@ -331,15 +331,15 @@ namespace Instrumental.Interaction.Input
 						Data.WristPose.position = (Vect3)combined.GetPosition();
 						Data.WristPose.rotation = (Quatn)combined.GetRotation();
 
-						Quaternion combinedRotation = combined.GetRotation();
+						Quatn combinedRotation = (Quatn)combined.GetRotation();
 
 						float palmDirOffset = (isLeft) ? palmRightOffset : -palmRightOffset;
-						Vector3 palmOffset = (Vector3.right * palmDirOffset) +
-							(Vector3.up * -palmForwardOffset) + (Vector3.forward * palmUpOffset);
+						Vect3 palmOffset = (Vect3.right * palmDirOffset) +
+							(Vect3.up * -palmForwardOffset) + (Vect3.forward * palmUpOffset);
 						palmOffset = combinedRotation * palmOffset;
-						Data.PalmPose = new PoseIC((Vect3)(combined.GetPosition() + palmOffset),
-							(Quatn)(Quaternion.LookRotation(combinedRotation * Vector3.up * -1,
-							combinedRotation * Vector3.forward)));
+						Data.PalmPose = new PoseIC(((Vect3)combined.GetPosition() + palmOffset),
+							Quatn.LookRotation(combinedRotation * Vect3.up * -1,
+							combinedRotation * Vect3.forward));
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.thumbProximal: // also thumb metacarpal
