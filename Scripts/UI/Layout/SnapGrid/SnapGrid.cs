@@ -1,7 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
+#if UNITY
+using UnityEngine;
+#elif STEREOKIT
+using StereoKit;
+#endif
+
+using Instrumental.Core;
+using Instrumental.Core.Math;
+
+// why is SnapGrid not in a namespace?
 public class SnapGrid : MonoBehaviour
 {
     private static List<SnapGrid> snapGrids;
@@ -20,7 +29,7 @@ public class SnapGrid : MonoBehaviour
     public enum GridType { TwoDimensional = 0, ThreeDimensional=1 }
 
     [SerializeField] GridType type = GridType.TwoDimensional;
-    [SerializeField] Vector3 bounds = new Vector3 { x = 0.3f, y = 0, z = 0.15f };
+    [SerializeField] Vect3 bounds = new Vect3 { x = 0.3f, y = 0, z = 0.15f };
     [SerializeField] float cellDimension = 0.02f;
     [SerializeField] Transform referencePoint;
 
@@ -77,9 +86,9 @@ public class SnapGrid : MonoBehaviour
         return (int)(bounds.y / cellDimension);
 	}
 
-    public Vector3 GetSnappedPosition(Vector3 input)
+    public Vect3 GetSnappedPosition(Vect3 input)
 	{
-        Vector3 localPosition = transform.InverseTransformPoint(input);
+		Vect3 localPosition = (Vect3)transform.InverseTransformPoint((Vector3)input);
         int xSteps = Mathf.RoundToInt(localPosition.x / cellDimension); // one thing I think we can do is divide localposition.x by cell dimensions?
         float x = xSteps * cellDimension;
 
@@ -88,20 +97,21 @@ public class SnapGrid : MonoBehaviour
 
         int zSteps = Mathf.RoundToInt(localPosition.z / cellDimension);
         float z = zSteps * cellDimension;
-        return transform.TransformPoint(new Vector3(x, y, z));
+        return (Vect3)transform.TransformPoint(new Vector3(x, y, z));
 	}
 
-    public bool IsInBounds(Vector3 localPoint)
+    public bool IsInBounds(Vect3 localPoint)
 	{
         Bounds gridBounds = new Bounds(Vector3.zero, 
-            (type == GridType.TwoDimensional) ? new Vector3(bounds.x, 0.1f, bounds.z) : bounds);
+            (type == GridType.TwoDimensional) ? new Vector3(bounds.x, 0.1f, bounds.z) : (Vector3)bounds);
 
-        return gridBounds.Contains(localPoint);
+        return gridBounds.Contains((Vector3)localPoint);
 	}
 
 	private void OnDrawGizmos()
 	{
-        Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
+#if UNITY
+		Gizmos.matrix = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one);
 
         // draw width
         float widthStartPos = -bounds.x * 0.5f;
@@ -133,6 +143,7 @@ public class SnapGrid : MonoBehaviour
         Gizmos.matrix = Matrix4x4.identity;
 
         Gizmos.color = Color.white;
-        Gizmos.DrawWireSphere(GetSnappedPosition(referencePoint.position), 0.01f);
-    }
+        Gizmos.DrawWireSphere((Vector3)GetSnappedPosition((Vect3)referencePoint.position), 0.01f);
+#endif
+	}
 }

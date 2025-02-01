@@ -5,6 +5,7 @@ using UnityEngine;
 using Instrumental.Space;
 using Instrumental.Interaction.Constraints;
 using Instrumental.Interaction.Solvers;
+using Instrumental.Core;
 using Instrumental.Core.Math;
 
 namespace Instrumental.Interaction
@@ -75,46 +76,46 @@ namespace Instrumental.Interaction
         {
             public InstrumentalHand Hand;
             public bool IsGrasping;
-            public Pose ThumbTip;
+            public PoseIC ThumbTip;
             public bool ThumbOverlap;
             public bool ThumbStartedGrasping; // true if this finger has contributed to the current grasp action
             public float ThumbCurlOnGrasp;
             public float ThumbCurlCurrent; // refactor for these is to calculate fixed timestep velocities
             public float ThumbCurlPrevious; // directly in instrumental hand
 
-            public Pose IndexTip;
+            public PoseIC IndexTip;
             public bool IndexOverlap;
             public float IndexCurlOnGrasp;
             public bool IndexStartedGrasping; // true if this finger has contributed to the current grasp action, even after grasp start
             public float IndexCurlCurrent;
             public float IndexCurlPrevious;
 
-            public Pose MiddleTip;
+            public PoseIC MiddleTip;
             public bool MiddleOverlap;
             public float MiddleCurlOnGrasp;
             public bool MiddleStartedGrasping; // true if this finger has contributed to the current grasp action, even after grasp start
             public float MiddleCurlCurrent;
             public float MiddleCurlPrevious;
 
-            public Pose RingTip;
+            public PoseIC RingTip;
             public bool RingOverlap;
             public float RingCurlOnGrasp;
             public bool RingStartedGrasping; // true if this finger has contributed to the current grasp action, even after grasp start
             public float RingCurlCurrent;
             public float RingCurlPrevious;
 
-            public Pose PinkyTip;
+            public PoseIC PinkyTip;
             public bool PinkyOverlap;
             public float PinkyCurlOnGrasp;
             public bool PinkyStartedGrasp; // true if this finger has contributed to the current grasp action, even after grasp start
             public float PinkyCurlCurrent;
             public float PinkyCurlPrevious;
 
-            public Vector3 GraspCenter;
-            public Vector3 GraspPositionOffset;
-            public Quaternion GraspRotationOffset;
-            public Vector3 GraspStartPosition;
-            public Vector3[] GraspStartConstellation;
+            public Vect3 GraspCenter;
+            public Vect3 GraspPositionOffset;
+            public Quatn GraspRotationOffset;
+            public Vect3 GraspStartPosition;
+            public Vect3[] GraspStartConstellation;
             public float RegraspTimer; // turn this into an ungrasp filter instead of a regrasp filter
 
             public Collider[] ThumbColliderResults;
@@ -155,13 +156,13 @@ namespace Instrumental.Interaction
         Bounds itemBounds;
         Collider[] itemColliders;
         Rigidbody rigidBody;
-        Vector3 previousCenterOfMass;
+        Vect3 previousCenterOfMass;
         GraspConstraint constraint;
 
 		#region Hover Vars
 		float leftHoverDist =float.PositiveInfinity;
         float rightHoverDist=float.PositiveInfinity;
-        Vector3 leftHoverPoint, rightHoverPoint, hoverPoint;
+        Vect3 leftHoverPoint, rightHoverPoint, hoverPoint;
 
         float hoverTValue;
         [Range(0.05f, 0.3f)]
@@ -181,9 +182,9 @@ namespace Instrumental.Interaction
         Lens<bool> gravityGraspLens;
 
         List<GraspDataVars> graspableHands;
-        List<Vector3> graspStartPoints;
+        List<Vect3> graspStartPoints;
         List<Vector4> graspCurrentPoints;
-        List<Vector3> offsetStartPoints; // these are used so we can subtract the body position from
+        List<Vect3> offsetStartPoints; // these are used so we can subtract the body position from
                                     // grasp start points before solving
         AudioSource graspSource;
         KabschSolver poseSolver;
@@ -236,14 +237,14 @@ namespace Instrumental.Interaction
         [SerializeField] bool drawGizmos = false;
         #endregion
 
-        private Vector3 respawnPosition;
-        private Quaternion respawnRotation;
+        private Vect3 respawnPosition;
+        private Quatn respawnRotation;
 
         public float ItemRadius { get { return itemRadius; } }
 		public bool IsGrasped { get { return isGrasped; } }
         public bool IsHovering { get { return (leftHoverDist < hoverDistance) || (rightHoverDist < hoverDistance); } }
         public float HoverTValue { get { return hoverTValue; } }
-        public Vector3 HoverPoint { get { return hoverPoint; } }
+        public Vect3 HoverPoint { get { return hoverPoint; } }
         public Rigidbody RigidBody { get { return rigidBody; } }
 
         public float CurrentGraspDistance { get { return currentGraspDistance; } }
@@ -269,9 +270,9 @@ namespace Instrumental.Interaction
 
             // init hands
             graspableHands = new List<GraspDataVars>();
-            graspStartPoints = new List<Vector3>(10);
+            graspStartPoints = new List<Vect3>(10);
             graspCurrentPoints = new List<Vector4>(10);
-            offsetStartPoints = new List<Vector3>(10);
+            offsetStartPoints = new List<Vect3>(10);
 
             poseSolver = new KabschSolver();
 
@@ -285,14 +286,14 @@ namespace Instrumental.Interaction
 
             GraspDataVars leftHandGraspData = new GraspDataVars()
             {
-                GraspCenter = Vector3.zero,
+                GraspCenter = Vect3.zero,
                 Hand = InstrumentalHand.LeftHand,
                 IsGrasping = false,
-                IndexTip = new Pose(),
-                MiddleTip = new Pose(),
-                PinkyTip = new Pose(),
-                RingTip = new Pose(),
-                ThumbTip = new Pose(),
+                IndexTip = new PoseIC(),
+                MiddleTip = new PoseIC(),
+                PinkyTip = new PoseIC(),
+                RingTip = new PoseIC(),
+                ThumbTip = new PoseIC(),
                 ThumbColliderResults = new Collider[5],
                 IndexColliderResults = new Collider[5],
                 MiddleColliderResults = new Collider[5],
@@ -301,14 +302,14 @@ namespace Instrumental.Interaction
             };
             GraspDataVars rightHandGraspData = new GraspDataVars()
             {
-                GraspCenter = Vector3.zero,
+                GraspCenter = Vect3.zero,
                 Hand = InstrumentalHand.RightHand,
                 IsGrasping = false,
-                IndexTip = new Pose(),
-                MiddleTip = new Pose(),
-                PinkyTip = new Pose(),
-                RingTip = new Pose(),
-                ThumbTip = new Pose(),
+                IndexTip = new PoseIC(),
+                MiddleTip = new PoseIC(),
+                PinkyTip = new PoseIC(),
+                RingTip = new PoseIC(),
+                ThumbTip = new PoseIC(),
                 ThumbColliderResults = new Collider[5],
                 IndexColliderResults = new Collider[5],
                 MiddleColliderResults = new Collider[5],
@@ -372,7 +373,7 @@ namespace Instrumental.Interaction
             defaultGravityState = gravityValue;
 		}
 
-        public void SetRespawnLocation(Vector3 position, Quaternion rotation)
+        public void SetRespawnLocation(Vect3 position, Quatn rotation)
 		{
             respawnPosition = position;
             respawnRotation = rotation;
@@ -380,16 +381,16 @@ namespace Instrumental.Interaction
 
         public void SetRespawnLocation()
 		{
-            Vector3 position = rigidBody.position;
-            Quaternion rotation = rigidBody.rotation;
+            Vect3 position = (Vect3)rigidBody.position;
+            Quatn rotation = (Quatn)rigidBody.rotation;
 
             SetRespawnLocation(position, rotation);
         }
 
         public void Respawn()
 		{
-            rigidBody.position = respawnPosition;
-            rigidBody.rotation = respawnRotation;
+            rigidBody.position = (Vector3)respawnPosition;
+            rigidBody.rotation = (Quaternion)respawnRotation;
             rigidBody.velocity = Vector3.zero;
             rigidBody.angularVelocity = Vector3.zero;
 		}
@@ -429,7 +430,7 @@ namespace Instrumental.Interaction
             CalculateRadius(itemColliders);
         }
 
-        public bool ClosestPointOnItem(Vector3 position, out Vector3 closestPoint,
+        public bool ClosestPointOnItem(Vect3 position, out Vect3 closestPoint,
             out bool isPointInside)
         {
             float closestDistance = float.PositiveInfinity;
@@ -448,9 +449,12 @@ namespace Instrumental.Interaction
                 for (int i = 0; i < itemColliders.Length; i++)
                 {
                     Collider testCollider = itemColliders[i];
-                    Vector3 closestPointOnCollider = testCollider.ClosestPoint(closestPoint);
+                    Vect3 closestPointOnCollider = (Vect3)testCollider.ClosestPoint((Vector3)closestPoint);
 
-                    isPointInside = (closestPointOnCollider == position);
+					isPointInside = //(closestPointOnCollider == position);
+						closestPointOnCollider.x == position.x &&
+						closestPointOnCollider.y == position.y &&
+						closestPointOnCollider.z == position.z;
 
                     if (isPointInside)
                     {
@@ -716,27 +720,27 @@ namespace Instrumental.Interaction
                     indexPinchIsCloser ? hand.GetPinchInfo(Finger.Index).PinchCenter :
                     hand.GetPinchInfo(Finger.Middle).PinchCenter; // replace this with a blended version
                                                                   // once you figure out how to make the blend work properly.
-                int numThumbHits = Physics.OverlapSphereNonAlloc(handDataVars.ThumbTip.position, tipRadius, handDataVars.ThumbColliderResults);
+                int numThumbHits = Physics.OverlapSphereNonAlloc((Vector3)handDataVars.ThumbTip.position, tipRadius, handDataVars.ThumbColliderResults);
                 handDataVars.ThumbOverlap = HasItemCollider(numThumbHits, handDataVars.ThumbColliderResults);
                 handDataVars.ThumbCurlPrevious = handDataVars.ThumbCurlCurrent;
                 handDataVars.ThumbCurlCurrent = hand.ThumbCurl;
 
-                int numIndexHits = Physics.OverlapSphereNonAlloc(handDataVars.IndexTip.position, tipRadius, handDataVars.IndexColliderResults);
+                int numIndexHits = Physics.OverlapSphereNonAlloc((Vector3)handDataVars.IndexTip.position, tipRadius, handDataVars.IndexColliderResults);
                 handDataVars.IndexOverlap = HasItemCollider(numIndexHits, handDataVars.IndexColliderResults);
                 handDataVars.IndexCurlPrevious = handDataVars.IndexCurlCurrent;
                 handDataVars.IndexCurlCurrent = hand.IndexCurl;
 
-                int numMiddleHits = Physics.OverlapSphereNonAlloc(handDataVars.MiddleTip.position, tipRadius, handDataVars.MiddleColliderResults);
+                int numMiddleHits = Physics.OverlapSphereNonAlloc((Vector3)handDataVars.MiddleTip.position, tipRadius, handDataVars.MiddleColliderResults);
                 handDataVars.MiddleOverlap = HasItemCollider(numMiddleHits, handDataVars.MiddleColliderResults);
                 handDataVars.MiddleCurlPrevious = handDataVars.MiddleCurlCurrent;
                 handDataVars.MiddleCurlCurrent = hand.MiddleCurl;
 
-                int numRingHits = Physics.OverlapSphereNonAlloc(handDataVars.RingTip.position, tipRadius, handDataVars.RingColliderResults);
+                int numRingHits = Physics.OverlapSphereNonAlloc((Vector3)handDataVars.RingTip.position, tipRadius, handDataVars.RingColliderResults);
                 handDataVars.RingOverlap = HasItemCollider(numRingHits, handDataVars.RingColliderResults);
                 handDataVars.RingCurlPrevious = handDataVars.RingCurlCurrent;
                 handDataVars.RingCurlCurrent = hand.RingCurl;
 
-                int numPinkyHits = Physics.OverlapSphereNonAlloc(handDataVars.PinkyTip.position, tipRadius, handDataVars.PinkyColliderResults);
+                int numPinkyHits = Physics.OverlapSphereNonAlloc((Vector3)handDataVars.PinkyTip.position, tipRadius, handDataVars.PinkyColliderResults);
                 handDataVars.PinkyOverlap = HasItemCollider(numPinkyHits, handDataVars.PinkyColliderResults);
                 handDataVars.PinkyCurlPrevious = handDataVars.PinkyCurlCurrent;
                 handDataVars.PinkyCurlCurrent = hand.PinkyCurl;
@@ -839,14 +843,14 @@ namespace Instrumental.Interaction
             if (currentGraspCount == 0) Ungrasp(hand.Velocity, hand.AngularVelocity);
         }
 
-        void Ungrasp(Vector3 velocity, Vector3 angularVelocity)
+        void Ungrasp(Vect3 velocity, Vect3 angularVelocity)
 		{
             isGrasped = false;
 
             if (applyThrowBoost)
             {
-                rigidBody.velocity = velocity * velocityPower;
-                rigidBody.angularVelocity = angularVelocity * velocityPower;
+                rigidBody.velocity = (Vector3)(velocity * velocityPower);
+                rigidBody.angularVelocity = (Vector3)(angularVelocity * velocityPower);
             }
 
             if(OnUngrasped != null)
@@ -883,15 +887,15 @@ namespace Instrumental.Interaction
 
             InstrumentalHand hand = graspData.Hand;
             Input.HandData handData = hand.GetHandData();
-            Pose palmPose = hand.GetAnchorPose(AnchorPoint.Palm);
+            PoseIC palmPose = hand.GetAnchorPose(AnchorPoint.Palm);
 
-            Vector3[] handConstellation = new Vector3[5]
+            Vect3[] handConstellation = new Vect3[5]
             {
                 handData.IndexJoints[1].Pose.position, // index knuckle
                 handData.ThumbJoints[0].Pose.position, // wrist thumb joint
                 handData.PinkyJoints[0].Pose.position, // pinky wrist joint,
                 handData.PinkyJoints[1].Pose.position,
-                palmPose.position + ((palmPose.rotation * Vector3.forward) * 0.03f)// palm normal offset
+                palmPose.position + ((palmPose.rotation * Vect3.forward) * 0.03f)// palm normal offset
             };
 
             if(graspData.GraspStartConstellation == null || graspData.GraspStartConstellation.Length == 0)
@@ -919,10 +923,10 @@ namespace Instrumental.Interaction
 
             for(int i=0; i < handConstellation.Length; i++)
             { 
-                constellationStartSpheres[i + startOffset].transform.position = handConstellation[i];
+                constellationStartSpheres[i + startOffset].transform.position = (Vector3)handConstellation[i];
                 constellationStartSpheres[i + startOffset].gameObject.SetActive(showConstellationGraspPoints);
 
-                constellationRuntimeSpheres[i + startOffset].transform.position = handConstellation[i];
+                constellationRuntimeSpheres[i + startOffset].transform.position = (Vector3)handConstellation[i];
                 constellationRuntimeSpheres[i + startOffset].gameObject.SetActive(showConstellationGraspPoints);
             }
 
@@ -933,7 +937,7 @@ namespace Instrumental.Interaction
 		{
             isGrasped = true;
             graspSource.Play();
-            previousCenterOfMass = rigidBody.centerOfMass;
+            previousCenterOfMass = (Vect3)rigidBody.centerOfMass;
 
             graspStartedThisFrame = true;
 
@@ -947,20 +951,20 @@ namespace Instrumental.Interaction
 		{
             // todo: when we add more specific grasp poses,
             // create a code flow branch here to allow for that.
-            Vector3 graspPositionOffset = transform.InverseTransformPoint(graspData.GraspCenter);
-            Quaternion handRotation = graspData.Hand.GetAnchorPose(AnchorPoint.Palm).rotation;
-            Vector3 handRotationLocalUp = handRotation * Vector3.up;
-            Vector3 handRotationLocalForward = handRotation * Vector3.forward;
-            handRotationLocalUp = transform.InverseTransformDirection(handRotationLocalUp);
-            handRotationLocalForward = transform.InverseTransformDirection(handRotationLocalForward);
+            Vect3 graspPositionOffset = (Vect3)transform.InverseTransformPoint((Vector3)graspData.GraspCenter);
+            Quatn handRotation = graspData.Hand.GetAnchorPose(AnchorPoint.Palm).rotation;
+            Vect3 handRotationLocalUp = handRotation * Vect3.up;
+			Vect3 handRotationLocalForward = handRotation * Vect3.forward;
+            handRotationLocalUp = (Vect3)transform.InverseTransformDirection((Vector3)handRotationLocalUp);
+            handRotationLocalForward = (Vect3)transform.InverseTransformDirection((Vector3)handRotationLocalForward);
 
             if(poseType == GraspPoseType.StrictPoseMatch)
 			{
-                graspPositionOffset = Vector3.zero;
+                graspPositionOffset = Vect3.zero;
             }
 
-            Quaternion handRotationLocal = Quaternion.LookRotation(handRotationLocalForward, handRotationLocalUp);
-            Quaternion graspRotationOffset = Quaternion.Inverse(handRotationLocal);
+            Quatn handRotationLocal = Quatn.LookRotation(handRotationLocalForward, handRotationLocalUp);
+			Quatn graspRotationOffset = Quatn.Inverse(handRotationLocal);
 
             graspData.GraspPositionOffset = graspPositionOffset;
             graspData.GraspRotationOffset = graspRotationOffset;
@@ -974,13 +978,13 @@ namespace Instrumental.Interaction
         /// https://forum.unity.com/threads/average-quaternions.86898/
         /// </summary>
         /// <returns></returns>
-        Pose GetSolvedPose()
+        PoseIC GetSolvedPose()
         {
             int graspCount = 0;
 
-            Vector3 averagePosition = Vector3.zero;
-            Vector3 forwardSum = Vector3.zero;
-            Vector3 upSum = Vector3.zero;
+            Vect3 averagePosition = Vect3.zero;
+			Vect3 forwardSum = Vect3.zero;
+			Vect3 upSum = Vect3.zero;
 
             for (int i = 0; i < graspableHands.Count; i++)
             {
@@ -989,21 +993,22 @@ namespace Instrumental.Interaction
                 if (currentGraspData.IsGrasping)
                 {
                     InstrumentalHand hand = currentGraspData.Hand;
-                    Pose currentGraspPose = new Pose(currentGraspData.GraspCenter,
+                    PoseIC currentGraspPose = new PoseIC(currentGraspData.GraspCenter,
                         hand.GetAnchorPose(AnchorPoint.Palm).rotation);
 
-                    Vector3 worldSpaceOffsetPose = transform.TransformPoint(currentGraspData.GraspPositionOffset);
-                    Vector3 offset = currentGraspPose.position - worldSpaceOffsetPose;
-                    Vector3 position = transform.position + offset; // maybe change transform.position to body.position?
+					Vect3 worldSpaceOffsetPose = (Vect3)transform.TransformPoint(
+						(Vector3)currentGraspData.GraspPositionOffset);
+					Vect3 offset = currentGraspPose.position - worldSpaceOffsetPose;
+					Vect3 position = (Vect3)transform.position + offset; // maybe change transform.position to body.position?
                     /*destinationPose = new Pose(position + destinationPose.position,
                         destinationPose.rotation * (currentGraspPose.rotation * currentGraspData.GraspRotationOffset));*/
 
                     averagePosition += position;
 
-                    Quaternion rotation = (currentGraspPose.rotation * currentGraspData.GraspRotationOffset);
+                    Quatn rotation = (currentGraspPose.rotation * currentGraspData.GraspRotationOffset);
 
-                    forwardSum += rotation * Vector3.forward;
-                    upSum += rotation * Vector3.up;
+                    forwardSum += rotation * Vect3.forward;
+                    upSum += rotation * Vect3.up;
 
                     graspCount++;
                 }
@@ -1013,20 +1018,20 @@ namespace Instrumental.Interaction
             forwardSum /= graspCount;
             upSum /= graspCount;
 
-            Pose destinationPose = new Pose(averagePosition, Quaternion.LookRotation(forwardSum, upSum));
+            PoseIC destinationPose = new PoseIC(averagePosition, Quatn.LookRotation(forwardSum, upSum));
 
             if(graspCount == 0)
 			{
-                destinationPose = new Pose(rigidBody.position, rigidBody.rotation); // this should never happen but whatever
+                destinationPose = new PoseIC((Vect3)rigidBody.position, (Quatn)rigidBody.rotation); // this should never happen but whatever
 			}
 
             return destinationPose;
 		}
 
-        Pose GetKabschSolvedPose()
+        PoseIC GetKabschSolvedPose()
 		{
-            Vector3 bodyPosition = rigidBody.position;
-            Quaternion bodyRotation = rigidBody.rotation;
+            Vect3 bodyPosition = (Vect3)rigidBody.position;
+            Quatn bodyRotation = (Quatn)rigidBody.rotation;
 
             offsetStartPoints.Clear();
             for (int i = 0; i < graspStartPoints.Count; i++)
@@ -1036,9 +1041,9 @@ namespace Instrumental.Interaction
 
             for (int i = 0; i < graspCurrentPoints.Count; i++)
             {
-                Vector3 currentPoint = new Vector3(graspCurrentPoints[i].x,
+				Vect3 currentPoint = new Vect3(graspCurrentPoints[i].x,
                     graspCurrentPoints[i].y, graspCurrentPoints[i].z);
-                Vector3 adjustedPoint = currentPoint - bodyPosition;
+				Vect3 adjustedPoint = currentPoint - bodyPosition;
                 graspCurrentPoints[i] = new Vector4(currentPoint.x, currentPoint.y, currentPoint.z, 1);
             }
 
@@ -1047,15 +1052,15 @@ namespace Instrumental.Interaction
             // points and the body position
             Matrix4x4 solvedMatrix = poseSolver.SolveKabsch(offsetStartPoints, graspCurrentPoints);
 
-            return new Pose(bodyPosition + solvedMatrix.GetVector3(),
-                    solvedMatrix.GetRotation() * bodyRotation);
+            return new PoseIC(bodyPosition + (Vect3)solvedMatrix.GetVector3(),
+                    (Quatn)solvedMatrix.GetRotation() * bodyRotation);
 		}
 
         void DoGraspMovement()
 		{
             if (poseType != GraspPoseType.None)
             {
-                Pose destinationPose = Pose.identity;
+                PoseIC destinationPose = PoseIC.identity;
 
                 if(useKabschSolve)
 				{
@@ -1072,8 +1077,8 @@ namespace Instrumental.Interaction
                 // use physics movement if non-kinematic
                 if (rigidBody.isKinematic)
                 {
-                    rigidBody.MovePosition(destinationPose.position);
-                    rigidBody.MoveRotation(destinationPose.rotation);
+                    rigidBody.MovePosition((Vector3)destinationPose.position);
+                    rigidBody.MoveRotation((Quaternion)destinationPose.rotation);
                 }
                 else
 				{
@@ -1087,7 +1092,7 @@ namespace Instrumental.Interaction
 					Vect3 targetVelocity = Core.Math.Math.CalculateSingleShotVelocity(destinationPosition, 
                          rigidbodyPosition, Core.Time.fixedDeltaTime);
                     Vect3 targetAngularVelocity = Core.Math.Math.CalculateSingleShotAngularVelocity(destinationPose.rotation, 
-                        rigidBody.rotation, Core.Time.fixedDeltaTime);
+                        (Quatn)rigidBody.rotation, Core.Time.fixedDeltaTime);
 
                     float targetSpeedSquared = targetVelocity.sqrMagnitude;
                     if(targetSpeedSquared > maxMovementSpeed)
@@ -1100,7 +1105,7 @@ namespace Instrumental.Interaction
                     float strength = 1;
                     if(!graspStartedThisFrame)
 					{
-                        float remainingDistance = Vector3.Distance(rigidBody.position, destinationPose.position);
+                        float remainingDistance = Vect3.Distance((Vect3)rigidBody.position, destinationPose.position);
                         strength = distanceMotionCurve.Evaluate(remainingDistance);
 					}
 
@@ -1268,8 +1273,9 @@ namespace Instrumental.Interaction
             
             if(grasping)
 			{
-                Vector3 graspOffsetObjectToWorldPoint = transform.TransformPoint(graspVars.GraspPositionOffset);
-                return Vector3.Distance(graspVars.GraspCenter, graspOffsetObjectToWorldPoint);
+                Vect3 graspOffsetObjectToWorldPoint = (Vect3)transform.TransformPoint(
+					(Vector3)graspVars.GraspPositionOffset);
+                return Vect3.Distance(graspVars.GraspCenter, graspOffsetObjectToWorldPoint);
 			}
             else
 			{
@@ -1295,12 +1301,12 @@ namespace Instrumental.Interaction
             graspingHand = Handedness.None;*/
 		}
 
-        float HoverDist(InstrumentalHand hand, out Vector3 hoverPoint)
+        float HoverDist(InstrumentalHand hand, out Vect3 hoverPoint)
 		{
             hoverPoint = hand.GraspPinch.PinchCenter;
 
             // check to see if we should distance hover
-            Vector3 hoverClosestPoint = hoverPoint;
+            Vect3 hoverClosestPoint = hoverPoint;
             bool isInside = false;
 
             if(ClosestPointOnItem(hoverClosestPoint, out hoverClosestPoint, out isInside))
@@ -1361,8 +1367,8 @@ namespace Instrumental.Interaction
                 GraspDataVars hand0 = graspableHands[0];
                 for (int i = 0; i < 5; i++)
                 {
-                    Pose pose = hand0.Hand.GetAnchorPose((AnchorPoint)i + 2);
-                    tipGrabSpheres[i].transform.position = pose.position;
+                    PoseIC pose = hand0.Hand.GetAnchorPose((AnchorPoint)i + 2);
+                    tipGrabSpheres[i].transform.position = (Vector3)pose.position;
                     tipGrabSpheres[i].transform.localScale = Vector3.one * tipRadius;
 
                     tipGrabSpheres[i].gameObject.SetActive(hand0.Hand.IsTracking);
@@ -1379,8 +1385,8 @@ namespace Instrumental.Interaction
                 {
                     GraspDataVars hand1 = graspableHands[1];
                     int offset = 5;
-                    Pose pose = hand1.Hand.GetAnchorPose((AnchorPoint)i + 2);
-                    tipGrabSpheres[i + offset].transform.position = pose.position;
+                    PoseIC pose = hand1.Hand.GetAnchorPose((AnchorPoint)i + 2);
+                    tipGrabSpheres[i + offset].transform.position = (Vector3)pose.position;
                     tipGrabSpheres[i + offset].transform.localScale = Vector3.one * tipRadius;
 
                     tipGrabSpheres[i + offset].gameObject.SetActive(hand1.Hand.IsTracking);

@@ -1,7 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
+#if UNITY
+using UnityEngine;
+#elif STEREOKIT
+using StereoKit;
+#endif
+
+using Instrumental.Core;
+using Instrumental.Core.Math;
 using Instrumental.Overlay;
 using Instrumental.Interaction.Triggers;
 
@@ -51,8 +58,8 @@ namespace Instrumental.Interaction.VirtualJoystick
 
             if(hand.IsTracking)
 			{
-                distance = Vector3.Distance(hand.GraspPinch.PinchCenter,
-                    joystick.transform.position);
+                distance = Vect3.Distance(hand.GraspPinch.PinchCenter,
+                    (Vect3)joystick.transform.position);
 
                 distance -= ringActivator.Radius;
                 distance = Mathf.Max(0, distance);
@@ -79,13 +86,13 @@ namespace Instrumental.Interaction.VirtualJoystick
         {
             if (hand)
             {
-                Pose anchorPose = hand.GetAnchorPose(AnchorPoint.Palm);
-                ringActivator.transform.position = anchorPose.position;
-                Vector3 forward, up;
-                forward = anchorPose.rotation * Vector3.up;
-                up = anchorPose.rotation * Vector3.forward;
+                PoseIC anchorPose = hand.GetAnchorPose(AnchorPoint.Palm);
+                ringActivator.transform.position = (Vector3)anchorPose.position;
+                Vect3 forward, up;
+                forward = anchorPose.rotation * Vect3.up;
+                up = anchorPose.rotation * Vect3.forward;
 
-                ringActivator.transform.rotation = Quaternion.LookRotation(forward, up);
+                ringActivator.transform.rotation = (Quaternion)Quatn.LookRotation(forward, up);
 
                 ringActivator.enabled = logicTrigger.IsActive && 
                     !joystick.gameObject.activeInHierarchy;
@@ -97,8 +104,10 @@ namespace Instrumental.Interaction.VirtualJoystick
 
 		private void OnDrawGizmos()
 		{
-            Gizmos.DrawWireSphere(joystick.transform.position,
+#if UNITY
+			Gizmos.DrawWireSphere(joystick.transform.position,
                 GetOuterRadius());
+#endif
 		}
 	}
 }

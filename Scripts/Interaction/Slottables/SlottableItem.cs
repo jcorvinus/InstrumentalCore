@@ -144,8 +144,9 @@ namespace Instrumental.Interaction.Slottables
 
 					Vect3 targetVelocity = Core.Math.Math.CalculateSingleShotVelocity(ownerSlotPosition,
                         rigidBodyPosition, Core.Time.fixedDeltaTime);
-					Vect3 targetAngularVelocity = Core.Math.Math.CalculateSingleShotAngularVelocity(ownerSlot.transform.rotation,
-                        rigidBody.rotation, Core.Time.fixedDeltaTime);
+					Vect3 targetAngularVelocity = Core.Math.Math.CalculateSingleShotAngularVelocity(
+						(Quatn)ownerSlot.transform.rotation,
+                        (Quatn)rigidBody.rotation, Core.Time.fixedDeltaTime);
 
                     float targetSpeedSquared = targetVelocity.sqrMagnitude;
                     if (targetSpeedSquared > maxMovementSpeed)
@@ -177,7 +178,7 @@ namespace Instrumental.Interaction.Slottables
                     hoverTimer += (interactiveItem.IsHovering) ? Core.Time.fixedDeltaTime : -Core.Time.fixedDeltaTime;
                     hoverTimer = Mathf.Clamp(hoverTimer, 0, hoverDuration);
                     float hoverTValue = Mathf.InverseLerp(0, hoverDuration, hoverTimer);
-                    Vector3 direction = interactiveItem.HoverPoint - ownerSlot.transform.position;
+					Vect3 direction = interactiveItem.HoverPoint - (Vect3)ownerSlot.transform.position;
 
                     float distance = direction.magnitude;
                     direction /= distance;
@@ -185,8 +186,8 @@ namespace Instrumental.Interaction.Slottables
                     float targetDistance = (distance * 0.5f);
                     float hoverDistance = (interactiveItem.HoverDistance * 0.5f);
 
-                    Vector3 goalPosition = ownerSlot.transform.position + (direction * ((targetDistance < hoverDistance) ? targetDistance : hoverDistance));
-                    rigidBody.position = Vector3.Lerp(ownerSlot.transform.position, goalPosition, hoverTValue);
+					Vect3 goalPosition = (Vect3)ownerSlot.transform.position + (direction * ((targetDistance < hoverDistance) ? targetDistance : hoverDistance));
+                    rigidBody.position = (Vector3)Vect3.Lerp((Vect3)ownerSlot.transform.position, goalPosition, hoverTValue);
 
                     rigidBody.angularVelocity = Vector3.zero;
                     rigidBody.rotation = ownerSlot.transform.rotation;

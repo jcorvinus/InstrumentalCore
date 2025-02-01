@@ -1,9 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
+#if UNITY
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+#elif STEREOKIT
+using StereoKit;
+#endif
+
+using Instrumental.Core;
+using Instrumental.Core.Math;
 
 namespace Instrumental.Interaction.Input
 {
@@ -23,7 +30,7 @@ namespace Instrumental.Interaction.Input
 
         UICursor cursor;
 
-        #region Input Stuff
+#region Input Stuff
         [SerializeField] bool isLeft = false;
         private EventSystem eventSystem;
         private HandInputModule inputModule;
@@ -47,9 +54,9 @@ namespace Instrumental.Interaction.Input
         private List<RaycastResult> raycastResults = new List<RaycastResult>();
 
         const float defaultRaycastLength = 1f;
-		#endregion
+#endregion
 
-		#region Feedback Stuff
+#region Feedback Stuff
 		MeshRenderer pinchConeRenderer;
         int pinchDiffuseHash;
         int pinchEmissHash;
@@ -66,7 +73,7 @@ namespace Instrumental.Interaction.Input
 
         LineRenderer lineRenderer;
         Vector3[] linePoints;
-		#endregion
+#endregion
 
 		private void Awake()
 		{
@@ -74,7 +81,7 @@ namespace Instrumental.Interaction.Input
             eventSystem = GetComponentInParent<EventSystem>();
             cursor = GetComponentInChildren<UICursor>();
 
-			#region Feedback Stuff
+#region Feedback Stuff
 			pinchConeRenderer = transform.GetChild(0).GetComponent<MeshRenderer>();
             pinchDiffuseHash = Shader.PropertyToID("_Color");
             pinchEmissHash = Shader.PropertyToID("_EmissionColor");
@@ -85,7 +92,7 @@ namespace Instrumental.Interaction.Input
             lineRenderer.enabled = false;
 
             linePoints = new Vector3[lineRenderer.positionCount];
-			#endregion
+#endregion
 		}
 
 		// Start is called before the first frame update
@@ -125,17 +132,18 @@ namespace Instrumental.Interaction.Input
         // Update is called once per frame
         void Update()
         {
-            Ray handRay = (isLeft) ? body.LeftHandRay : body.RightHandRay;
-            Vector3 aimPosition = (isLeft) ? body.LeftAimPosition : body.RightAimPosition;
-            Pose palmPose = hand.GetAnchorPose(AnchorPoint.Palm);
+            RayIC handRay = (isLeft) ? body.LeftHandRay : body.RightHandRay;
+            Vect3 aimPosition = (isLeft) ? body.LeftAimPosition : body.RightAimPosition;
+            PoseIC palmPose = hand.GetAnchorPose(AnchorPoint.Palm);
 
             bool active = IsActive(); // todo: add palm direction filtering here
 
             if(active)
 			{
                 // set our transform position and rotation to that of the ray
-                pinchConeRenderer.transform.SetPositionAndRotation(aimPosition, Quaternion.LookRotation(handRay.direction, 
-                    palmPose.rotation * Vector3.back));
+                pinchConeRenderer.transform.SetPositionAndRotation((Vector3)aimPosition, 
+					Quaternion.LookRotation((Vector3)handRay.direction, 
+                    (Quaternion)palmPose.rotation * Vector3.back));
 
                 // enable pinch cone
                 pinchConeRenderer.enabled = true;
@@ -153,8 +161,8 @@ namespace Instrumental.Interaction.Input
 
                 // do our line renderer feedback
                 lineRenderer.enabled = true;
-                Vector3 endpoint = handRay.origin + (handRay.direction * defaultRaycastLength);
-                if (cursor.SurfaceTarget) endpoint = cursor.transform.position;
+                Vect3 endpoint = handRay.position + (handRay.direction * defaultRaycastLength);
+                if (cursor.SurfaceTarget) endpoint = (Vect3)cursor.transform.position;
                 DoLine(aimPosition, endpoint);
 			}
             else
@@ -164,24 +172,24 @@ namespace Instrumental.Interaction.Input
 			}
         }
 
-        void DoLine(Vector3 origin, Vector3 endPoint)
+        void DoLine(Vect3 origin, Vect3 endPoint)
 		{
-            Vector3 startPoint = origin;
+            Vect3 startPoint = origin;
 
             for(int i = 0; i < lineRenderer.positionCount; i++)
 			{
                 if(i == 0)
 				{
-                    linePoints[0] = startPoint;
+                    linePoints[0] = (Vector3)startPoint;
 				}
                 else if (i == lineRenderer.positionCount - 1)
 				{
-                    linePoints[lineRenderer.positionCount - 1] = endPoint;
+                    linePoints[lineRenderer.positionCount - 1] = (Vector3)endPoint;
 				}
                 else
 				{
                     float tValue = Mathf.InverseLerp(0, lineRenderer.positionCount, i);
-                    linePoints[i] = Vector3.Lerp(startPoint, endPoint, tValue);
+                    linePoints[i] = (Vector3)Vect3.Lerp(startPoint, endPoint, tValue);
 				}
 			}
 
@@ -199,7 +207,7 @@ namespace Instrumental.Interaction.Input
             eventData.Reset();
             eventData.button = PointerEventData.InputButton.Left;
 
-            Ray handRay = (isLeft) ? body.LeftHandRay : body.RightHandRay;
+            RayIC handRay = (isLeft) ? body.LeftHandRay : body.RightHandRay;
 
             // find our UISurfaceTarget if there is one
             UISurfaceTarget hitSurface = null;
@@ -217,7 +225,8 @@ namespace Instrumental.Interaction.Input
             {
                 // raycast against our hit target, send the cursor there
                 UIRaycastHit uiRaycastHt;
-                bool didHitSurface = hitSurface.DoRaycast(handRay, defaultRaycastLength, out uiRaycastHt);
+				Ray uHandRay = new Ray((Vector3)handRay.position, (Vector3)handRay.direction);
+                bool didHitSurface = hitSurface.DoRaycast(uHandRay, defaultRaycastLength, out uiRaycastHt);
 
                 if(didHitSurface)
 				{
@@ -332,7 +341,7 @@ namespace Instrumental.Interaction.Input
             // don't process empty events
             if (eventData == null) return;
 
-			#region Raycast
+#region Raycast
 			if (eventData.pointerCurrentRaycast.gameObject == null || currentState == PointerState.OffCanvas)
 			{
                 return;
@@ -450,9 +459,9 @@ namespace Instrumental.Interaction.Input
 				}
 			}
 
-			#endregion
+#endregion
 
-			#region Scrolling
+#region Scrolling
             if(!eventData.dragging && currentDragObject && 
                 Vector2.Distance(eventData.position, dragStartPosition) * 100f >
                 EventSystem.current.pixelDragThreshold)
@@ -472,9 +481,9 @@ namespace Instrumental.Interaction.Input
                     currentObject = null;
 				}
 			}
-			#endregion
+#endregion
 
-			#region End Interaction
+#region End Interaction
             if(!IsPinching())
 			{
                 previousPinching = false;
@@ -504,7 +513,7 @@ namespace Instrumental.Interaction.Input
                     currentDragObject = null;
                 }
 			}
-			#endregion
+#endregion
 
 			// dragging
             if(eventData.pointerDrag != null && eventData.dragging)

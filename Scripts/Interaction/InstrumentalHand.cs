@@ -4,6 +4,8 @@ using UnityEngine;
 
 using Valve.VR;
 using Instrumental.Interaction.Input;
+using Instrumental.Core;
+using Instrumental.Core.Math;
 
 namespace Instrumental.Interaction
 {
@@ -32,7 +34,7 @@ namespace Instrumental.Interaction
 
 	public struct PinchInfo
 	{
-		public Vector3 PinchCenter;
+		public Vect3 PinchCenter;
 		public float PinchDistance;
 		public float PinchAmount;
 	}
@@ -49,12 +51,12 @@ namespace Instrumental.Interaction
 		const float basisDrawDist = 0.02f;
 
 		#region finger extension and curls
-		Pose palmPose;
-		Pose thumbPose;
-		Pose indexPose;
-		Pose middlePose;
-		Pose ringPose;
-		Pose pinkyPose;
+		PoseIC palmPose;
+		PoseIC thumbPose;
+		PoseIC indexPose;
+		PoseIC middlePose;
+		PoseIC ringPose;
+		PoseIC pinkyPose;
 
 		bool thumbIsExtended = false;
 		bool indexIsExtended = false;
@@ -142,8 +144,8 @@ namespace Instrumental.Interaction
 		public static InstrumentalHand RightHand { get { return rightHand; } }
 		public InstrumentalBody Body { get { return body; } }
 
-		public Vector3 Velocity { get { return dataHand.Data.Velocity; } }
-		public Vector3 AngularVelocity { get { return dataHand.Data.AngularVelocity; } }
+		public Vect3 Velocity { get { return dataHand.Data.Velocity; } }
+		public Vect3 AngularVelocity { get { return dataHand.Data.AngularVelocity; } }
 
 		private void Awake()
 		{
@@ -178,45 +180,45 @@ namespace Instrumental.Interaction
 			pinkyPose = GetAnchorPose(AnchorPoint.PinkyTip);
 		}
 
-		public Pose GetAnchorPose(AnchorPoint anchorPoint)
+		public PoseIC GetAnchorPose(AnchorPoint anchorPoint)
 		{
 			switch (anchorPoint)
 			{
 				case AnchorPoint.None:
-					return Pose.identity;
+					return PoseIC.identity;
 
 				case AnchorPoint.Palm:
 					return dataHand.Data.PalmPose;
 
 				case AnchorPoint.IndexTip:
-					return new Pose(dataHand.Data.IndexTip,
+					return new PoseIC(dataHand.Data.IndexTip,
 						dataHand.Data.IndexJoints[3].Pose.rotation);
 
 				case AnchorPoint.MiddleTip:
-					return new Pose(dataHand.Data.MiddleTip,
+					return new PoseIC(dataHand.Data.MiddleTip,
 						dataHand.Data.MiddleJoints[3].Pose.rotation);
 
 				case AnchorPoint.ThumbTip:
-					return new Pose(dataHand.Data.ThumbTip,
+					return new PoseIC(dataHand.Data.ThumbTip,
 						dataHand.Data.ThumbJoints[3].Pose.rotation);
 
 				case AnchorPoint.RingTip:
-					return new Pose(dataHand.Data.RingTip,
+					return new PoseIC(dataHand.Data.RingTip,
 						dataHand.Data.RingJoints[3].Pose.rotation);
 
 				case AnchorPoint.PinkyTip:
-					return new Pose(dataHand.Data.PinkyTip,
+					return new PoseIC(dataHand.Data.PinkyTip,
 						dataHand.Data.PinkyJoints[3].Pose.rotation);
 
 				default:
-					return new Pose(Vector3.zero, Quaternion.identity);
+					return new PoseIC(Vect3.zero, Quatn.identity);
 			}
 		}
 
-		float GetFingerAngle(Vector3 baseDirection,
-			Vector3 forward, Vector3 axis)
+		float GetFingerAngle(Vect3 baseDirection,
+			Vect3 forward, Vect3 axis)
 		{
-			float signedAngle = Vector3.SignedAngle(baseDirection, forward, axis);
+			float signedAngle = Vect3.SignedAngle(baseDirection, forward, axis);
 
 			if (signedAngle < 0 && signedAngle > -60) signedAngle = 0;
 			else if (signedAngle < 0 /*&& signedAngle > -130*/)
@@ -243,20 +245,20 @@ namespace Instrumental.Interaction
 
 		void CalculateExtension()
 		{
-			Vector3 palmDirection = palmPose.rotation * Vector3.up;
-			Vector3 palmThumbRef = palmPose.rotation * Vector3.right;
+			Vect3 palmDirection = palmPose.rotation * Vect3.up;
+			Vect3 palmThumbRef = palmPose.rotation * Vect3.right;
 
-			Vector3 thumbForward = thumbPose.rotation * Vector3.forward;
-			Vector3 indexForward = indexPose.rotation * Vector3.forward;
-			Vector3 middleForward = middlePose.rotation * Vector3.forward;
-			Vector3 ringForward = ringPose.rotation * Vector3.forward;
-			Vector3 pinkyForward = pinkyPose.rotation * Vector3.forward;
+			Vect3 thumbForward = thumbPose.rotation * Vect3.forward;
+			Vect3 indexForward = indexPose.rotation * Vect3.forward;
+			Vect3 middleForward = middlePose.rotation * Vect3.forward;
+			Vect3 ringForward = ringPose.rotation * Vect3.forward;
+			Vect3 pinkyForward = pinkyPose.rotation * Vect3.forward;
 
-			Pose thumbMedialPose = dataHand.Data.ThumbJoints[dataHand.Data.ThumbJoints.Length - 2].Pose;
-			Quaternion thumbInverse = thumbPose.rotation * Quaternion.Inverse(thumbMedialPose.rotation);
-			Vector3 thumbEuler = thumbInverse.eulerAngles;
+			PoseIC thumbMedialPose = dataHand.Data.ThumbJoints[dataHand.Data.ThumbJoints.Length - 2].Pose;
+			Quatn thumbInverse = thumbPose.rotation * Quatn.Inverse(thumbMedialPose.rotation);
+			Vect3 thumbEuler = thumbInverse.eulerAngles;
 
-			thumbCurl = Vector3.Dot(thumbForward, palmThumbRef);
+			thumbCurl = Vect3.Dot(thumbForward, palmThumbRef);
 			if (hand == Handedness.Right) thumbCurl *= -1;
 			thumbCurl = 1 - Mathf.InverseLerp(-0.8f, 0.8f, thumbCurl);
 
@@ -296,8 +298,8 @@ namespace Instrumental.Interaction
 
 		PinchInfo ProcessPinch(Finger finger)
 		{
-			Vector3 thumbTip, fingerTip = Vector3.zero;
-			Vector3 pinchCenter = Vector3.zero;
+			Vect3 thumbTip, fingerTip = Vect3.zero;
+			Vect3 pinchCenter = Vect3.zero;
 			float pinchDistance = 0, pinchAmount = 0;
 			thumbTip = thumbPose.position;
 
@@ -323,9 +325,9 @@ namespace Instrumental.Interaction
 
 			pinchCenter = (fingerTip + thumbTip) * 0.5f;
 
-			Vector3 offset = (fingerTip - thumbTip);
+			Vect3 offset = (fingerTip - thumbTip);
 			pinchDistance = offset.magnitude;
-			pinchAmount = 1 - Mathf.InverseLerp(pinchMinDistance, pinchMaxDistance, pinchDistance);
+			pinchAmount = 1 - Mathf.InverseLerp(pinchMinDistance, pinchMaxDistance, pinchDistance); // using mathf for now because unity's is clamped
 
 			return new PinchInfo()
 			{
@@ -355,28 +357,29 @@ namespace Instrumental.Interaction
 			return new PinchInfo()
 			{
 				PinchAmount = Mathf.Max(indexPinch.PinchAmount, middlePinch.PinchAmount),
-				PinchCenter = Vector3.Lerp(indexPinch.PinchCenter, middlePinch.PinchCenter, blendValue),
+				PinchCenter = Vect3.Lerp(indexPinch.PinchCenter, middlePinch.PinchCenter, blendValue),
 				PinchDistance = Mathf.Min(indexPinch.PinchDistance, middlePinch.PinchDistance)
 			};
 		}
 
 
-		void DrawBasis(Pose pose)
+		void DrawBasis(PoseIC pose)
 		{
-			Vector3 up, forward, right;
-			up = pose.rotation * Vector3.up;
-			forward = pose.rotation * Vector3.forward;
-			right = pose.rotation * Vector3.right;
+			Vect3 up, forward, right;
+			up = pose.rotation * Vect3.up;
+			forward = pose.rotation * Vect3.forward;
+			right = pose.rotation * Vect3.right;
 
 			Gizmos.color = Color.yellow;
-			Gizmos.DrawLine(pose.position, pose.position + 
-				(up * basisDrawDist));
+			Vector3 position = (Vector3)pose.position;
+			Gizmos.DrawLine(position, (Vector3)(pose.position + 
+				(up * basisDrawDist)));
 			Gizmos.color = Color.blue;
-			Gizmos.DrawLine(pose.position, pose.position + 
-				(forward * basisDrawDist));
+			Gizmos.DrawLine(position, (Vector3)(pose.position + 
+				(forward * basisDrawDist)));
 			Gizmos.color = Color.red;
-			Gizmos.DrawLine(pose.position, pose.position + 
-				(right * basisDrawDist));
+			Gizmos.DrawLine(position, (Vector3)(pose.position + 
+				(right * basisDrawDist)));
 		}
 
 		private void OnDrawGizmos()

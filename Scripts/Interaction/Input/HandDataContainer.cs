@@ -4,6 +4,9 @@ using UnityEngine;
 
 using Valve.VR;
 
+using Instrumental.Core;
+using Instrumental.Core.Math;
+
 namespace Instrumental.Interaction.Input
 {
     public class HandDataContainer : MonoBehaviour
@@ -24,8 +27,8 @@ namespace Instrumental.Interaction.Input
 		[Range(0, 0.1f)]
 		[SerializeField] float jointRadius = 0.08f;
 
-		Vector3 previousTrackedPosition;
-		Quaternion previousTrackedRotation;
+		Vect3 previousTrackedPosition;
+		Quatn previousTrackedRotation;
 		VelocityEstimation velocityEstimation;
 
 		// steamVR palm offsets
@@ -61,7 +64,7 @@ namespace Instrumental.Interaction.Input
 
 				if (transform.parent)
 				{
-					skeletonPosition = transform.parent.TransformPoint(skeletonPosition);
+					skeletonPosition = transform.parent.TransformPoint((Vector3)skeletonPosition);
 					skeletonRotation = transform.parent.rotation * skeletonRotation;
 				}
 
@@ -83,8 +86,8 @@ namespace Instrumental.Interaction.Input
 				else
 				{
 					if (velocityEstimation.IsEstimating) velocityEstimation.StopEstimation();
-					Data.Velocity = Vector3.zero;
-					Data.AngularVelocity = Vector3.zero;
+					Data.Velocity = Vect3.zero;
+					Data.AngularVelocity = Vect3.zero;
 				}
 
 				previousTrackedPosition = Data.PalmPose.position;
@@ -104,38 +107,38 @@ namespace Instrumental.Interaction.Input
 				PinkyJoints = new Joint[4],
 				HasForearm = false,
 				ForearmJoint = new Joint(),
-				WristPose = new Pose(Vector3.zero, Quaternion.identity),
-				PalmPose = new Pose(Vector3.zero, Quaternion.identity)
+				WristPose = new PoseIC(Vect3.zero, Quatn.identity),
+				PalmPose = new PoseIC(Vect3.zero, Quatn.identity)
 			};
 
 			// wrist joint 
-			Data.WristPose = new Pose(Vector3.zero, Quaternion.identity);
+			Data.WristPose = new PoseIC(Vect3.zero, Quatn.identity);
 
 			#region Thumb Joints
 			Data.ThumbJoints[0] = new Joint()
 			{
-				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Pose = new PoseIC(Vect3.zero, Quatn.identity),
 				Radius = jointRadius,
 				Type = JointType.Metacarpal
 			};
 
 			Data.ThumbJoints[1] = new Joint()
 			{
-				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Pose = new PoseIC(Vect3.zero, Quatn.identity),
 				Radius = jointRadius,
 				Type = JointType.Proximal
 			};
 
 			Data.ThumbJoints[2] = new Joint()
 			{
-				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Pose = new PoseIC(Vect3.zero, Quatn.identity),
 				Radius = jointRadius,
 				Type = JointType.Medial
 			};
 
 			Data.ThumbJoints[3] = new Joint()
 			{
-				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Pose = new PoseIC(Vect3.zero, Quatn.identity),
 				Radius = jointRadius,
 				Type = JointType.Distal
 			};
@@ -144,28 +147,28 @@ namespace Instrumental.Interaction.Input
 			#region Index Joints
 			Data.IndexJoints[0] = new Joint()
 			{
-				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Pose = new PoseIC(Vect3.zero, Quatn.identity),
 				Radius = jointRadius,
 				Type = JointType.Metacarpal
 			};
 
 			Data.IndexJoints[1] = new Joint()
 			{
-				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Pose = new PoseIC(Vect3.zero, Quatn.identity),
 				Radius = jointRadius,
 				Type = JointType.Proximal
 			};
 
 			Data.IndexJoints[2] = new Joint()
 			{
-				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Pose = new PoseIC(Vect3.zero, Quatn.identity),
 				Radius = jointRadius,
 				Type = JointType.Medial
 			};
 
 			Data.MiddleJoints[3] = new Joint()
 			{
-				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Pose = new PoseIC(Vect3.zero, Quatn.identity),
 				Radius = jointRadius,
 				Type = JointType.Distal
 			};
@@ -174,25 +177,25 @@ namespace Instrumental.Interaction.Input
 			#region MiddleJoints
 			Data.MiddleJoints[0] = new Joint()
 			{
-				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Pose = new PoseIC(Vect3.zero, Quatn.identity),
 				Radius = jointRadius,
 				Type = JointType.Metacarpal
 			};
 			Data.MiddleJoints[1] = new Joint()
 			{
-				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Pose = new PoseIC(Vect3.zero, Quatn.identity),
 				Radius = jointRadius,
 				Type = JointType.Proximal
 			};
 			Data.MiddleJoints[2] = new Joint()
 			{
-				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Pose = new PoseIC(Vect3.zero, Quatn.identity),
 				Radius = jointRadius,
 				Type = JointType.Medial
 			};
 			Data.MiddleJoints[3] = new Joint()
 			{
-				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Pose = new PoseIC(Vect3.zero, Quatn.identity),
 				Radius = jointRadius,
 				Type = JointType.Distal
 			};
@@ -201,25 +204,25 @@ namespace Instrumental.Interaction.Input
 			#region Ring Joints
 			Data.RingJoints[0] = new Joint()
 			{
-				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Pose = new PoseIC(Vect3.zero, Quatn.identity),
 				Radius = jointRadius,
 				Type = JointType.Metacarpal
 			};
 			Data.RingJoints[1] = new Joint()
 			{
-				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Pose = new PoseIC(Vect3.zero, Quatn.identity),
 				Radius = jointRadius,
 				Type = JointType.Proximal
 			};
 			Data.RingJoints[2] = new Joint()
 			{
-				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Pose = new PoseIC(Vect3.zero, Quatn.identity),
 				Radius = jointRadius,
 				Type = JointType.Medial
 			};
 			Data.RingJoints[3] = new Joint()
 			{
-				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Pose = new PoseIC(Vect3.zero, Quatn.identity),
 				Radius = jointRadius,
 				Type = JointType.Distal
 			};
@@ -228,28 +231,28 @@ namespace Instrumental.Interaction.Input
 			#region Pinky Joints
 			Data.PinkyJoints[0] = new Joint()
 			{
-				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Pose = new PoseIC(Vect3.zero, Quatn.identity),
 				Radius = jointRadius,
 				Type = JointType.Metacarpal
 			};
 
 			Data.PinkyJoints[1] = new Joint()
 			{
-				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Pose = new PoseIC(Vect3.zero, Quatn.identity),
 				Radius = jointRadius,
 				Type = JointType.Proximal
 			};
 
 			Data.PinkyJoints[2] = new Joint()
 			{
-				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Pose = new PoseIC(Vect3.zero, Quatn.identity),
 				Radius = jointRadius,
 				Type = JointType.Medial
 			};
 
 			Data.PinkyJoints[3] = new Joint()
 			{
-				Pose = new Pose(Vector3.zero, Quaternion.identity),
+				Pose = new PoseIC(Vect3.zero, Quatn.identity),
 				Radius = jointRadius,
 				Type = JointType.Distal
 			};
@@ -325,8 +328,8 @@ namespace Instrumental.Interaction.Input
 						boneMatrix = Matrix4x4.TRS(bonePosition, rotation, Vector3.one);
 						combined = skeletonMatrix * boneMatrix;
 
-						Data.WristPose.position = combined.GetPosition();
-						Data.WristPose.rotation = combined.GetRotation();
+						Data.WristPose.position = (Vect3)combined.GetPosition();
+						Data.WristPose.rotation = (Quatn)combined.GetRotation();
 
 						Quaternion combinedRotation = combined.GetRotation();
 
@@ -334,124 +337,124 @@ namespace Instrumental.Interaction.Input
 						Vector3 palmOffset = (Vector3.right * palmDirOffset) +
 							(Vector3.up * -palmForwardOffset) + (Vector3.forward * palmUpOffset);
 						palmOffset = combinedRotation * palmOffset;
-						Data.PalmPose = new Pose(combined.GetPosition() + palmOffset,
-							Quaternion.LookRotation(combinedRotation * Vector3.up * -1,
-							combinedRotation * Vector3.forward));
+						Data.PalmPose = new PoseIC((Vect3)(combined.GetPosition() + palmOffset),
+							(Quatn)(Quaternion.LookRotation(combinedRotation * Vector3.up * -1,
+							combinedRotation * Vector3.forward)));
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.thumbProximal: // also thumb metacarpal
-						Data.ThumbJoints[0].Pose.position = combined.GetPosition(); //bonePosition;
-						Data.ThumbJoints[0].Pose.rotation = combined.GetRotation(); //rotation;
+						Data.ThumbJoints[0].Pose.position = (Vect3)combined.GetPosition(); //bonePosition;
+						Data.ThumbJoints[0].Pose.rotation = (Quatn)combined.GetRotation(); //rotation;
 
-						Data.ThumbJoints[1].Pose.position = combined.GetPosition(); //bonePosition;
-						Data.ThumbJoints[1].Pose.rotation = combined.GetRotation(); // rotation;
+						Data.ThumbJoints[1].Pose.position = (Vect3)combined.GetPosition(); //bonePosition;
+						Data.ThumbJoints[1].Pose.rotation = (Quatn)combined.GetRotation(); // rotation;
 						break;
 					case SteamVR_Skeleton_JointIndexEnum.thumbMiddle:
-						Data.ThumbJoints[2].Pose.position = combined.GetPosition(); //bonePosition;
-						Data.ThumbJoints[2].Pose.rotation = combined.GetRotation();//rotation;
+						Data.ThumbJoints[2].Pose.position = (Vect3)combined.GetPosition(); //bonePosition;
+						Data.ThumbJoints[2].Pose.rotation = (Quatn)combined.GetRotation();//rotation;
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.thumbDistal:
-						Data.ThumbJoints[3].Pose.position = combined.GetPosition();
-						Data.ThumbJoints[3].Pose.rotation = combined.GetRotation();
+						Data.ThumbJoints[3].Pose.position = (Vect3)combined.GetPosition();
+						Data.ThumbJoints[3].Pose.rotation = (Quatn)combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.thumbTip:
-						Data.ThumbTip = combined.GetPosition();
+						Data.ThumbTip = (Vect3)combined.GetPosition();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.indexMetacarpal:
-						Data.IndexJoints[0].Pose.position = combined.GetPosition();
-						Data.IndexJoints[0].Pose.rotation = combined.GetRotation();
+						Data.IndexJoints[0].Pose.position = (Vect3)combined.GetPosition();
+						Data.IndexJoints[0].Pose.rotation = (Quatn)combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.indexProximal:
-						Data.IndexJoints[1].Pose.position = combined.GetPosition();
-						Data.IndexJoints[1].Pose.rotation = combined.GetRotation();
+						Data.IndexJoints[1].Pose.position = (Vect3)combined.GetPosition();
+						Data.IndexJoints[1].Pose.rotation = (Quatn)combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.indexMiddle:
-						Data.IndexJoints[2].Pose.position = combined.GetPosition();
-						Data.IndexJoints[2].Pose.rotation = combined.GetRotation();
+						Data.IndexJoints[2].Pose.position = (Vect3)combined.GetPosition();
+						Data.IndexJoints[2].Pose.rotation = (Quatn)combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.indexDistal:
-						Data.IndexJoints[3].Pose.position = combined.GetPosition();
-						Data.IndexJoints[3].Pose.rotation = combined.GetRotation();
+						Data.IndexJoints[3].Pose.position = (Vect3)combined.GetPosition();
+						Data.IndexJoints[3].Pose.rotation = (Quatn)combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.indexTip:
-						Data.IndexTip = combined.GetPosition();
+						Data.IndexTip = (Vect3)combined.GetPosition();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.middleMetacarpal:
-						Data.MiddleJoints[0].Pose.position = combined.GetPosition();
-						Data.MiddleJoints[0].Pose.rotation = combined.GetRotation();
+						Data.MiddleJoints[0].Pose.position = (Vect3)combined.GetPosition();
+						Data.MiddleJoints[0].Pose.rotation = (Quatn)combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.middleProximal:
-						Data.MiddleJoints[1].Pose.position = combined.GetPosition();
-						Data.MiddleJoints[1].Pose.rotation = combined.GetRotation();
+						Data.MiddleJoints[1].Pose.position = (Vect3)combined.GetPosition();
+						Data.MiddleJoints[1].Pose.rotation = (Quatn)combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.middleMiddle:
-						Data.MiddleJoints[2].Pose.position = combined.GetPosition();
-						Data.MiddleJoints[2].Pose.rotation = combined.GetRotation();
+						Data.MiddleJoints[2].Pose.position = (Vect3)combined.GetPosition();
+						Data.MiddleJoints[2].Pose.rotation = (Quatn)combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.middleDistal:
-						Data.MiddleJoints[3].Pose.position = combined.GetPosition();
-						Data.MiddleJoints[3].Pose.rotation = combined.GetRotation();
+						Data.MiddleJoints[3].Pose.position = (Vect3)combined.GetPosition();
+						Data.MiddleJoints[3].Pose.rotation = (Quatn)combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.middleTip:
-						Data.MiddleTip = combined.GetPosition();
+						Data.MiddleTip = (Vect3)combined.GetPosition();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.ringMetacarpal:
-						Data.RingJoints[0].Pose.position = combined.GetPosition();
-						Data.RingJoints[0].Pose.rotation = combined.GetRotation();
+						Data.RingJoints[0].Pose.position = (Vect3)combined.GetPosition();
+						Data.RingJoints[0].Pose.rotation = (Quatn)combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.ringProximal:
-						Data.RingJoints[1].Pose.position = combined.GetPosition();
-						Data.RingJoints[1].Pose.rotation = combined.GetRotation();
+						Data.RingJoints[1].Pose.position = (Vect3)combined.GetPosition();
+						Data.RingJoints[1].Pose.rotation = (Quatn)combined.GetRotation();
 						break;
 					case SteamVR_Skeleton_JointIndexEnum.ringMiddle:
-						Data.RingJoints[2].Pose.position = combined.GetPosition();
-						Data.RingJoints[2].Pose.rotation = combined.GetRotation();
+						Data.RingJoints[2].Pose.position = (Vect3)combined.GetPosition();
+						Data.RingJoints[2].Pose.rotation = (Quatn)combined.GetRotation();
 						break;
 					case SteamVR_Skeleton_JointIndexEnum.ringDistal:
-						Data.RingJoints[3].Pose.position = combined.GetPosition();
-						Data.RingJoints[3].Pose.rotation = combined.GetRotation();
+						Data.RingJoints[3].Pose.position = (Vect3)combined.GetPosition();
+						Data.RingJoints[3].Pose.rotation = (Quatn)combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.ringTip:
-						Data.RingTip = combined.GetPosition();
+						Data.RingTip = (Vect3)combined.GetPosition();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.pinkyMetacarpal:
-						Data.PinkyJoints[0].Pose.position = combined.GetPosition();
-						Data.PinkyJoints[0].Pose.rotation = combined.GetRotation();
+						Data.PinkyJoints[0].Pose.position = (Vect3)combined.GetPosition();
+						Data.PinkyJoints[0].Pose.rotation = (Quatn)combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.pinkyProximal:
-						Data.PinkyJoints[1].Pose.position = combined.GetPosition();
-						Data.PinkyJoints[1].Pose.rotation = combined.GetRotation();
+						Data.PinkyJoints[1].Pose.position = (Vect3)combined.GetPosition();
+						Data.PinkyJoints[1].Pose.rotation = (Quatn)combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.pinkyMiddle:
-						Data.PinkyJoints[2].Pose.position = combined.GetPosition();
-						Data.PinkyJoints[2].Pose.rotation = combined.GetRotation();
+						Data.PinkyJoints[2].Pose.position = (Vect3)combined.GetPosition();
+						Data.PinkyJoints[2].Pose.rotation = (Quatn)combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.pinkyDistal:
-						Data.PinkyJoints[3].Pose.position = combined.GetPosition();
-						Data.PinkyJoints[3].Pose.rotation = combined.GetRotation();
+						Data.PinkyJoints[3].Pose.position = (Vect3)combined.GetPosition();
+						Data.PinkyJoints[3].Pose.rotation = (Quatn)combined.GetRotation();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.pinkyTip:
-						Data.PinkyTip = combined.GetPosition();
+						Data.PinkyTip = (Vect3)combined.GetPosition();
 						break;
 
 					case SteamVR_Skeleton_JointIndexEnum.thumbAux: // these have already been filled
@@ -496,19 +499,19 @@ namespace Instrumental.Interaction.Input
 			DrawBasis(joint.Pose);
 		}
 
-		void DrawBasis(UnityEngine.Pose pose)
+		void DrawBasis(PoseIC pose)
 		{
 			const float size = 0.01f;
 
 			Gizmos.color = Color.red;
-			Gizmos.DrawLine(pose.position,
-				pose.position + ((pose.rotation * Vector3.right) * size));
+			Gizmos.DrawLine((Vector3)pose.position,
+				(Vector3)(pose.position + ((pose.rotation * Vect3.right) * size)));
 			Gizmos.color = Color.yellow;
-			Gizmos.DrawLine(pose.position,
-				pose.position + ((pose.rotation * Vector3.up) * size));
+			Gizmos.DrawLine((Vector3)pose.position,
+				(Vector3)(pose.position + ((pose.rotation * Vect3.up) * size)));
 			Gizmos.color = Color.blue;
-			Gizmos.DrawLine(pose.position,
-				pose.position + ((pose.rotation * Vector3.forward) * size));
+			Gizmos.DrawLine((Vector3)pose.position,
+				(Vector3)(pose.position + ((pose.rotation * Vect3.forward) * size)));
 		}
 
         private void OnDrawGizmos()
@@ -525,12 +528,6 @@ namespace Instrumental.Interaction.Input
 				Data = HandData.GetTestData(isLeft);
 			}
 
-			if(printTestDataStruct)
-			{
-				printTestDataStruct = false;
-				Debug.Log(Data.PrintInitCode());
-			}
-
 			if(drawPalmPose)
 			{
 				DrawBasis(Data.PalmPose);
@@ -540,7 +537,7 @@ namespace Instrumental.Interaction.Input
 			{
 				if (drawBoneBasis)
 				{
-					DrawBasis(new Pose(skeletonPosition, skeletonRotation));
+					DrawBasis(new PoseIC((Vect3)skeletonPosition, (Quatn)skeletonRotation));
 				}
 
 				// draw the hand
@@ -555,7 +552,7 @@ namespace Instrumental.Interaction.Input
 					// draw our joints
 					for (int jointIndx = 0; jointIndx < 5; jointIndx++)
 					{
-						Vector3 start, end;
+						Vect3 start, end;
 						if (jointIndx == 0)
 						{
 							start = Data.WristPose.position;
@@ -576,7 +573,7 @@ namespace Instrumental.Interaction.Input
 						}
 
 						Gizmos.color = Color.white;
-						Gizmos.DrawLine(start, end);
+						Gizmos.DrawLine((Vector3)start, (Vector3)end);
 					}
 				}
 			}

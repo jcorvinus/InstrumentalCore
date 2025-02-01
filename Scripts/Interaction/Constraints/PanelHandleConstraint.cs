@@ -1,7 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
+#if UNITY
+using UnityEngine;
+#elif STEREOKIT
+using StereoKit;
+#endif
+
+using Instrumental.Core;
+using Instrumental.Core.Math;
 using Instrumental.Controls;
 
 namespace Instrumental.Interaction.Constraints
@@ -16,9 +23,10 @@ namespace Instrumental.Interaction.Constraints
 			handle = GetComponent<PanelHandle>();
 		}
 
-		public override Pose DoConstraint(Pose targetPose)
+		public override PoseIC DoConstraint(PoseIC targetPose)
 		{
-			Vector3 constrainedLocalPosition = transform.parent.InverseTransformPoint(targetPose.position);
+			Vect3 constrainedLocalPosition = (Vect3)transform.parent.InverseTransformPoint(
+				(Vector3)targetPose.position);
             constrainedLocalPosition.z = 0;
 
             // enforce any handle-specific constraints
@@ -63,9 +71,10 @@ namespace Instrumental.Interaction.Constraints
                     break;
             }
 
-            Vector3 worldConstrainedPosition = transform.parent.TransformPoint(constrainedLocalPosition);
+			Vect3 worldConstrainedPosition = 
+				(Vect3)transform.parent.TransformPoint((Vector3)constrainedLocalPosition);
 
-            return new Pose(worldConstrainedPosition, transform.parent.rotation);
+            return new PoseIC(worldConstrainedPosition, (Quatn)transform.parent.rotation);
 		}
 	}
 }

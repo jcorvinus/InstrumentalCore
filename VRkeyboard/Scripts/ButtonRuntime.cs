@@ -25,6 +25,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 using Instrumental;
+using Instrumental.Core.Math;
 using Instrumental.Interaction;
 using Instrumental.Space;
 
@@ -109,14 +110,15 @@ namespace Instrumental.Controls
 			rightHand = InstrumentalHand.RightHand;
 		}
 
-		bool IsInBounds(Vector3 point)
+		bool IsInBounds(Vect3 point)
 		{
-			Vector3 closestPointOnBounds = boundsCollider.ClosestPoint(point);
+			Vector3 closestPointOnBounds = boundsCollider.ClosestPoint((Vector3)point);
+			Vector3 uPoint = (Vector3)point;
 
-			return closestPointOnBounds == point;
+			return closestPointOnBounds == uPoint;
 		}
 
-		Vector3 GetTipPosition(InstrumentalHand hand)
+		Vect3 GetTipPosition(InstrumentalHand hand)
 		{
 			return hand.GetAnchorPose(AnchorPoint.IndexTip).position;
 		}
@@ -146,16 +148,16 @@ namespace Instrumental.Controls
 
 				if (isLeftInBounds)
 				{
-					Vector3 leftTipPosition = GetTipPosition(leftHand);
-					leftTipPosition = transform.InverseTransformPoint(leftTipPosition);
+					Vect3 leftTipPosition = GetTipPosition(leftHand);
+					leftTipPosition = (Vect3)transform.InverseTransformPoint((Vector3)leftTipPosition);
 
 					if (furthestPushPoint > leftTipPosition.z) furthestPushPoint = leftTipPosition.z;
 				}
 
 				if (isRightInBounds)
 				{
-					Vector3 rightTipPosition = GetTipPosition(rightHand);
-					rightTipPosition = transform.InverseTransformPoint(rightTipPosition);
+					Vect3 rightTipPosition = GetTipPosition(rightHand);
+					rightTipPosition = (Vect3)transform.InverseTransformPoint((Vector3)rightTipPosition);
 
 					if (furthestPushPoint > rightTipPosition.z) furthestPushPoint = rightTipPosition.z;
 				}

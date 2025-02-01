@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using Instrumental.Core;
+using Instrumental.Core.Math;
+
 namespace Instrumental.Interaction.Solvers
 {
     public class KabschSolver
@@ -10,7 +13,7 @@ namespace Instrumental.Interaction.Solvers
         Vector3[] DataCovariance = new Vector3[3];
         Quaternion OptimalRotation = Quaternion.identity;
         public float scaleRatio = 1f;
-        public Matrix4x4 SolveKabsch(List<Vector3> inPoints, List<Vector4> refPoints, bool solveRotation = true, bool solveScale = false)
+        public Matrix4x4 SolveKabsch(List<Vect3> inPoints, List<Vector4> refPoints, bool solveRotation = true, bool solveScale = false)
         {
             if (inPoints.Count != refPoints.Count) { return Matrix4x4.identity; }
 
@@ -77,7 +80,7 @@ namespace Instrumental.Interaction.Solvers
         }
 
         //Calculate Covariance Matrices --------------------------------------------------
-        public static Vector3[] TransposeMultSubtract(List<Vector3> vec1, List<Vector4> vec2, Vector3 vec1Centroid, Vector3 vec2Centroid, Vector3[] covariance)
+        public static Vector3[] TransposeMultSubtract(List<Vect3> vec1, List<Vector4> vec2, Vector3 vec1Centroid, Vector3 vec2Centroid, Vector3[] covariance)
         {
             UnityEngine.Profiling.Profiler.BeginSample("Calculate Covariance Matrix");
             for (int i = 0; i < 3; i++)
@@ -87,7 +90,7 @@ namespace Instrumental.Interaction.Solvers
 
             for (int k = 0; k < vec1.Count; k++)
             {//k is the column in this matrix
-                Vector3 left = (vec1[k] - vec1Centroid) * vec2[k].w;
+                Vector3 left = ((Vector3)vec1[k] - vec1Centroid) * vec2[k].w;
                 Vector3 right = (new Vector3(vec2[k].x, vec2[k].y, vec2[k].z) - vec2Centroid) * Mathf.Abs(vec2[k].w);
 
                 covariance[0][0] += left[0] * right[0];

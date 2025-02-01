@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Instrumental.Interaction;
+using Instrumental.Core;
+using Instrumental.Core.Math;
 
 namespace Instrumental.Interaction.Triggers
 {
@@ -85,8 +87,8 @@ namespace Instrumental.Interaction.Triggers
 
 		void DrawFingerState(bool passes, AnchorPoint anchorPoint)
 		{
-			Vector3 position = hand.GetAnchorPose(anchorPoint).position;
-			Quaternion rotation = hand.GetAnchorPose(anchorPoint).rotation;
+			Vector3 position = (Vector3)hand.GetAnchorPose(anchorPoint).position;
+			Quaternion rotation = (Quaternion)hand.GetAnchorPose(anchorPoint).rotation;
 			Vector3 forward = rotation * Vector3.forward;
 
 			Gizmos.color = (passes) ? Color.green : Color.red;
@@ -97,14 +99,16 @@ namespace Instrumental.Interaction.Triggers
 		{
 			if(hand)
 			{
-				Pose palmPose = hand.GetAnchorPose(AnchorPoint.Palm);
+				PoseIC palmPose = hand.GetAnchorPose(AnchorPoint.Palm);
 
-				Vector3 palmDirection = palmPose.rotation * Vector3.up;
-				Vector3 palmThumbRef = palmPose.rotation * Vector3.right;
+				Vect3 palmDirection = palmPose.rotation * Vect3.up;
+				Vect3 palmThumbRef = palmPose.rotation * Vect3.right;
 				Gizmos.color = Color.yellow;
-				Gizmos.DrawLine(palmPose.position, palmPose.position + (palmDirection * lineDist));
+				Gizmos.DrawLine((Vector3)(palmPose.position), 
+					(Vector3)(palmPose.position + (palmDirection * lineDist)));
 				Gizmos.color = Color.magenta;
-				Gizmos.DrawLine(palmPose.position, palmPose.position + palmThumbRef);
+				Gizmos.DrawLine((Vector3)palmPose.position, 
+					(Vector3)(palmPose.position + palmThumbRef));
 				DrawFingerState(thumbPasses, AnchorPoint.ThumbTip);
 				DrawFingerState(indexPasses, AnchorPoint.IndexTip);
 				DrawFingerState(middlePasses, AnchorPoint.MiddleTip);

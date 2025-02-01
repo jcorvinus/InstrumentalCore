@@ -1,8 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+
+#if UNITY
 using UnityEngine;
+#endif
 
 using Instrumental.Interaction;
+using Instrumental.Core;
+using Instrumental.Core.Math;
 
 namespace VRKeyboard
 {
@@ -40,16 +45,16 @@ namespace VRKeyboard
 
 			// in the future, we can worry about hip placement and if the user is lying down or in any other pose,
 			// but for now let's do this simply.
-			Quaternion userRotation = Quaternion.LookRotation(body.ForwardDirection, Vector3.up);
-			Vector3 userRight = userRotation * Vector3.right;
+			Quatn userRotation = Quatn.LookRotation(body.ForwardDirection, Vect3.up);
+			Vect3 userRight = userRotation * Vect3.right;
 
-			Vector3 userForwardDirection = Quaternion.AngleAxis(30, userRight) * body.ForwardDirection;
-			Vector3 placementPosition = body.Head.position + (userForwardDirection * 0.46f);
-			Vector3 rotationDirection = (body.Head.position - placementPosition);
-			Quaternion rotation = Quaternion.LookRotation(rotationDirection,
-				-(Quaternion.AngleAxis(120, userRight) * body.ForwardDirection));
+			Vect3 userForwardDirection = Quatn.AngleAxis(30, userRight) * body.ForwardDirection;
+			Vect3 placementPosition = (Vect3)body.Head.position + (userForwardDirection * 0.46f);
+			Vect3 rotationDirection = ((Vect3)body.Head.position - placementPosition);
+			Quatn rotation = Quatn.LookRotation(rotationDirection,
+				-(Quatn.AngleAxis(120, userRight) * body.ForwardDirection));
 
-			transform.SetPositionAndRotation(placementPosition, rotation);
+			transform.SetPositionAndRotation((Vector3)placementPosition, (Quaternion)rotation);
 			keyboards[currentKeboardIndex].gameObject.SetActive(true);
 
 			keyboards[currentKeboardIndex].Show();

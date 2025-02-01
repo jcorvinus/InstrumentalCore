@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Instrumental.Interaction;
+using Instrumental.Core.Math;
 using Instrumental.Schema;
 using Instrumental.Modeling.ProceduralGraphics;
 
@@ -38,7 +39,7 @@ namespace Instrumental.Controls
         bool isLeftInBounds;
         bool isRightInBounds;
 
-        Vector3 furthestPushPoint;
+        Vect3 furthestPushPoint;
 
         float horizontalPercent = 0;
 
@@ -52,7 +53,7 @@ namespace Instrumental.Controls
             }
         }
 
-        public Vector3 FurthestPushPoint { get { return furthestPushPoint; } }
+        public Vect3 FurthestPushPoint { get { return furthestPushPoint; } }
         public float FurthestPushDistance { get { return furthestPushPoint.z; } }
         private List<float> fingerDots;
         private bool waitingForReactivation;
@@ -194,13 +195,14 @@ namespace Instrumental.Controls
         }
 
 		#region Runtime Behavior
-		bool IsInBounds(Vector3 point)
+		bool IsInBounds(Vect3 point)
 		{
-            Vector3 closestPointOnBounds = runtimeFaceCollider.ClosestPoint(point);
-            return closestPointOnBounds == point;
+            Vector3 closestPointOnBounds = runtimeFaceCollider.ClosestPoint((Vector3)point);
+			Vector3 uPoint = (Vector3)point;
+            return closestPointOnBounds == uPoint;
 		}
 
-        Vector3 GetTipPosition(InstrumentalHand hand)
+        Vect3 GetTipPosition(InstrumentalHand hand)
         {
             return hand.GetAnchorPose(AnchorPoint.IndexTip).position;
         }
@@ -250,16 +252,16 @@ namespace Instrumental.Controls
 
                 if (isLeftInBounds)
                 {
-                    Vector3 leftTipPosition = GetTipPosition(leftHand);
-                    leftTipPosition = transform.InverseTransformPoint(leftTipPosition);
+                    Vect3 leftTipPosition = GetTipPosition(leftHand);
+                    leftTipPosition = (Vect3)transform.InverseTransformPoint((Vector3)leftTipPosition);
 
                     if (FurthestPushDistance > leftTipPosition.z) furthestPushPoint = leftTipPosition;
                 }
 
                 if (isRightInBounds)
                 {
-                    Vector3 rightTipPosition = GetTipPosition(rightHand);
-                    rightTipPosition = transform.InverseTransformPoint(rightTipPosition);
+                    Vect3 rightTipPosition = GetTipPosition(rightHand);
+                    rightTipPosition = (Vect3)transform.InverseTransformPoint((Vector3)rightTipPosition);
 
                     if (FurthestPushDistance > rightTipPosition.z) furthestPushPoint = rightTipPosition;
                 }

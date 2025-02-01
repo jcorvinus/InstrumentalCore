@@ -7,22 +7,22 @@ namespace Instrumental.Core
 {
 	public struct PoseIC /*: System.IEquatable<PoseIC>*/
 	{
-		public Vect3 Position;
-		public Quatn Rotation;
+		public Vect3 position;
+		public Quatn rotation;
 
 		public PoseIC(Vect3 position, Quatn rotation)
 		{
-			Position = position;
-			Rotation = rotation;
+			this.position = position;
+			this.rotation = rotation;
 		}
 
-		public static readonly PoseIC Identity = new PoseIC(Vect3.zero, Quatn.identity);
+		public static readonly PoseIC identity = new PoseIC(Vect3.zero, Quatn.identity);
 
 		public Vect3 forward
 		{
 			get
 			{
-				return Rotation * Vect3.forward;
+				return rotation * Vect3.forward;
 			}
 		}
 
@@ -30,7 +30,7 @@ namespace Instrumental.Core
 		{
 			get
 			{
-				return Rotation * Vect3.right;
+				return rotation * Vect3.right;
 			}
 		}
 
@@ -38,13 +38,13 @@ namespace Instrumental.Core
 		{
 			get
 			{
-				return Rotation * Vect3.up;
+				return rotation * Vect3.up;
 			}
 		}
 
 		//public bool Equals(PoseIC other)
 		//{
-		//	return Position == other.Position && Rotation == other.Rotation;
+		//	return position == other.position && rotation == other.rotation;
 		//}
 	}
 }

@@ -1,6 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+
+#if UNITY
 using UnityEngine;
+#elif STEREOKIT
+using StereoKit;
+#endif
+
+using Instrumental.Core;
 
 namespace Instrumental.Interaction.Constraints
 {
@@ -14,6 +21,6 @@ namespace Instrumental.Interaction.Constraints
 			graspItem.SetConstraint(this);
 		}
 
-		public abstract Pose DoConstraint(Pose targetPose);
+		public abstract PoseIC DoConstraint(PoseIC targetPose);
     }
 }

@@ -111,8 +111,6 @@ MonoBehaviour:
   StartOnEnable: 0
   forward: 1
   enableDebugLogging: 0
-  StartScale: {x: 0, y: 0, z: 0}
-  GoalScale: {x: 1, y: 1, z: 1}
   Unclamped: 0
   RunWhileNotPlay: 0
 --- !u!1 &4079726732628830459

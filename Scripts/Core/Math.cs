@@ -262,12 +262,12 @@ namespace Instrumental.Core.Math
             return velocityFactor * (position - previousPosition);
         }
 
-        public static Vect3 CalculateSingleShotAngularVelocity(Quaternion rotation, Quaternion previousRotation,
+        public static Vect3 CalculateSingleShotAngularVelocity(Quatn rotation, Quatn previousRotation,
             float deltaTime)
         {
-            Quaternion deltaRotation = rotation * Quaternion.Inverse(previousRotation);
+			Quatn deltaRotation = rotation * Quatn.Inverse(previousRotation);
 
-            Vector3 _deltaAxis;
+            Vect3 _deltaAxis;
             Vect3 deltaAxis;
             float deltaAngle;
 

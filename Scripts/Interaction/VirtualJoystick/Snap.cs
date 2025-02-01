@@ -1,11 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
+
+#if UNITY
 using UnityEngine;
+#elif STEREOKIT
+using StereoKit;
+#endif
 
 using Instrumental.Overlay;
 using Instrumental.Interaction;
 using Instrumental.Interaction.Constraints;
 using Instrumental.Interaction.VirtualJoystick;
+using Instrumental.Core;
+using Instrumental.Core.Math;
 
 namespace Instrumental.Interaction.VirtualJoystick
 {
@@ -18,10 +25,10 @@ namespace Instrumental.Interaction.VirtualJoystick
         bool isDeployed = false;
         float deployedTime = 0;
         const float deployedTimeDuration = 0.15f;
-        Vector3 deployementSourcePosition;
+		Vect3 deployementSourcePosition;
         bool freshDeployment = true;
-        Vector3 velocity;
-        Vector3 direction;
+		Vect3 velocity;
+		Vect3 direction;
 
         Vector3[] linePoints;
 
@@ -53,13 +60,13 @@ namespace Instrumental.Interaction.VirtualJoystick
 
         public bool IsSnapActive { get { return isSnapLeft || isSnapRight; } }
 
-        public Vector2 Value 
+        public Vect2 Value 
         { 
             get 
             {
-                if (isSnapLeft) return Vector2.left;
-                else if (isSnapRight) return Vector2.right;
-                else return Vector2.zero;
+                if (isSnapLeft) return Vect2.left;
+                else if (isSnapRight) return Vect2.right;
+                else return Vect2.zero;
             }
         }
 
@@ -87,7 +94,7 @@ namespace Instrumental.Interaction.VirtualJoystick
         {
             isDeployed = true;
             deployedTime = 0;
-            deployementSourcePosition = transform.position;
+            deployementSourcePosition = (Vect3)transform.position;
             freshDeployment = true;
             handle.transform.localScale = Vector3.one * Mathf.Epsilon;
             handle.gameObject.SetActive(true);
@@ -126,24 +133,24 @@ namespace Instrumental.Interaction.VirtualJoystick
 				{
                     deployedTime = 0;
                     freshDeployment = false;
-                    deployementSourcePosition = handle.transform.position;
+                    deployementSourcePosition = (Vect3)handle.transform.position;
 				}
 
                 float tValue = Mathf.InverseLerp(0, deployedTimeDuration, deployedTime);
-                Vector3 targetPosition = GetTargetPosition(tValue);
-                Vector3 startPosition = GetStartPosition();
+				Vect3 targetPosition = GetTargetPosition(tValue);
+				Vect3 startPosition = GetStartPosition();
 
                 if (!handle.IsGrasped) // don't move if grasped
                 {
                     if (freshDeployment)
                     {
                         handle.transform.localScale = Vector3.one * tValue;
-                        handle.transform.position = targetPosition;
+                        handle.transform.position = (Vector3)targetPosition;
                     }
                     else
                     {
                         // smoothdamp back to position
-                        handle.transform.position = Vector3.Lerp(deployementSourcePosition, targetPosition,
+                        handle.transform.position = (Vector3)Vect3.Lerp(deployementSourcePosition, targetPosition,
                             Mathf.InverseLerp(0, deployedTimeDuration, deployedTime));
                     }
 
@@ -157,23 +164,23 @@ namespace Instrumental.Interaction.VirtualJoystick
                     // actual processing of snap turning
                     signifierContainer.gameObject.SetActive(true);
 
-                    // we can solve the 'where do the cones go?' problem by moving them upwards
-                    // a lot simpler than the other ideas I'd had in mind.
-                    Vector3 coneRef = GetTargetPosition(1) + (direction * handleCollider.radius);
+					// we can solve the 'where do the cones go?' problem by moving them upwards
+					// a lot simpler than the other ideas I'd had in mind.
+					Vect3 coneRef = GetTargetPosition(1) + (direction * handleCollider.radius);
 
-                    // place our left and right cones
-                    Vector3 leftConeLinePosition = coneRef + (direction * -coneVisDistance);
-                    leftCone.transform.position = leftConeLinePosition + (Vector3.up * coneUpOffset);
-                    leftCone.transform.rotation = Quaternion.LookRotation(-direction, Vector3.up);
+					// place our left and right cones
+					Vect3 leftConeLinePosition = coneRef + (direction * -coneVisDistance);
+                    leftCone.transform.position = (Vector3)(leftConeLinePosition + (Vect3.up * coneUpOffset));
+                    leftCone.transform.rotation = (Quaternion)Quatn.LookRotation(-direction, Vect3.up);
 
-                    Vector3 rightConeLinePosition = coneRef + (direction * coneVisDistance);
-                    rightCone.transform.position = coneRef + (Vector3.up * coneUpOffset);
-                    rightCone.transform.rotation = Quaternion.LookRotation(direction, Vector3.up);
+					Vect3 rightConeLinePosition = coneRef + (direction * coneVisDistance);
+                    rightCone.transform.position = (Vector3)(coneRef + (Vect3.up * coneUpOffset));
+                    rightCone.transform.rotation = (Quaternion)Quatn.LookRotation(direction, Vect3.up);
 
                     // get our distance. Do it relative to the start point since we know that can
                     // be done in one distance check instead of two and doesn't have the double-bounds problem
                     // of my old check. We can also use offset from grab dist to get the baseline.
-                    float dist = Vector3.Distance(handle.transform.position, startPosition);
+                    float dist = Vect3.Distance((Vect3)handle.transform.position, startPosition);
                     float zeroed = dist - graspDistance;
 
                     float leftScale = (zeroed > 0) ? 0 : Mathf.InverseLerp(0, coneSnapDist, Mathf.Abs(zeroed));
@@ -195,11 +202,11 @@ namespace Instrumental.Interaction.VirtualJoystick
                 }
 
                 // handle line renderer stuff
-                linePoints[0] = startPosition;
-                linePoints[1] = targetPosition;
+                linePoints[0] = (Vector3)startPosition;
+                linePoints[1] = (Vector3)targetPosition;
                 outboundRenderer.SetPositions(linePoints);
                 outboundRenderer.enabled = true;
-                linearConstraint.SetPoints(linePoints[0], GetMaxConstraintPos());
+                linearConstraint.SetPoints((Vect3)linePoints[0], GetMaxConstraintPos());
             }
             else
 			{
@@ -225,52 +232,53 @@ namespace Instrumental.Interaction.VirtualJoystick
             snapSource.PlayOneShot(snapClips[snapSoudIndex]);
 		}
 
-        Vector3 GetMaxConstraintPos()
+        Vect3 GetMaxConstraintPos()
 		{
             return GetStartPosition() + (direction);
 		}
 
-        Vector3 GetTargetPosition(float tValue)
+		Vect3 GetTargetPosition(float tValue)
 		{
             return GetStartPosition() +
                 (direction * (graspDistance * tValue));
         }
 
-        Vector3 GetDirection()
+		Vect3 GetDirection()
 		{
             if (Application.isPlaying)
             {
                 if (joystick)
                 {
-                    // get our joystick relative position
-                    Vector3 shoulderPoint = InstrumentalBody.Instance.RightShoulder;
-                    Vector3 shoulderDirection = (shoulderPoint - joystick.transform.position);
-                    shoulderDirection = Vector3.Scale(shoulderDirection, new Vector3(1, 0, 1)).normalized;
+					// get our joystick relative position
+					Vect3 shoulderPoint = InstrumentalBody.Instance.RightShoulder;
+					Vect3 joystickPosition = (Vect3)joystick.transform.position;
+					Vect3 shoulderDirection = (shoulderPoint - joystickPosition);
+                    shoulderDirection = Vect3.Scale(shoulderDirection, new Vect3(1, 0, 1)).normalized;
 
-                    Vector3 headRight = Vector3.Scale(InstrumentalBody.Instance.Head.right, new Vector3(1, 0, 1)).normalized;
+					Vect3 headRight = Vect3.Scale((Vect3)InstrumentalBody.Instance.Head.right, new Vect3(1, 0, 1)).normalized;
 
-                    return Vector3.Slerp(shoulderDirection, headRight, shoulderHeadRightBlend).normalized;
+                    return Vect3.Slerp(shoulderDirection, headRight, shoulderHeadRightBlend).normalized;
                 }
-                else return transform.forward;
+                else return (Vect3)transform.forward;
             }
             else
 			{
-                return transform.forward;
+                return (Vect3)transform.forward;
 			}
 		}
 
-        Vector3 GetStartPosition()
+		Vect3 GetStartPosition()
 		{
             if(Application.isPlaying)
 			{
                 if (joystick)
                 {
                     // get our joystick relative position
-                    return joystick.transform.position + (direction * joystickMaster.GetInnerRadius());
+                    return (Vect3)joystick.transform.position + (direction * joystickMaster.GetInnerRadius());
                 }
-                else return transform.position;
+                else return (Vect3)transform.position;
 			}
-            else return transform.position;
+            else return (Vect3)transform.position;
 		}
 	}
 }

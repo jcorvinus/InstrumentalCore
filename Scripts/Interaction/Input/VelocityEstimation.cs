@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Instrumental;
+using Instrumental.Core.Math;
 
 namespace Instrumental.Interaction.Input
 {
     [System.Serializable]
     public struct SampleData
     {
-        public Vector3 Velocity;
-        public Vector3 AngularVelocity;
+        public Vect3 Velocity;
+        public Vect3 AngularVelocity;
     }
 
     public class VelocityEstimation : MonoBehaviour
@@ -20,8 +21,8 @@ namespace Instrumental.Interaction.Input
             // hit currentSampleIndex + 1. Remember to handle the case of sampleIndex == sampleData.length - 1.
             // that means just stop at 0
 
-        Vector3 currentVelocityEstimation;
-        Vector3 currentAngularEstimation;
+        Vect3 currentVelocityEstimation;
+		Vect3 currentAngularEstimation;
 
         [SerializeField] int sampleWindow=10;
         int currentSampleIndex = 0;
@@ -29,8 +30,8 @@ namespace Instrumental.Interaction.Input
 
         bool isEstimating = false;
         public bool IsEstimating { get { return isEstimating; } }
-        public Vector3 Velocity { get { return currentVelocityEstimation; } }
-        public Vector3 AngularVelocity { get { return currentAngularEstimation; } }
+        public Vect3 Velocity { get { return currentVelocityEstimation; } }
+        public Vect3 AngularVelocity { get { return currentAngularEstimation; } }
 
         // Start is called before the first frame update
         void Start()
@@ -51,9 +52,9 @@ namespace Instrumental.Interaction.Input
 
         void DoEstimation()
 		{
-            // get our starting values
-            Vector3 velocity = Vector3.zero;
-            Vector3 angularVelocity = Vector3.zero;
+			// get our starting values
+			Vect3 velocity = Vect3.zero;
+			Vect3 angularVelocity = Vect3.zero;
 
             // walk backwards through the ring buffer
             int scanIndex = currentSampleIndex;
@@ -81,8 +82,8 @@ namespace Instrumental.Interaction.Input
 
             SampleData firstSample = new SampleData
             {
-                AngularVelocity = Vector3.zero,
-                Velocity = Vector3.zero,
+                AngularVelocity = Vect3.zero,
+                Velocity = Vect3.zero,
             };
 
             // clear the buffer
@@ -109,17 +110,17 @@ namespace Instrumental.Interaction.Input
             isEstimating = false;
         }
 
-        Vector3 CalculateSingleShotVelocity(Vector3 position, Vector3 previousPosition)
+		Vect3 CalculateSingleShotVelocity(Vect3 position, Vect3 previousPosition)
 		{
             float velocityFactor = 1.0f / Core.Time.deltaTime;
             return velocityFactor * (position - previousPosition);
 		}
 
-        Vector3 CalculateSingleShotAngularVelocity(Quaternion rotation, Quaternion previousRotation)
+        Vect3 CalculateSingleShotAngularVelocity(Quatn rotation, Quatn previousRotation)
 		{
             float velocityFactor = 1.0f / Core.Time.deltaTime;
 
-            Quaternion offsetRotation = rotation * Quaternion.Inverse(previousRotation);
+            Quatn offsetRotation = rotation * Quatn.Inverse(previousRotation);
             float theta = 2.0f * Mathf.Acos(Mathf.Clamp(offsetRotation.w, -1.0f, 1.0f));
 
             if(theta > Mathf.PI)
@@ -127,7 +128,7 @@ namespace Instrumental.Interaction.Input
                 theta -= 2.0f * Mathf.PI;
 			}
 
-            Vector3 angularVelocity = new Vector3(offsetRotation.x, offsetRotation.y,
+            Vect3 angularVelocity = new Vect3(offsetRotation.x, offsetRotation.y,
                 offsetRotation.z);
 
             if(angularVelocity.sqrMagnitude > 0.0f)
@@ -138,18 +139,18 @@ namespace Instrumental.Interaction.Input
             return angularVelocity;
 		}
 
-        SampleData CalculateValues(Vector3 position, Vector3 previousPosition,
-            Quaternion rotation, Quaternion previousRotation)
+        SampleData CalculateValues(Vect3 position, Vect3 previousPosition,
+            Quatn rotation, Quatn previousRotation)
 		{
-            Vector3 velocity = CalculateSingleShotVelocity(position, previousPosition);
-            Vector3 angularVelocity = CalculateSingleShotAngularVelocity(rotation, previousRotation);
+			Vect3 velocity = CalculateSingleShotVelocity(position, previousPosition);
+			Vect3 angularVelocity = CalculateSingleShotAngularVelocity(rotation, previousRotation);
             return new SampleData() { Velocity = velocity, AngularVelocity = angularVelocity };
 		}
 
         // note: calculate your deltas in the class that calls this
         // alternately, provide them here so they can be calculated
-        public void SubmitSample(Vector3 position, Vector3 previousPosition,
-            Quaternion rotation, Quaternion previousRotation)
+        public void SubmitSample(Vect3 position, Vect3 previousPosition,
+            Quatn rotation, Quatn previousRotation)
         {
             SampleData sample = CalculateValues(position, previousPosition,
                 rotation, previousRotation);

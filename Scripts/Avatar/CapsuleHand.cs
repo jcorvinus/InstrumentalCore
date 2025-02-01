@@ -137,16 +137,16 @@ namespace Instrumental.Avatar
 
                         Instrumental.Interaction.Input.Joint currentJoint, nextJoint;
                         currentJoint = boneJoints[boneIndx + offset];
-                        startPosition = currentJoint.Pose.position;
+                        startPosition = (Vector3)currentJoint.Pose.position;
 
                         if (isLast)
 						{
-                            endPosition = dataContainer.Data.GetFingertip(finger);
+                            endPosition = (Vector3)dataContainer.Data.GetFingertip(finger);
 						}
                         else 
                         {
                             nextJoint = boneJoints[boneIndx + offset + 1];
-                            endPosition = nextJoint.Pose.position;
+                            endPosition = (Vector3)nextJoint.Pose.position;
                         }
 
                         center = (startPosition + endPosition) * 0.5f;
@@ -154,9 +154,9 @@ namespace Instrumental.Avatar
 
                         BoneInfo bone = bones[fingerIndx, boneIndx];
 
-                        bone.StartEpiphysis.transform.position = currentJoint.Pose.position;
+                        bone.StartEpiphysis.transform.position = (Vector3)currentJoint.Pose.position;
                         bone.Diaphysis.transform.position = center;
-                        Quaternion rotation = currentJoint.Pose.rotation;
+                        Quaternion rotation = (Quaternion)currentJoint.Pose.rotation;
                         Quaternion basisRotation = Quaternion.AngleAxis(90, Vector3.right);
                         bone.Diaphysis.transform.rotation = rotation * basisRotation; 
                         bone.Diaphysis.transform.localScale = new Vector3(radius, length * 0.5f, radius);

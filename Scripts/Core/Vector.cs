@@ -374,6 +374,35 @@ namespace Instrumental.Core.Math
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Vect3 ProjectOnPlane(Vect3 vector, Vect3 onNormal)
+		{
+#if UNITY
+			Vector3 uVector, uOnNormal;
+			uVector = (Vector3)vector;
+			uOnNormal = (Vector3)onNormal;
+
+			return (Vect3)Vector3.ProjectOnPlane(uVector, uOnNormal);
+#elif STEREOKIT
+			throw new System.NotImplementedException();
+#endif
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float SignedAngle(Vect3 from, Vect3 to, Vect3 axis)
+		{
+#if UNITY
+			Vector3 uFrom, uTo, uAxis;
+			uFrom = (Vector3)from;
+			uTo = (Vector3)to;
+			uAxis = (Vector3)axis;
+
+			return Vector3.SignedAngle(uFrom, uTo, uAxis);
+#elif STEREOKIT
+			throw new System.NotImplementedException();
+#endif
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vect3 Lerp(Vect3 a, Vect3 b, float t)
 		{
 #if UNITY
@@ -396,6 +425,37 @@ namespace Instrumental.Core.Math
 				Math.Lerp(a.x, b.x, t),
 				Math.Lerp(a.y, b.y, t),
 				Math.Lerp(a.z, b.z, t));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Vect3 Scale(Vect3 a, Vect3 b)
+		{
+#if UNITY
+			Vector3 uA, uB;
+			uA = (Vector3)a;
+			uB = (Vector3)b;
+
+			return (Vect3)Vector3.Scale(uA, uB);
+#elif STEREOKIT
+			return new Vect3(
+			a.x * b.x,
+			a.y * b.y,
+			a.z * b.z);
+#endif
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Vect3 Slerp(Vect3 a, Vect3 b, float t)
+		{
+#if UNITY
+			Vector3 uA, uB;
+			uA = (Vector3)a;
+			uB = (Vector3)b;
+
+			return (Vect3)Vector3.Slerp(uA, uB, t);
+#elif STEREOKIT
+			throw new System.NotImplementedException();
+#endif
 		}
 
 #region Operators

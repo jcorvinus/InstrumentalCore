@@ -129,9 +129,83 @@ namespace Instrumental.Core.Math
 #endif
 		}
 
+		public static Quatn AngleAxis(float angle, Vect3 axis)
+		{
+#if UNITY
+			return (Quatn)Quaternion.AngleAxis(angle, (Vector3)axis);
+#elif STEREOKIT
+			throw new System.NotImplementedException(); // gonna have to implement this later
+#endif
+		}
+
+		// missing some methods, get to them later as needed
+		public static Quatn Euler(float x, float y, float z)
+		{
+#if UNITY
+			return (Quatn)Quaternion.Euler(x, y, z);
+#elif STEREOKIT
+			throw new System.NotImplementedException;
+#endif
+		}
+
+		public static Quatn Inverse(Quatn rotation)
+		{
+#if UNITY
+			Quaternion uRotation = (Quaternion)rotation;
+			return (Quatn)Quaternion.Inverse(uRotation);
+#elif STEREOKIT
+			Quat skRotation = (Quat)rotation;
+			return (Quatn)Quat.Inverse(skRotation);
+#endif
+		}
+
+		public static Quatn Slerp(Quatn a, Quatn b, float t)
+		{
+#if UNITY
+			Quaternion uA, uB;
+			uA = (Quaternion)a;
+			uB = (Quaternion)b;
+			return (Quatn)Quaternion.Slerp(uA, uB, t);
+#elif STEREOKIT
+			Quat skA, skB;
+			skA = (Quat)a;
+			skB = (Quat)b;
+
+			return (Quatn)Quat.Slerp(skA, skB, t);
+#endif
+		}
+
+		public static Quatn LookRotation(Vect3 forward)
+		{
+			return Quatn.LookRotation(forward, Vect3.up);
+		}
+
+		public static Quatn LookRotation(Vect3 forward, Vect3 up)
+		{
+#if UNITY
+			Vector3 uForward, uUp;
+			uForward = (Vector3)forward;
+			uUp = (Vector3)up;
+			return (Quatn)Quaternion.LookRotation(uForward, uUp);
+#elif STEREOKIT
+			throw new System.NotImplementedException();
+#endif
+		}
+
 		// get back to the other methods later, I was having problems with 
 		// feature parity between unity and stereokit.
 		// for now I need operator overloads so I can do multiplications
+
+		public void ToAngleAxis(out float angle, out Vect3 axis)
+		{
+#if UNITY
+			Vector3 uAxis = Vector3.zero; 
+			q.ToAngleAxis(out angle, out uAxis);
+			axis = (Vect3)uAxis;
+#elif STEREOKIT
+			throw new System.NotImplementedException();
+#endif
+		}
 
 		public static Vect3 operator *(Quatn rotation, Vect3 point)
 		{

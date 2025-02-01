@@ -1,8 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
+
+#if UNITY
 using UnityEngine;
+#elif STEREOKIT
+using StereoKit;
+#endif
 
 using Instrumental.Interaction;
+using Instrumental.Core;
+using Instrumental.Core.Math;
 
 namespace Instrumental.Interaction.Triggers
 {
@@ -35,8 +42,8 @@ namespace Instrumental.Interaction.Triggers
 
         float measuredAngle;
 
-        Vector3 comparisonDirection;
-        Vector3 palmDirection;
+        Vect3 comparisonDirection;
+		Vect3 palmDirection;
 
         // Start is called before the first frame update
         void Start()
@@ -52,7 +59,7 @@ namespace Instrumental.Interaction.Triggers
             if (hand) head = hand.Body.Head;
         }
 
-        Vector3 GetDirectionToCheck()
+		Vect3 GetDirectionToCheck()
 		{
 			switch (directionToCheck)
 			{
@@ -63,13 +70,13 @@ namespace Instrumental.Interaction.Triggers
                     return (handedness == Handedness.Left) ? InstrumentalBody.Instance.LeftPalmDiagonal :
                         InstrumentalBody.Instance.RightPalmDiagonal;
                 case DirectionToCheck.HeadForward:
-                    return head.forward;
+                    return (Vect3)head.forward;
                 case DirectionToCheck.DirectionToHead:
-                    Vector3 palmPosition = hand.GetAnchorPose(AnchorPoint.Palm).position;
-                    Vector3 directionToHead = (head.position - palmPosition).normalized;
+					Vect3 palmPosition = hand.GetAnchorPose(AnchorPoint.Palm).position;
+					Vect3 directionToHead = ((Vect3)head.position - palmPosition).normalized;
                     return directionToHead;
 				default:
-                    return Vector3.up;
+                    return Vect3.up;
 			}
 		}
 
@@ -83,10 +90,10 @@ namespace Instrumental.Interaction.Triggers
             else
 			{
                 comparisonDirection = GetDirectionToCheck();
-                palmDirection = hand.GetAnchorPose(AnchorPoint.Palm).rotation * Vector3.forward;
-                bool isCorrectSide = (Vector3.Dot(palmDirection, comparisonDirection) > 0); // vector3.angle doesn't 
+                palmDirection = hand.GetAnchorPose(AnchorPoint.Palm).rotation * Vect3.forward;
+                bool isCorrectSide = (Vect3.Dot(palmDirection, comparisonDirection) > 0); // vector3.angle doesn't 
                                                                                           // have a notion of sidedness and I'm not screwing around with vector3.signed angle rn
-                measuredAngle = Vector3.Angle(palmDirection, comparisonDirection);
+                measuredAngle = Vect3.Angle(palmDirection, comparisonDirection);
 
                 if (IsActive)
                 {
@@ -115,22 +122,22 @@ namespace Instrumental.Interaction.Triggers
             }
         }
 
-        void DrawCone(Vector3 source, float length, float coneAngle, Vector3 normal)
+		void DrawCone(Vect3 source, float length, float coneAngle, Vect3 normal)
         {
-            Vector3 center = source + (normal * length);
+			Vect3 center = source + (normal * length);
             // so we want to draw a single circle at a specific distance.
             float radius = Mathf.Tan(coneAngle * Mathf.Deg2Rad) * length;
 
-            DebugExtension.DrawCircle(center, normal, Gizmos.color, radius);
+            DebugExtension.DrawCircle((Vector3)center, (Vector3)normal, Gizmos.color, radius);
 
             // then draw our connecting lines
             float iter = 360 * 0.25f;
             for (int i = 0; i < 4; i++)
             {
-                Vector3 startPoint = ((Vector3.forward) * radius);
-                Vector3 destination = Quaternion.AngleAxis(i * iter, normal) *
+				Vect3 startPoint = ((Vect3.forward) * radius);
+				Vect3 destination = Quatn.AngleAxis(i * iter, normal) *
                     startPoint;
-                Gizmos.DrawLine(source, source + (normal * length) + destination);
+                Gizmos.DrawLine((Vector3)source, (Vector3)(source + (normal * length) + destination));
             }
         }
 
@@ -143,9 +150,9 @@ namespace Instrumental.Interaction.Triggers
 			{
                 Gizmos.matrix = Matrix4x4.identity;
                 Gizmos.color = Color.blue;
-                Vector3 rayOrigin = hand.GetAnchorPose(AnchorPoint.Palm).position;
-                Gizmos.DrawRay(rayOrigin,
-                    palmDirection);
+				Vect3 rayOrigin = hand.GetAnchorPose(AnchorPoint.Palm).position;
+                Gizmos.DrawRay((Vector3)rayOrigin,
+                    (Vector3)palmDirection);
 
                 DrawCone(rayOrigin, DrawLength, entryAngle,
                     palmDirection);
@@ -155,7 +162,7 @@ namespace Instrumental.Interaction.Triggers
                     palmDirection);
 
                 Gizmos.color = Color.blue;
-                Gizmos.DrawRay(rayOrigin, comparisonDirection);
+                Gizmos.DrawRay((Vector3)rayOrigin, (Vector3)comparisonDirection);
 			}
 		}
 	}

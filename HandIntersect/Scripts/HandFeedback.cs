@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Instrumental.Interaction;
+using Instrumental.Core.Math;
 
 namespace Instrumental
 {
@@ -63,8 +64,8 @@ namespace Instrumental
 		private int leftFingertipHash;
 		private int rightFingertipHash;
 		private int fingerGlowDistanceHash;
-		Vector3 leftGlowPoint;
-		Vector3 rightGlowPoint;
+		Vect3 leftGlowPoint;
+		Vect3 rightGlowPoint;
 
 		private void Awake()
 		{
@@ -162,7 +163,7 @@ namespace Instrumental
 			//Vector3 centerPoint = ((hand.GetAnchorPose(AnchorPoint.IndexTip).position +
 			//	(hand.GetAnchorPose(AnchorPoint.MiddleTip).position)) * 0.5f);
 
-			Vector3 centerPoint = hand.GetAnchorPose(AnchorPoint.IndexTip).position;
+			Vect3 centerPoint = hand.GetAnchorPose(AnchorPoint.IndexTip).position;
 
 			if (hand.Hand == Handedness.Left)
 			{
@@ -327,11 +328,11 @@ namespace Instrumental
 			{
 				if (hand.Hand == Handedness.Left)
 				{
-					Gizmos.DrawWireSphere(leftGlowPoint, fingerUIDistanceGlow);
+					Gizmos.DrawWireSphere((Vector3)leftGlowPoint, fingerUIDistanceGlow);
 				}
 				else
 				{
-					Gizmos.DrawWireSphere(rightGlowPoint, fingerUIDistanceGlow);
+					Gizmos.DrawWireSphere((Vector3)rightGlowPoint, fingerUIDistanceGlow);
 				}
 			}
 		}

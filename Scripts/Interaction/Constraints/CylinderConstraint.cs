@@ -1,6 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+
+#if UNITY
 using UnityEngine;
+#elif STEREOKIT
+using StereoKit;
+#endif
+
+using Instrumental.Core;
+using Instrumental.Core.Math;
 
 namespace Instrumental.Interaction.Constraints
 {
@@ -10,11 +18,11 @@ namespace Instrumental.Interaction.Constraints
         [SerializeField] float height = 0.1f;
 		[SerializeField] Transform reference;
 
-		public override Pose DoConstraint(Pose targetPose)
+		public override PoseIC DoConstraint(PoseIC targetPose)
 		{
-			Vector3 position = reference.InverseTransformPoint(targetPose.position);
+			Vect3 position = (Vect3)reference.InverseTransformPoint((Vector3)targetPose.position);
 
-			Vector3 radial = new Vector3(position.x, 0, position.z);
+			Vect3 radial = new Vect3(position.x, 0, position.z);
 			float radialMag = radial.magnitude;
 
 			if (radialMag > radius)
@@ -23,19 +31,21 @@ namespace Instrumental.Interaction.Constraints
 				radial *= radius;
 			}
 
-			position = new Vector3(radial.x, Mathf.Min(position.y, height), radial.z);
+			position = new Vect3(radial.x, Mathf.Min(position.y, height), radial.z);
 
-			return new Pose(reference.TransformPoint(position), targetPose.rotation);
+			return new PoseIC((Vect3)reference.TransformPoint((Vector3)position), targetPose.rotation);
 		}
 
 		private void OnDrawGizmos()
 		{
+#if UNITY
 			// draw our cylinder
 			if(reference)
 			{
 				DebugExtension.DrawCylinder(reference.position, reference.position +
 					reference.up * height, radius);
 			}
+#endif
 		}
 	}
 }

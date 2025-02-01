@@ -4,6 +4,8 @@ using UnityEngine;
 
 using Instrumental.Interaction.Input;
 using Instrumental.Interaction;
+using Instrumental.Core;
+using Instrumental.Core.Math;
 
 namespace Instrumental.Avatar
 {
@@ -144,8 +146,8 @@ namespace Instrumental.Avatar
                 // do retargeting
                 Quaternion wristRotationOffset = Quaternion.LookRotation(wristForwardDirection, wristUpDirection);
 
-                wrist.SetPositionAndRotation(dataContainer.Data.WristPose.position,
-                    dataContainer.Data.WristPose.rotation * Quaternion.Inverse(wristRotationOffset));
+                wrist.SetPositionAndRotation((Vector3)dataContainer.Data.WristPose.position,
+                    (Quaternion)dataContainer.Data.WristPose.rotation * Quaternion.Inverse(wristRotationOffset));
 
                 // set up the fingers
                 for (int i = 0; i < fingers.Length; i++)
@@ -161,8 +163,8 @@ namespace Instrumental.Avatar
                             Quaternion jointRotationOffset = Quaternion.LookRotation(fingerDirection, -palmDirection);
 
                             Interaction.Input.Joint fingerJoint = fingerJoints[jointIndx + 1];
-                            joint.SetPositionAndRotation(fingerJoint.Pose.position,
-                                fingerJoint.Pose.rotation * Quaternion.Inverse(jointRotationOffset));
+                            joint.SetPositionAndRotation((Vector3)fingerJoint.Pose.position,
+                                (Quaternion)fingerJoint.Pose.rotation * Quaternion.Inverse(jointRotationOffset));
                         }
                     }
                     else
@@ -175,8 +177,8 @@ namespace Instrumental.Avatar
                             Quaternion jointRotationOffset = Quaternion.LookRotation(fingerDirection, -palmDirection);
 
                             Interaction.Input.Joint fingerJoint = fingerJoints[jointIndx];
-                            joint.SetPositionAndRotation(fingerJoint.Pose.position,
-                                fingerJoint.Pose.rotation * Quaternion.Inverse(jointRotationOffset));
+                            joint.SetPositionAndRotation((Vector3)fingerJoint.Pose.position,
+                                (Quaternion)fingerJoint.Pose.rotation * Quaternion.Inverse(jointRotationOffset));
                         }
                     }
                 }
@@ -190,7 +192,7 @@ namespace Instrumental.Avatar
                         Instrumental.Interaction.Input.Joint currentJoint = dataContainer.Data.MiddleJoints[boneIndx];
 
                         // instead of next joint, for the last one we should do the tip
-                        Vector3 endPoint;
+                        Vect3 endPoint;
                         if (boneIndx == 3)
                         {
                             endPoint = dataContainer.Data.MiddleTip;
@@ -201,22 +203,22 @@ namespace Instrumental.Avatar
                             endPoint = nextJoint.Pose.position;
                         }
 
-                        dataMiddleFingerLength += Vector3.Distance(currentJoint.Pose.position, endPoint);
+                        dataMiddleFingerLength += Vect3.Distance(currentJoint.Pose.position, endPoint);
                     }
 
-                    dataWristToMiddleProximalDistance = Vector3.Distance(dataContainer.Data.WristPose.position,
+                    dataWristToMiddleProximalDistance = Vect3.Distance(dataContainer.Data.WristPose.position,
                         dataContainer.Data.MiddleJoints[1].Pose.position);
 
-                    Pose pinkyDataPose = dataContainer.Data.PinkyJoints[1].Pose;
-                    Pose wristDataPose = dataContainer.Data.WristPose;
+                    PoseIC pinkyDataPose = dataContainer.Data.PinkyJoints[1].Pose;
+                    PoseIC wristDataPose = dataContainer.Data.WristPose;
 
-                    dataPinkyInDataWristSpace = pinkyDataPose.position - wristDataPose.position;
-                    dataPinkyInDataWristSpace = Quaternion.Inverse(wristDataPose.rotation) * dataPinkyInDataWristSpace;
+                    dataPinkyInDataWristSpace = (Vector3)(pinkyDataPose.position - wristDataPose.position);
+                    dataPinkyInDataWristSpace = Quaternion.Inverse((Quaternion)wristDataPose.rotation) * dataPinkyInDataWristSpace;
                     dataPinkyInDataWristSpace.Scale(new Vector3(1, 0, 0));
-                    dataPinkyInDataWristSpace = wristDataPose.rotation * dataPinkyInDataWristSpace;
-                    dataPinkyInDataWristSpace += wristDataPose.position;
+                    dataPinkyInDataWristSpace = (Quaternion)wristDataPose.rotation * dataPinkyInDataWristSpace;
+                    dataPinkyInDataWristSpace += (Vector3)wristDataPose.position;
 
-                    float dataWristPinkyLength = Vector3.Distance(dataContainer.Data.PinkyJoints[0].Pose.position, dataPinkyInDataWristSpace);
+                    float dataWristPinkyLength = Vector3.Distance((Vector3)dataContainer.Data.PinkyJoints[0].Pose.position, dataPinkyInDataWristSpace);
 
                     float fullDataLength = dataMiddleFingerLength + dataWristToMiddleProximalDistance;
                     float fullModelLength = modelFingerLengths[(int)Finger.Middle] + modelWristToMiddleProximalDistance;

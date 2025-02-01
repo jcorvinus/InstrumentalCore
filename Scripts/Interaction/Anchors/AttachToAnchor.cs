@@ -1,6 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+
+#if UNITY
 using UnityEngine;
+#elif STEREOKIT
+using StereoKit;
+#endif
+
+using Instrumental.Core;
 
 namespace Instrumental.Interaction
 {
@@ -26,8 +33,8 @@ namespace Instrumental.Interaction
 				InstrumentalHand hand = (handToAttach == Handedness.Left) ?
 					InstrumentalHand.LeftHand : InstrumentalHand.RightHand;
 
-				Pose attachPose = hand.GetAnchorPose(pointToAttach);
-				transform.SetPositionAndRotation(attachPose.position, attachPose.rotation);
+				PoseIC attachPose = hand.GetAnchorPose(pointToAttach);
+				transform.SetPositionAndRotation((Vector3)attachPose.position, (Quaternion)attachPose.rotation);
 			}
 		}
 	}

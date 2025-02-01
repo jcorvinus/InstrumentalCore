@@ -40,7 +40,7 @@ namespace Instrumental.Interaction.Feedback
         void Update()
         {
             PinchInfo pinchInfo = GetPinchInfo();
-            visModel.transform.position = pinchInfo.PinchCenter;
+            visModel.transform.position = (Vector3)pinchInfo.PinchCenter;
             visModel.transform.localScale = Vector3.one * (pinchInfo.PinchDistance * 0.5f);
             visModel.SetActive(true);
         }
