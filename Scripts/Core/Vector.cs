@@ -305,9 +305,9 @@ namespace Instrumental.Core.Math
 #endif
 		public static readonly Vect3 forward =
 #if UNITY
-			new Vect3(1, 0, 0);
+			new Vect3(0, 0, 1);
 #elif STEREOKIT
-			new Vector3(-1, 0,0);
+			new Vector3(0, 0, -1);
 #endif
 		public static readonly Vect3 one =
 			new Vect3(1, 1, 1);

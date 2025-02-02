@@ -45,6 +45,8 @@ namespace Instrumental.Interaction.Triggers
         Vect3 comparisonDirection;
 		Vect3 palmDirection;
 
+		[SerializeField] bool showDebugGizmos = false;
+
         // Start is called before the first frame update
         void Start()
         {
@@ -146,7 +148,8 @@ namespace Instrumental.Interaction.Triggers
 
         private void OnDrawGizmos()
 		{
-		    if(hand)
+#if UNITY
+			if(hand && showDebugGizmos)
 			{
                 Gizmos.matrix = Matrix4x4.identity;
                 Gizmos.color = Color.blue;
@@ -164,6 +167,7 @@ namespace Instrumental.Interaction.Triggers
                 Gizmos.color = Color.blue;
                 Gizmos.DrawRay((Vector3)rayOrigin, (Vector3)comparisonDirection);
 			}
+#endif
 		}
 	}
 }
