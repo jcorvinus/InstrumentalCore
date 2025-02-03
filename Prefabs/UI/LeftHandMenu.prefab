@@ -111,6 +111,8 @@ MonoBehaviour:
   StartOnEnable: 0
   forward: 1
   enableDebugLogging: 0
+  StartScale: {x: 0, y: 1, z: 1}
+  GoalScale: {x: 1, y: 1, z: 1}
   Unclamped: 0
   RunWhileNotPlay: 0
 --- !u!1 &4079726732628830459
@@ -191,6 +193,7 @@ MonoBehaviour:
   entryAngle: 21
   exitAngle: 30
   feedbackActivationAngleOuter: 80
+  showDebugGizmos: 0
   DrawLength: 0.2
 --- !u!1 &7407452433184291576
 GameObject:

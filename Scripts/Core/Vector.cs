@@ -226,7 +226,7 @@ namespace Instrumental.Core.Math
 #if UNITY
 	[System.Serializable]
 #endif
-	public struct Vect3 /*: System.IConvertible*/
+	public struct Vect3
 	{
 #if UNITY
 		private UnityEngine.Vector3 v;
