@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
+using Instrumental.Core;
+using Instrumental.Core.Math;
+
 namespace Instrumental.Modeling.ProceduralGraphics
 {
     [CustomEditor(typeof(FilletPanel))]
@@ -105,37 +108,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 			if(!Application.isPlaying)
 			{
 				EditorGUILayout.PropertyField(testSchemaProperty, true);
-
-				/*if(testSchemaProperty.objectReferenceValue != null)
-				{
-					// get our new properties if needed
-					//if(schemaPropertyWasNull && schemaPropertyIsValid)
-					//{
-                        testSchemaProperty.serializedObject.Update();
-						testSchemaDimensions = testSchemaProperty.FindPropertyRelative("PanelDimensions");
-						testSchemaDepth = testSchemaProperty.FindPropertyRelative("Depth");
-						testSchemaRadius = testSchemaProperty.FindPropertyRelative("Radius");
-						testSchemaRadiusSegments = testSchemaProperty.FindPropertyRelative("RadiusSegments");
-						testSchemaBorderThickness = testSchemaProperty.FindPropertyRelative("BorderThickness");
-                    //}
-
-                    // do sub property drawing
-
-                    // validate the schema to ensure PanelType is Fillet
-                    // I don't think we support space curving without a Panel object?
-                    // that is correct, although we might not be able to handle that here.
-
-                    //EditorGUILayout.PropertyField(testSchemaDimensions);
-                    //EditorGUILayout.PropertyField(testSchemaDepth);
-                    //EditorGUILayout.PropertyField(testSchemaRadius);
-                    //EditorGUILayout.PropertyField(testSchemaRadiusSegments);
-                    //EditorGUILayout.PropertyField(testSchemaBorderThickness);
-                }*/
 			}
-
-            panelDimensionsProperty.vector2Value = EditorGUILayout.Vector2Field("Panel Dimensions", panelDimensionsProperty.vector2Value);
-            panelDepthProperty.floatValue = EditorGUILayout.Slider("Depth", panelDepthProperty.floatValue, FilletPanel.MIN_DEPTH, FilletPanel.MAX_DEPTH);
-            radiusProperty.floatValue = EditorGUILayout.FloatField("Radius", radiusProperty.floatValue);
 
             if(EditorApplication.isPlaying)
             {
@@ -143,8 +116,6 @@ namespace Instrumental.Modeling.ProceduralGraphics
             }
             else
             {
-                filletSegmentsProperty.intValue = EditorGUILayout.IntSlider("Fillet Segments", filletSegmentsProperty.intValue, 
-                    FilletPanel.MIN_FILLET_SEGMENTS, FilletPanel.MAX_FILLET_SEGMENTS);
                 widthSegmentsProperty.intValue = EditorGUILayout.IntField("Width Segnments", widthSegmentsProperty.intValue);
                 heightSegmentsProperty.intValue = EditorGUILayout.IntField("Height Segments", heightSegmentsProperty.intValue);
             }
@@ -208,21 +179,21 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
         private void DrawCorner(Vector3 v1, Vector3 v2, Vector3 v3, float radius)
         {
-            FilletPanel.CornerInfo cornerInfo = m_instance.GetCorner(v1, v2, v3, radius);
+            FilletPanel.CornerInfo cornerInfo = m_instance.GetCorner((Vect3)v1, (Vect3)v2, (Vect3)v3, radius);
             if (cornerInfo.Valid)
             {
                 Handles.color = Color.cyan;
                 Handles.DrawWireArc(
-                    cornerInfo.Center,
-                    cornerInfo.Normal,
-                    cornerInfo.From,
+                    (Vector3)cornerInfo.Center,
+                    (Vector3)cornerInfo.Normal,
+                    (Vector3)cornerInfo.From,
                     cornerInfo.Angle, 
                     cornerInfo.Radius); // normal determines the direction of fill
             }
             else
             {
                 Handles.color = Color.red;
-                Handles.DrawWireDisc(cornerInfo.Center, cornerInfo.Normal, cornerInfo.Radius);
+                Handles.DrawWireDisc((Vector3)cornerInfo.Center, (Vector3)cornerInfo.Normal, cornerInfo.Radius);
             }
         }
 
@@ -230,15 +201,15 @@ namespace Instrumental.Modeling.ProceduralGraphics
         {
             Vector3[] cornerVerts = new Vector3[filletSegmentsProperty.intValue];
 
-            FilletPanel.CornerInfo cornerInfo = m_instance.GetCorner(v1, v2, v3,
+            FilletPanel.CornerInfo cornerInfo = m_instance.GetCorner((Vect3)v1, (Vect3)v2, (Vect3)v3,
                 radius);
 
             float angleIncrement = cornerInfo.Angle / (cornerVerts.Length - 1);
 
             for(int i=0; i < cornerVerts.Length; i++)
             {
-                cornerVerts[i] = cornerInfo.Center + (Quaternion.AngleAxis(angleIncrement * i, cornerInfo.Normal) *
-                    cornerInfo.From) * cornerInfo.Radius;
+                cornerVerts[i] = (Vector3)cornerInfo.Center + (Quaternion.AngleAxis(angleIncrement * i, (Vector3)cornerInfo.Normal) *
+                    (Vector3)cornerInfo.From) * cornerInfo.Radius;
             }
 
             Handles.color = Color.yellow;
@@ -251,23 +222,23 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
         private void DrawWidthSegments(float inset)
         {
-            Vector3[] upperSegments = m_instance.GetUpperPoints(inset);
-            Vector3[] lowerSegments = m_instance.GetLowerPoints(inset);
+            Vect3[] upperSegments = m_instance.GetUpperPoints(inset);
+			Vect3[] lowerSegments = m_instance.GetLowerPoints(inset);
 
             for(int i=0; i < upperSegments.Length; i++)
             {
-                Handles.DrawLine(upperSegments[i], lowerSegments[i]);
+                Handles.DrawLine((Vector3)upperSegments[i], (Vector3)lowerSegments[i]);
             }
         }
 
         private void DrawHeightSegments(float inset)
         {
-            Vector3[] leftSegments = m_instance.GetLeftPoints(inset);
-            Vector3[] rightSegments = m_instance.GetRightPoints(inset);
+            Vect3[] leftSegments = m_instance.GetLeftPoints(inset);
+            Vect3[] rightSegments = m_instance.GetRightPoints(inset);
 
             for(int i=0; i < leftSegments.Length; i++)
             {
-                Handles.DrawLine(leftSegments[i], rightSegments[i]);
+                Handles.DrawLine((Vector3)leftSegments[i], (Vector3)rightSegments[i]);
             }
         }
 
@@ -345,24 +316,24 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
             float depth = panelDepthProperty.floatValue;
             float radius = radiusProperty.floatValue;
-            Vector3 frontPrimaryV1, frontPrimaryV2, frontPrimaryV3, frontPrimaryV4;
+            Vect3 frontPrimaryV1, frontPrimaryV2, frontPrimaryV3, frontPrimaryV4;
             m_instance.GetCorners(out frontPrimaryV1, out frontPrimaryV2, 
                 out frontPrimaryV3, out frontPrimaryV4, 0);
 
             // draw our primary outline
             DrawOutlines(transformMatrix, visMode,
-                frontPrimaryV1, frontPrimaryV2, frontPrimaryV3, frontPrimaryV4, 
+                (Vector3)frontPrimaryV1, (Vector3)frontPrimaryV2, (Vector3)frontPrimaryV3, (Vector3)frontPrimaryV4, 
                 radius, 0);
 
             FilletPanel.BorderType border = (FilletPanel.BorderType)borderProperty.enumValueIndex;
             if(border == FilletPanel.BorderType.Outline)
             {
                 float inset = radius * borderInsetProperty.floatValue;
-                Vector3 frontInsetV1, frontInsetV2, frontInsetV3, frontInsetV4;
+                Vect3 frontInsetV1, frontInsetV2, frontInsetV3, frontInsetV4;
                 m_instance.GetCorners(out frontInsetV1, out frontInsetV2, out frontInsetV3, out frontInsetV4,
                     inset);
 
-                DrawOutlines(transformMatrix, visMode, frontInsetV1, frontInsetV2, frontInsetV3, frontInsetV4,
+                DrawOutlines(transformMatrix, visMode, (Vector3)frontInsetV1, (Vector3)frontInsetV2, (Vector3)frontInsetV3, (Vector3)frontInsetV4,
                     radius, inset);
 
                 if (displaySegmentLinesProperty.boolValue)
@@ -380,7 +351,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
                 }
             }
 
-            Vector3[] verts;
+            Vect3[] verts;
             FilletPanel.PanelInfo panelInfo;
 
             m_instance.GenerateVerts(out verts, out panelInfo);
@@ -391,7 +362,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
             {
                 for (int i = 0; i < verts.Length; i++)
                 {
-                    Vector3 vert = verts[i];
+                    Vector3 vert = (Vector3)verts[i];
 
                     int vertIndx = (i) / width;
                     int horizIndx = (i) % width;

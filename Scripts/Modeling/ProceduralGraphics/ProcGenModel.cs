@@ -42,6 +42,16 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
 		private int[] tris;
 
+		private string name = "";
+
+		public void SetName(string name)
+		{
+			this.name = name;
+#if UNITY
+			mesh.name = this.name;
+#endif
+		}
+
 		public ProcGenMesh()
 		{
 #if UNITY
@@ -51,6 +61,27 @@ namespace Instrumental.Modeling.ProceduralGraphics
 			mesh = new Mesh();
 #endif
 		}
+
+		public int GetVertexCount()
+		{
+#if UNITY
+			return (verts != null) ? verts.Length : 0;
+#elif STEREOKIT
+			return (meshVerts != null) ? meshVerts.Length : 0;
+#endif
+		}
+
+#if UNITY
+		public Vector3 GetVertexAtIndex(int index)
+		{
+			return verts[index];
+		}
+
+		public Vector3 GetNormalAtIndex(int index)
+		{
+			return mesh.normals[index];
+		}
+#endif
 
 		/// <summary>
 		/// Clears the mesh, and starts fresh with the data you send it

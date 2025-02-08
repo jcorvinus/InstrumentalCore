@@ -98,14 +98,10 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
         Vect2 panelDimensions; // schema property
 
-        [SerializeField]
         float depth = 0.01f; // schema property
 
-        [SerializeField]
         float radius; // schema property
 
-        [Range(MIN_FILLET_SEGMENTS, MAX_FILLET_SEGMENTS)]
-        [SerializeField]
         int filletSegments; // schema property
 
 		// This one isn't a schema property because I believe we were going to do it automatically?
@@ -151,13 +147,13 @@ namespace Instrumental.Modeling.ProceduralGraphics
         public ColorType FaceColorType { get { return faceColorType; } }
 
 		#region Mesh Vars
-		ProcGenMesh mesh = new ProcGenMesh();
+		ProcGenMesh mesh;
 
         PanelInfo panelInfo;
 		Vect3[] verts;
         Vect2[] uvs;
         int[] tris;
-        Color[] vColors;
+        ColorIC[] vColors;
 
 #if UNITY
 		public Mesh Mesh { get { return mesh.UnityMesh; } }
@@ -191,7 +187,9 @@ namespace Instrumental.Modeling.ProceduralGraphics
         public override void Awake()
         {
             base.Awake();
-        }
+			mesh = new ProcGenMesh();
+
+		}
 
         // Use this for initialization
         public override void Start()
@@ -245,10 +243,8 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
             if(useVColors)
             {
-                //GenerateVerts(out verts, out panelInfo);
                 GenerateVColors(out vColors);
-                //mesh.vertices = verts;
-                mesh.colors = vColors;
+				mesh.Update(null, null, null, null, vColors, false, false);
             }
 
             SetPropertiesChanged();
@@ -266,11 +262,9 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
             if (useVColors)
             {
-                //GenerateVerts(out verts, out panelInfo);
                 GenerateVColors(out vColors);
-                //mesh.vertices = verts;
-                mesh.colors = vColors;
-            }
+				mesh.Update(null, null, null, null, vColors, false, false);
+			}
 
             SetPropertiesChanged();
         }
@@ -281,10 +275,8 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
             if (useVColors)
             {
-                //GenerateVerts(out verts, out panelInfo);
                 GenerateVColors(out vColors);
-                //mesh.vertices = verts;
-                mesh.colors = vColors;
+                mesh.Update(null, null, null, null, vColors, false, false);
             }
 
             SetPropertiesChanged();
@@ -514,12 +506,9 @@ namespace Instrumental.Modeling.ProceduralGraphics
         {
             PanelInfo panelInfo;
 
-            if (mesh == null)
-            {
-                mesh = new Mesh();
-                mesh.MarkDynamic();
-                mesh.name = "fillet";
-            }
+			if(mesh == null) mesh = new ProcGenMesh();
+
+			mesh.SetName("fillet");
 
             GenerateVerts(out verts, out panelInfo);
             GenerateUVs(verts, out uvs);
@@ -534,13 +523,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
             tris = triangles;
 
-            mesh.Clear();
-            mesh.vertices = verts;
-            mesh.uv = uvs;
-            mesh.triangles = tris;
-            if (useVColors) mesh.colors = vColors;
-            else mesh.colors = null;
-            mesh.RecalculateNormals();
+			mesh.Create(verts, tris, null, (useVColors) ? uvs : null, vColors);
 
             this.panelInfo = panelInfo;
         }
@@ -608,7 +591,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 		{
             for(int i=0; i < verts.Length; i++)
 			{
-                verts[i] = WarpVertex(verts[i], transform);
+                verts[i] = (Vect3)WarpVertex((Vector3)verts[i], transform);
 			}
 		}
 
@@ -1030,9 +1013,9 @@ namespace Instrumental.Modeling.ProceduralGraphics
             return baseID;
         }
 
-        void GenerateVColors(out Color[] vertexColors)
+        void GenerateVColors(out ColorIC[] vertexColors)
         {
-            vertexColors = new Color[verts.Length];
+            vertexColors = new ColorIC[verts.Length]; // todo: update this to be more efficient
 
             int frontStartIndex = 0;
             int frontEndIndex = frontStartIndex + GetVertexCountForFaceSide(true);
@@ -1045,7 +1028,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
                     {
                         case ColorType.FlatColor:
                             // do our front face color
-                            vertexColors[i] = faceColor;
+                            vertexColors[i] = (ColorIC)faceColor;
                             break;
                         case ColorType.Gradient:
                             float gradientValue = 0;
@@ -1063,7 +1046,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
                             }
 
                             if (faceGradientInfo.Invert) gradientValue = 1 - gradientValue;
-                            vertexColors[i] = faceGradient.Evaluate(gradientValue);
+                            vertexColors[i] = (ColorIC)faceGradient.Evaluate(gradientValue);
 
                             break;
                         default:
@@ -1073,7 +1056,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
                 else
                 {
                     // just do our border color
-                    vertexColors[i] = borderColor;
+                    vertexColors[i] = (ColorIC)borderColor;
                 }
             }
         }
@@ -1083,7 +1066,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
             if(useVColors)
             {
                 GenerateVColors(out vColors);
-                mesh.colors = vColors;
+				mesh.Update(null, null, null, null, vColors, false, false);
             }
         }
 
@@ -1649,12 +1632,13 @@ namespace Instrumental.Modeling.ProceduralGraphics
                 GenerateVerts(out verts, out panelInfo);
             }
 
-            mesh.vertices = verts;
+			mesh.Update(verts, null, null, null, null, true, false);
         }
 
         private void DrawGizmoMesh()
         {
-            GenerateVerts(out verts, out panelInfo);
+#if UNITY
+			GenerateVerts(out verts, out panelInfo);
             GenerateTriangles(panelInfo, out tris);
 
             Color[] colors = { Color.green, Color.white };
@@ -1672,7 +1656,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
                 try
                 {
-                    Gizmos.DrawLine(verts[tris[vertA]], verts[tris[vertB]]);
+                    Gizmos.DrawLine((Vector3)verts[tris[vertA]], (Vector3)verts[tris[vertB]]);
                 }
                 catch (System.IndexOutOfRangeException e)
                 {
@@ -1681,7 +1665,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
                 try
                 {
-                    Gizmos.DrawLine(verts[tris[vertB]], verts[tris[vertC]]);
+                    Gizmos.DrawLine((Vector3)verts[tris[vertB]], (Vector3)verts[tris[vertC]]);
                 }
                 catch (System.IndexOutOfRangeException e)
                 {
@@ -1690,7 +1674,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
                 try
                 {
-                    Gizmos.DrawLine(verts[tris[vertA]], verts[tris[vertC]]);
+                    Gizmos.DrawLine((Vector3)verts[tris[vertA]], (Vector3)verts[tris[vertC]]);
                 }
                 catch(System.IndexOutOfRangeException e)
                 {
@@ -1700,26 +1684,29 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
             float normalDisplayLength = Mathf.Min(panelDimensions.x, panelDimensions.y) * 0.2f;
 
-            if (displayNormals && mesh != null)
+            if (displayNormals && mesh.UnityMesh != null)
             {
-                for(int i=0; i < mesh.vertexCount; i++)
+                for(int i=0; i < mesh.GetVertexCount(); i++)
                 {
-                    Vector3 start = verts[i];
-                    Vector3 direction = mesh.normals[i] * normalDisplayLength * 0.5f;
+                    Vector3 start = (Vector3)verts[i];
+                    Vector3 direction = mesh.GetNormalAtIndex(i) * normalDisplayLength * 0.5f;
 
                     Gizmos.DrawLine(start, start + direction);
                 }
             }
 
             Gizmos.matrix = Matrix4x4.identity;
-        }
+#endif
+		}
 
         private void OnDrawGizmosSelected()
         {
-            if (visualizationMode == VisualizationMode.Mesh)
+#if UNITY
+			if (visualizationMode == VisualizationMode.Mesh)
             {
                 DrawGizmoMesh();
             }
-        }
+#endif
+		}
     }
 }
