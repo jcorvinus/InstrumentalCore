@@ -1,9 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+
+#if UNITY
 using UnityEngine;
+#elif STEREOKIT
+using StereoKit;
+#endif
 
 using Instrumental.Modeling;
+using Instrumental.Core;
 using Instrumental.Core.Math;
+using Instrumental.Schema;
 
 namespace Instrumental.Modeling.ProceduralGraphics
 {
@@ -26,9 +33,9 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
         public struct CornerInfo
         {
-            public Vector3 Center;
-            public Vector3 Normal;
-            public Vector3 From;
+            public Vect3 Center;
+            public Vect3 Normal;
+            public Vect3 From;
             public float Angle;
             public bool Valid;
             public float Radius;
@@ -75,23 +82,40 @@ namespace Instrumental.Modeling.ProceduralGraphics
         public const float MAX_DIMENSION_WIDTH = 0.9f;
         public const float MAX_DIMENSION_HEIGHT = 0.6f;
 
-        [SerializeField]
-        Vector2 panelDimensions;
+		/// <summary>
+		/// TestSchema stores variables that can be used for testing,
+		/// such as in edit mode in Unity, or for automated testing later
+		/// down the line. If you do not override these values via a
+		/// Panel class and deliberate loading, these will just get used
+		/// as a fallback.
+		/// </summary>
+#if UNITY
+		[SerializeField]
+		PanelSchema testSchema;
+#elif STEREOKIT
+		PanelSchema testSchema = PanelSchema.GetDefaults();
+#endif
+
+        Vect2 panelDimensions; // schema property
 
         [SerializeField]
-        float depth = 0.01f;
+        float depth = 0.01f; // schema property
 
         [SerializeField]
-        float radius;
+        float radius; // schema property
 
         [Range(MIN_FILLET_SEGMENTS, MAX_FILLET_SEGMENTS)]
         [SerializeField]
-        int filletSegments;
+        int filletSegments; // schema property
 
+		// This one isn't a schema property because I believe we were going to do it automatically?
+		// maybe based off of distance, or if we're in a curved space or not
         [SerializeField]
         int widthSegments;
 
-        [SerializeField]
+		// This one isn't a schema property because I believe we were going to do it automatically?
+		// maybe based off of distance, or if we're in a curved space or not
+		[SerializeField]
         int heightSegments;
 
         [SerializeField]
@@ -115,33 +139,37 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
         [Range(MIN_INSET_PERCENT, MAX_INSET_PERCENT)]
         [SerializeField]
-        float borderInsetPercent = 0.1f;
+        float borderInsetPercent = 0.1f; // schema property
 
         [Range(MIN_BORDER_SEGMENTS, MAX_BORDER_SEGMENTS)]
         [SerializeField]
-        int borderSegments = 1;
+        int borderSegments = 1; // appears to be unused
 
         [SerializeField]
-        Color borderColor = Color.white;
+        Color borderColor = Color.white; // schema property
 
         public ColorType FaceColorType { get { return faceColorType; } }
 
-        #region Mesh Vars
-        Mesh mesh;
+		#region Mesh Vars
+		ProcGenMesh mesh = new ProcGenMesh();
 
         PanelInfo panelInfo;
-        Vector3[] verts;
-        Vector2[] uvs;
+		Vect3[] verts;
+        Vect2[] uvs;
         int[] tris;
         Color[] vColors;
 
-        public Mesh Mesh { get { return mesh; } }
-        public Vector3[] Verts { get { return verts; } }
-        public Vector2[] UVs { get { return uvs; } }
+#if UNITY
+		public Mesh Mesh { get { return mesh.UnityMesh; } }
+#elif STEREOKIT
+		public Mesh Mesh { get { return mesh.StereoKitMesh; } }
+#endif
+		public Vect3[] Verts { get { return verts; } }
+        public Vect2[] UVs { get { return uvs; } }
         public int[] Tris { get { return tris; } }
-        #endregion
+#endregion
 
-        #region Debug Variables
+#region Debug Variables
         [SerializeField]
         VisualizationMode visualizationMode = VisualizationMode.ActualOutlines;
 
@@ -158,7 +186,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
         bool doBackFace = true;
 
         public bool DoExtrusion { get { return depth > 0; } }
-        #endregion
+#endregion
 
         public override void Awake()
         {
@@ -178,12 +206,12 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
             if(panelDimensions.x < MIN_DIMENSION_SIZE)
             {
-                panelDimensions = new Vector2(MIN_DIMENSION_SIZE, panelDimensions.y);
+                panelDimensions = new Vect2(MIN_DIMENSION_SIZE, panelDimensions.y);
             }
 
             if(panelDimensions.y < MIN_DIMENSION_SIZE)
             {
-                panelDimensions = new Vector2(MIN_DIMENSION_SIZE, 0.001f);
+                panelDimensions = new Vect2(MIN_DIMENSION_SIZE, 0.001f);
             }
 
             radius = Mathf.Max(radius, 0);
@@ -193,7 +221,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
             base.OnValidate();
         }
 
-        public void SetDimensions(Vector2 dimensions)
+        public void SetDimensions(Vect2 dimensions)
         {
             panelDimensions = dimensions;
             SetPropertiesChanged();
@@ -262,50 +290,50 @@ namespace Instrumental.Modeling.ProceduralGraphics
             SetPropertiesChanged();
         }
 
-        #region Panel Shape Methods
+#region Panel Shape Methods
         // assuming both vector3s are on a plane (and as such, actually vector2s),
         // get the normal that points 'towards' the reference point
-        private Vector3 GetNormal(Vector3 position1, Vector3 position2, Vector3 reference, out Vector3 center)
+        private Vect3 GetNormal(Vect3 position1, Vect3 position2, Vect3 reference, out Vect3 center)
         {
-            Vector3 direction = (position2 - position1).normalized;
+			Vect3 direction = (position2 - position1).normalized;
             center = (position1 + position2) * 0.5f;
 
-            Vector3 directionToReference = (reference - center).normalized;
+			Vect3 directionToReference = (reference - center).normalized;
 
-            Vector3 normal1 = Quaternion.AngleAxis(90, Vector3.forward) * direction;
-            Vector3 normal2 = Quaternion.AngleAxis(-90, Vector3.forward) * direction;
+			Vect3 normal1 = Quatn.AngleAxis(90, Vect3.forward) * direction;
+			Vect3 normal2 = Quatn.AngleAxis(-90, Vect3.forward) * direction;
 
-            return (Vector3.Dot(normal1, directionToReference) > Vector3.Dot(normal2, directionToReference)) ?
+            return (Vect3.Dot(normal1, directionToReference) > Vect3.Dot(normal2, directionToReference)) ?
                 normal1 : normal2;
         }
 
-        public void GetCorners(out Vector3 v1, out Vector3 v2, out Vector3 v3, out Vector3 v4,
+        public void GetCorners(out Vect3 v1, out Vect3 v2, out Vect3 v3, out Vect3 v4,
             float insetValue)
         {
-            v1 = Vector3.up * (panelDimensions.y - insetValue) + Vector3.right * -1 * (panelDimensions.x - insetValue);
+            v1 = Vect3.up * (panelDimensions.y - insetValue) + Vect3.right * -1 * (panelDimensions.x - insetValue);
             v1 *= 0.5f;
-            v2 = Vector3.down * (panelDimensions.y - insetValue) + Vector3.right * -1 * (panelDimensions.x - insetValue);
+            v2 = Vect3.down * (panelDimensions.y - insetValue) + Vect3.right * -1 * (panelDimensions.x - insetValue);
             v2 *= 0.5f;
-            v3 = Vector3.down * (panelDimensions.y - insetValue) + Vector3.right * (panelDimensions.x - insetValue);
+            v3 = Vect3.down * (panelDimensions.y - insetValue) + Vect3.right * (panelDimensions.x - insetValue);
             v3 *= 0.5f;
-            v4 = Vector3.up * (panelDimensions.y - insetValue) + Vector3.right * (panelDimensions.x - insetValue);
+            v4 = Vect3.up * (panelDimensions.y - insetValue) + Vect3.right * (panelDimensions.x - insetValue);
             v4 *= 0.5f;
 
             return;
         }
 
-        public Vector3[] GetUpperPoints(float inset = 0)
+        public Vect3[] GetUpperPoints(float inset = 0)
         {
-            Vector3 upperLeft, upperRight;
-            upperLeft = Vector3.up * (panelDimensions.y - inset) + Vector3.right * -1 * (panelDimensions.x - inset);
+			Vect3 upperLeft, upperRight;
+            upperLeft = Vect3.up * (panelDimensions.y - inset) + Vect3.right * -1 * (panelDimensions.x - inset);
             upperLeft *= 0.5f;
-            upperLeft = upperLeft + Vector3.right * radius;
+            upperLeft = upperLeft + Vect3.right * radius;
 
-            upperRight = Vector3.up * (panelDimensions.y - inset) + Vector3.right * (panelDimensions.x - inset);
+            upperRight = Vect3.up * (panelDimensions.y - inset) + Vect3.right * (panelDimensions.x - inset);
             upperRight *= 0.5f;
-            upperRight = upperRight + Vector3.right * -radius;
+            upperRight = upperRight + Vect3.right * -radius;
 
-            Vector3[] points = new Vector3[widthSegments + 2];
+			Vect3[] points = new Vect3[widthSegments + 2];
 
             points[0] = upperLeft;
             points[points.Length - 1] = upperRight;
@@ -314,24 +342,24 @@ namespace Instrumental.Modeling.ProceduralGraphics
             {
                 float tValue = (1f / (float)(widthSegments + 1f)) * i;
 
-                points[i] = Vector3.Lerp(points[0], points[points.Length - 1], tValue);
+                points[i] = Vect3.Lerp(points[0], points[points.Length - 1], tValue);
             }
 
             return points;
         }
 
-        public Vector3[] GetLowerPoints(float inset=0)
+        public Vect3[] GetLowerPoints(float inset=0)
         {
-            Vector3 lowerLeft, lowerRight;
-            lowerLeft = Vector3.down * (panelDimensions.y - inset) + Vector3.right * -1 * (panelDimensions.x - inset);
+			Vect3 lowerLeft, lowerRight;
+            lowerLeft = Vect3.down * (panelDimensions.y - inset) + Vect3.right * -1 * (panelDimensions.x - inset);
             lowerLeft *= 0.5f;
-            lowerLeft = lowerLeft + Vector3.right * radius;
+            lowerLeft = lowerLeft + Vect3.right * radius;
 
-            lowerRight = Vector3.down * (panelDimensions.y - inset) + Vector3.right * (panelDimensions.x - inset);
+            lowerRight = Vect3.down * (panelDimensions.y - inset) + Vect3.right * (panelDimensions.x - inset);
             lowerRight *= 0.5f;
-            lowerRight = lowerRight + Vector3.right * -radius;
+            lowerRight = lowerRight + Vect3.right * -radius;
 
-            Vector3[] points = new Vector3[widthSegments + 2];
+			Vect3[] points = new Vect3[widthSegments + 2];
 
             points[0] = lowerLeft;
             points[points.Length - 1] = lowerRight;
@@ -340,25 +368,25 @@ namespace Instrumental.Modeling.ProceduralGraphics
             {
                 float tValue = (1f / (float)(widthSegments + 1f)) * i;
 
-                points[i] = Vector3.Lerp(points[0], points[points.Length - 1], tValue);
+                points[i] = Vect3.Lerp(points[0], points[points.Length - 1], tValue);
             }
 
             return points;
         }
 
-        public Vector3[] GetLeftPoints(float inset=0)
+        public Vect3[] GetLeftPoints(float inset=0)
         {
-            Vector3 upperLeft, lowerLeft;
+			Vect3 upperLeft, lowerLeft;
 
-            upperLeft = Vector3.up * (panelDimensions.y - inset) + Vector3.right * -1 * (panelDimensions.x - inset);
+            upperLeft = Vect3.up * (panelDimensions.y - inset) + Vect3.right * -1 * (panelDimensions.x - inset);
             upperLeft *= 0.5f;
-            upperLeft = upperLeft + Vector3.up * -radius;
+            upperLeft = upperLeft + Vect3.up * -radius;
 
-            lowerLeft = Vector3.down * (panelDimensions.y - inset) + Vector3.right * -1 * (panelDimensions.x - inset);
+            lowerLeft = Vect3.down * (panelDimensions.y - inset) + Vect3.right * -1 * (panelDimensions.x - inset);
             lowerLeft *= 0.5f;
-            lowerLeft = lowerLeft + Vector3.up * radius;
+            lowerLeft = lowerLeft + Vect3.up * radius;
 
-            Vector3[] points = new Vector3[heightSegments + 2];
+			Vect3[] points = new Vect3[heightSegments + 2];
             points[0] = upperLeft;
             points[points.Length - 1] = lowerLeft;
 
@@ -366,25 +394,25 @@ namespace Instrumental.Modeling.ProceduralGraphics
             {
                 float tValue = (1f / (float)(heightSegments + 1f)) * i;
 
-                points[i] = Vector3.Lerp(points[0], points[points.Length - 1], tValue);
+                points[i] = Vect3.Lerp(points[0], points[points.Length - 1], tValue);
             }
 
             return points;
         }
 
-        public Vector3[] GetRightPoints(float inset=0)
+        public Vect3[] GetRightPoints(float inset=0)
         {
-            Vector3 upperRight, lowerRight;
+			Vect3 upperRight, lowerRight;
 
-            upperRight = Vector3.up * (panelDimensions.y - inset) + Vector3.right * (panelDimensions.x - inset);
+            upperRight = Vect3.up * (panelDimensions.y - inset) + Vect3.right * (panelDimensions.x - inset);
             upperRight *= 0.5f;
-            upperRight = upperRight + Vector3.up * -radius;
+            upperRight = upperRight + Vect3.up * -radius;
 
-            lowerRight = Vector3.down * (panelDimensions.y - inset) + Vector3.right * (panelDimensions.x - inset);
+            lowerRight = Vect3.down * (panelDimensions.y - inset) + Vect3.right * (panelDimensions.x - inset);
             lowerRight *= 0.5f;
-            lowerRight = lowerRight + Vector3.up * radius;
+            lowerRight = lowerRight + Vect3.up * radius;
 
-            Vector3[] points = new Vector3[heightSegments + 2];
+			Vect3[] points = new Vect3[heightSegments + 2];
             points[0] = upperRight;
             points[points.Length - 1] = lowerRight;
 
@@ -392,65 +420,65 @@ namespace Instrumental.Modeling.ProceduralGraphics
             {
                 float tValue = (1f / (float)(heightSegments + 1f)) * i;
 
-                points[i] = Vector3.Lerp(points[0], points[points.Length - 1], tValue);
+                points[i] = Vect3.Lerp(points[0], points[points.Length - 1], tValue);
             }
 
             return points;
         }
 
-        public CornerInfo GetCorner(Vector3 v1, Vector3 v2, Vector3 v3, float _radius)
+        public CornerInfo GetCorner(Vect3 v1, Vect3 v2, Vect3 v3, float _radius)
         {
-            Vector3 v2ToV1Dir = (v1 - v2).normalized;
-            Vector3 v2ToV3Dir = (v3 - v2).normalized;
+			Vect3 v2ToV1Dir = (v1 - v2).normalized;
+			Vect3 v2ToV3Dir = (v3 - v2).normalized;
 
-            Vector3 avgDir = (v2ToV1Dir + v2ToV3Dir) * 0.5f;
+			Vect3 avgDir = (v2ToV1Dir + v2ToV3Dir) * 0.5f;
             avgDir = avgDir.normalized;
 
-            // drawing normals
-            Vector3 v2ToV1Center;
-            Vector3 v2ToV3Center;
+			// drawing normals
+			Vect3 v2ToV1Center;
+			Vect3 v2ToV3Center;
 
-            Vector3 v2ToV1Normal = GetNormal(v2, v1, (v2 + avgDir * _radius), out v2ToV1Center);
-            Vector3 v2ToV3Normal = GetNormal(v2, v3, (v2 + avgDir * _radius), out v2ToV3Center);
+			Vect3 v2ToV1Normal = GetNormal(v2, v1, (v2 + avgDir * _radius), out v2ToV1Center);
+			Vect3 v2ToV3Normal = GetNormal(v2, v3, (v2 + avgDir * _radius), out v2ToV3Center);
 
 
-            Vector3 offsetL1V1 = v2 + (v2ToV1Normal * _radius);
-            Vector3 offsetL1V2 = v1 + (v2ToV1Normal * _radius);
+			Vect3 offsetL1V1 = v2 + (v2ToV1Normal * _radius);
+			Vect3 offsetL1V2 = v1 + (v2ToV1Normal * _radius);
 
-            Vector3 offsetL2V1 = v2 + (v2ToV3Normal * _radius);
-            Vector3 offsetL2V2 = v3 + (v2ToV3Normal * _radius);
+			Vect3 offsetL2V1 = v2 + (v2ToV3Normal * _radius);
+			Vect3 offsetL2V2 = v3 + (v2ToV3Normal * _radius);
 
             // let's turn l2 into a Plane and then do Plane.raycast
-            Plane l2Plane = new Plane(offsetL2V1, offsetL2V2, offsetL2V1 + Vector3.forward);
-            Ray l1Ray = new Ray(offsetL1V1, offsetL1V2 - offsetL1V1);
+            PlaneIC l2Plane = new PlaneIC(offsetL2V1, offsetL2V2, offsetL2V1 + Vect3.forward);
+            RayIC l1Ray = new RayIC(offsetL1V1, offsetL1V2 - offsetL1V1);
 
-            Vector3 center = Vector3.zero;
+			Vect3 center = Vect3.zero;
 
             float intersect = 0f;
             if (l2Plane.Raycast(l1Ray, out intersect))
             {
-                center = l1Ray.origin + l1Ray.direction * intersect;
+                center = l1Ray.position + l1Ray.direction * intersect;
 
-                // get our intersect points by walking back up our normals to the
-                // original lines
-                Plane v2ToV1Plane = new Plane(v1, v2, v1 + Vector3.forward);
-                Plane v2ToV3Plane = new Plane(v2, v3, v3 + Vector3.forward);
+				// get our intersect points by walking back up our normals to the
+				// original lines
+				PlaneIC v2ToV1Plane = new PlaneIC(v1, v2, v1 + Vect3.forward);
+				PlaneIC v2ToV3Plane = new PlaneIC(v2, v3, v3 + Vect3.forward);
 
-                Ray arcStartRay = new Ray(center, v2ToV1Normal * -1);
+                RayIC arcStartRay = new RayIC(center, v2ToV1Normal * -1);
                 float arcStartDistance = 0f;
-                Vector3 arcStartPoint = v2ToV1Center;
+				Vect3 arcStartPoint = v2ToV1Center;
                 if (v2ToV1Plane.Raycast(arcStartRay, out arcStartDistance))
                 {
-                    arcStartPoint = arcStartRay.origin + arcStartRay.direction * arcStartDistance;
+                    arcStartPoint = arcStartRay.position + arcStartRay.direction * arcStartDistance;
 
                     float normalMult = 1; // we need to figure out when to flip this!
 
                     return new CornerInfo()
                     {
-                        Angle = Vector3.Angle(v2ToV1Dir, v2ToV3Dir),
+                        Angle = Vect3.Angle(v2ToV1Dir, v2ToV3Dir),
                         Center = center,
                         From = (arcStartPoint - center).normalized,
-                        Normal = Vector3.forward * normalMult,
+                        Normal = Vect3.forward * normalMult,
                         Radius = _radius,
                         Valid = true
                     };
@@ -460,7 +488,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
                     return new CornerInfo()
                     {
                         Center = center,
-                        Normal = Vector3.forward,
+                        Normal = Vect3.forward,
                         Radius = _radius,
                         Valid = false
                     };
@@ -471,16 +499,16 @@ namespace Instrumental.Modeling.ProceduralGraphics
                 return new CornerInfo()
                 {
                     Center = center,
-                    Normal = Vector3.forward,
+                    Normal = Vect3.forward,
                     Radius = _radius,
                     Valid = false
                 };
             }
         }
 
-        #endregion
+#endregion
 
-        #region Meshing Methods
+#region Meshing Methods
 
         public override void GenerateModel()
         {
@@ -517,9 +545,9 @@ namespace Instrumental.Modeling.ProceduralGraphics
             this.panelInfo = panelInfo;
         }
 
-        public void GenerateVerts(out Vector3[] verts, out PanelInfo panelInfo)
+        public void GenerateVerts(out Vect3[] verts, out PanelInfo panelInfo)
         {
-            verts = new Vector3[GetTotalVertBufferSize()];
+            verts = new Vect3[GetTotalVertBufferSize()];
 
             FaceVertexArrayInfo frontVertInfo;
             FaceVertexArrayInfo backVertInfo;
@@ -584,23 +612,23 @@ namespace Instrumental.Modeling.ProceduralGraphics
 			}
 		}
 
-        public void GenerateUVs(Vector3[] verts, out Vector2[] uvs)
+        public void GenerateUVs(Vect3[] verts, out Vect2[] uvs)
         {
-            uvs = new Vector2[verts.Length];
+            uvs = new Vect2[verts.Length];
 
             // come up with a method of normalizing the vert locations
             // according to the panel dimensions
             for (int i = 0; i < verts.Length; i++)
             {
-                uvs[i] = new Vector2(verts[i].x, verts[i].y);
+                uvs[i] = new Vect2(verts[i].x, verts[i].y);
             }
         }
 
-        void GenerateVertsNoOutline(ref Vector3[] verts, out FaceVertexArrayInfo frontVertInfo,
+        void GenerateVertsNoOutline(ref Vect3[] verts, out FaceVertexArrayInfo frontVertInfo,
             out FaceVertexArrayInfo backVertInfo, out FaceVertexArrayInfo frontPanelExtrudeVertInfo,
             out FaceVertexArrayInfo backPanelExtrudeVertInfo)
         {
-            Vector3 c1, c2, c3, c4;
+            Vect3 c1, c2, c3, c4;
             GetCorners(out c1, out c2, out c3, out c4, 0);
 
             int baseID = 0;
@@ -619,7 +647,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
                 for (int i = backExtrusionID; i < baseID; i++)
                 {
                     // push these verts back
-                    verts[i] += Vector3.forward * depth;
+                    verts[i] += Vect3.forward * depth;
                 }
             }
             else
@@ -637,7 +665,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
                 for (int i = backSideBaseID; i < baseID; i++)
                 {
                     // push these verts back
-                    verts[i] += Vector3.forward * depth;
+                    verts[i] += Vect3.forward * depth;
                 }
             }
             else
@@ -646,13 +674,13 @@ namespace Instrumental.Modeling.ProceduralGraphics
             }
         }
 
-        void GenerateVertsOutline(ref Vector3[] verts, out FaceVertexArrayInfo frontVertInfo,
+        void GenerateVertsOutline(ref Vect3[] verts, out FaceVertexArrayInfo frontVertInfo,
             out FaceVertexArrayInfo backVertInfo, out FaceVertexArrayInfo frontOutlineVertInfo,
             out FaceVertexArrayInfo frontPanelExtrudeVertInfo, out FaceVertexArrayInfo backPanelExtrudeVertInfo)
         {
             float inset = radius * borderInsetPercent;
 
-            Vector3 c1, c2, c3, c4;
+			Vect3 c1, c2, c3, c4;
             GetCorners(out c1, out c2, out c3, out c4, inset);
 
             int baseID = 0;
@@ -676,7 +704,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
                 for (int i = backExtrusionID; i < baseID; i++)
                 {
                     // push these verts back
-                    verts[i] += Vector3.forward * depth;
+                    verts[i] += Vect3.forward * depth;
                 }
             }
             else
@@ -694,7 +722,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
                 for (int i = backSideBaseID; i < baseID; i++)
                 {
                     // push these verts back
-                    verts[i] += Vector3.forward * depth;
+                    verts[i] += Vect3.forward * depth;
                 }
             }
             else
@@ -703,14 +731,14 @@ namespace Instrumental.Modeling.ProceduralGraphics
             }
         }
 
-        void GenerateVertsOutlineExtrude(ref Vector3[] verts, out FaceVertexArrayInfo frontVertInfo,
+        void GenerateVertsOutlineExtrude(ref Vect3[] verts, out FaceVertexArrayInfo frontVertInfo,
             out FaceVertexArrayInfo backVertInfo, out FaceVertexArrayInfo frontOutlineVertInfo,
             out FaceVertexArrayInfo frontInnerExtrudeVertInfo, out FaceVertexArrayInfo frontPanelExtrudeVertInfo,
             out FaceVertexArrayInfo backPanelExtrudeVertInfo)
         {
             float inset = radius * borderInsetPercent;
 
-            Vector3 c1, c2, c3, c4;
+			Vect3 c1, c2, c3, c4;
             GetCorners(out c1, out c2, out c3, out c4, inset);
 
             int baseID = 0;
@@ -729,7 +757,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
             // adjust front outline here
             for (int i = frontOutlineBaseID; i < baseID; i++)
             {
-                verts[i] += Vector3.back * depth;
+                verts[i] += Vect3.back * depth;
             }
 
             // re-purposing our frontOutlineVertInfo to be the duplicate edge
@@ -743,7 +771,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
             for (int i = frontInnerExtrudeBaseID; i < baseID; i++)
             {
                 // push these verts forward
-                verts[i] += Vector3.back * depth;
+                verts[i] += Vect3.back * depth;
             }
 
             if (DoExtrusion)
@@ -754,7 +782,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
                 for (int i = backExtrusionID; i < baseID; i++)
                 {
                     // push these verts back
-                    verts[i] += Vector3.forward * depth;
+                    verts[i] += Vect3.forward * depth;
                 }
             }
             else
@@ -772,7 +800,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
                 for (int i = backSideBaseID; i < baseID; i++)
                 {
                     // push these verts back
-                    verts[i] += Vector3.forward * depth;
+                    verts[i] += Vect3.forward * depth;
                 }
             }
             else
@@ -781,8 +809,8 @@ namespace Instrumental.Modeling.ProceduralGraphics
             }
         }
 
-        private int GenerateFaceVerts(ref Vector3[] verts, int baseID,
-            Vector3 c1, Vector3 c2, Vector3 c3, Vector3 c4, bool isBack,
+        private int GenerateFaceVerts(ref Vect3[] verts, int baseID,
+			Vect3 c1, Vect3 c2, Vect3 c3, Vect3 c4, bool isBack,
             float _radius, float inset, out FaceVertexArrayInfo faceInfo)
         {
             baseID = GetGridInnerVerts(ref verts, baseID, inset);
@@ -840,7 +868,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
             return baseID;
         }
 
-        int GetCornerFanVerts(ref Vector3[] verts, int baseID, Vector3 c1, Vector3 c2, Vector3 c3, float _radius)
+        int GetCornerFanVerts(ref Vect3[] verts, int baseID, Vect3 c1, Vect3 c2, Vect3 c3, float _radius)
         {
             int trackID = baseID;
 
@@ -852,7 +880,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
             for (int i = 1; i < cornerVertsCount - 1; i++)
             {
-                verts[trackID] = cornerInfo.Center + (Quaternion.AngleAxis(angleIncrement * (i), cornerInfo.Normal) *
+                verts[trackID] = cornerInfo.Center + (Quatn.AngleAxis(angleIncrement * (i), cornerInfo.Normal) *
                     cornerInfo.From) * cornerInfo.Radius;
 
                 trackID++;
@@ -867,15 +895,15 @@ namespace Instrumental.Modeling.ProceduralGraphics
         /// <param name="verts">Vertes budffer</param>
         /// <param name="baseID">starting offset</param>
         /// <returns>index of last placed vertex</returns>
-        int GetGridInnerVerts(ref Vector3[] verts, int baseID, float inset = 0)
+        int GetGridInnerVerts(ref Vect3[] verts, int baseID, float inset = 0)
         {
             int innerWidthSegments = widthSegments + 2;
             int innerHeightSements = heightSegments + 2;
 
-            Vector2 innerDimensions = panelDimensions - (Vector2.one * radius * 2) - (Vector2.one * inset);
+            Vect2 innerDimensions = panelDimensions - (Vect2.one * radius * 2) - (Vect2.one * inset);
 
-            Vector3 startPos = (Vector3.left * 0.5f * (panelDimensions.x - inset)) +
-                (Vector3.up * 0.5f * (panelDimensions.y - inset)) + new Vector3(1, -1, 0) * radius;
+            Vect3 startPos = (Vect3.left * 0.5f * (panelDimensions.x - inset)) +
+                (Vect3.up * 0.5f * (panelDimensions.y - inset)) + new Vect3(1, -1, 0) * radius;
 
             float widthIncrement = innerDimensions.x / (float)(widthSegments + 1);
             float heightIncrement = innerDimensions.y / (float)(heightSegments + 1);
@@ -885,8 +913,8 @@ namespace Instrumental.Modeling.ProceduralGraphics
             {
                 for (int horizIndx = 0; horizIndx < innerWidthSegments; horizIndx++)
                 {
-                    verts[trackedIndx] = startPos + (Vector3.right * widthIncrement * horizIndx) +
-                        (Vector3.down * heightIncrement * vertIndx);
+                    verts[trackedIndx] = startPos + (Vect3.right * widthIncrement * horizIndx) +
+                        (Vect3.down * heightIncrement * vertIndx);
 
                     trackedIndx++;
                 }
@@ -901,7 +929,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
         /// <param name="verts">Vertes budffer</param>
         /// <param name="baseID">starting offset</param>
         /// <returns>index of last placed vertex</returns>
-        int GetGridEdgeVerts(ref Vector3[] verts, int baseID, out int upBaseID, out int downBaseID,
+        int GetGridEdgeVerts(ref Vect3[] verts, int baseID, out int upBaseID, out int downBaseID,
             out int leftBaseID, out int rightBaseID, float inset = 0)
         {
             int horizVertCount = widthSegments + 2;
@@ -913,17 +941,17 @@ namespace Instrumental.Modeling.ProceduralGraphics
             leftBaseID = 0;
             rightBaseID = 0;
 
-            Vector2 innerDimensions = panelDimensions - (Vector2.one * radius * 2) - (Vector2.one * inset);
+            Vect2 innerDimensions = panelDimensions - (Vect2.one * radius * 2) - (Vect2.one * inset);
             float widthIncrement = innerDimensions.x / (float)(widthSegments + 1);
             float heightIncrement = innerDimensions.y / (float)(heightSegments + 1);
 
             // up verts
             for (int i = 0; i < horizVertCount; i++)
             {
-                Vector3 startPos = (Vector3.left * 0.5f * (panelDimensions.x - inset)) +
-                    (Vector3.up * 0.5f * (panelDimensions.y - inset)) + new Vector3(1, 0, 0) * radius;
+				Vect3 startPos = (Vect3.left * 0.5f * (panelDimensions.x - inset)) +
+                    (Vect3.up * 0.5f * (panelDimensions.y - inset)) + new Vect3(1, 0, 0) * radius;
 
-                verts[vertTrackID] = startPos + (Vector3.right * widthIncrement * i);
+                verts[vertTrackID] = startPos + (Vect3.right * widthIncrement * i);
                 vertTrackID++;
             }
 
@@ -931,10 +959,10 @@ namespace Instrumental.Modeling.ProceduralGraphics
             downBaseID = vertTrackID;
             for (int i = 0; i < horizVertCount; i++)
             {
-                Vector3 startPos = (Vector3.left * 0.5f * (panelDimensions.x - inset)) +
-                    (Vector3.up * 0.5f * -(panelDimensions.y - inset)) + new Vector3(1, 0, 0) * radius;
+				Vect3 startPos = (Vect3.left * 0.5f * (panelDimensions.x - inset)) +
+                    (Vect3.up * 0.5f * -(panelDimensions.y - inset)) + new Vect3(1, 0, 0) * radius;
 
-                verts[vertTrackID] = startPos + (Vector3.right * widthIncrement * i);
+                verts[vertTrackID] = startPos + (Vect3.right * widthIncrement * i);
                 vertTrackID++;
             }
 
@@ -942,10 +970,10 @@ namespace Instrumental.Modeling.ProceduralGraphics
             leftBaseID = vertTrackID;
             for (int i = 0; i < verticalVertCount; i++)
             {
-                Vector3 startPos = (Vector3.left * 0.5f * (panelDimensions.x - inset)) +
-                    (Vector3.up * 0.5f * (panelDimensions.y - inset)) + new Vector3(0, -1, 0) * radius;
+				Vect3 startPos = (Vect3.left * 0.5f * (panelDimensions.x - inset)) +
+                    (Vect3.up * 0.5f * (panelDimensions.y - inset)) + new Vect3(0, -1, 0) * radius;
 
-                verts[vertTrackID] = startPos + (Vector3.down * heightIncrement * i);
+                verts[vertTrackID] = startPos + (Vect3.down * heightIncrement * i);
                 vertTrackID++;
             }
 
@@ -953,20 +981,20 @@ namespace Instrumental.Modeling.ProceduralGraphics
             rightBaseID = vertTrackID;
             for (int i = 0; i < verticalVertCount; i++)
             {
-                Vector3 startPos = (Vector3.right * 0.5f * (panelDimensions.x - inset)) +
-                    (Vector3.up * 0.5f * (panelDimensions.y - inset)) + new Vector3(0, -1, 0) * radius;
+				Vect3 startPos = (Vect3.right * 0.5f * (panelDimensions.x - inset)) +
+                    (Vect3.up * 0.5f * (panelDimensions.y - inset)) + new Vect3(0, -1, 0) * radius;
 
-                verts[vertTrackID] = startPos + (Vector3.down * heightIncrement * i);
+                verts[vertTrackID] = startPos + (Vect3.down * heightIncrement * i);
                 vertTrackID++;
             }
 
             return vertTrackID;
         }
 
-        int GenerateBorderEdge(ref Vector3[] _verts, int baseID, float _radius,
+        int GenerateBorderEdge(ref Vect3[] _verts, int baseID, float _radius,
             out FaceVertexArrayInfo edgeInfo, float inset = 0)
         {
-            Vector3 c1, c2, c3, c4;
+			Vect3 c1, c2, c3, c4;
             GetCorners(out c1, out c2, out c3, out c4, inset);
 
             int upBaseID, downBaseID, leftBaseID, rightBaseID;
@@ -1140,7 +1168,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
                 trackID += 6;
             }
 
-            #region Outer Edges
+#region Outer Edges
             // triangulate outer edges
             // do upper edge
             for (int i = 0; i < widthSegments + 1; i++)
@@ -1221,9 +1249,9 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
                 trackID += 6;
             }
-            #endregion
+#endregion
 
-            #region Triangulate Corner Fans
+#region Triangulate Corner Fans
             // upper left
             TriangulateFan(vertInfo.UpperEdgeBaseID, vertInfo.LeftEdgeBaseID,
                 innerGridBase, vertInfo.UpperLeftCornerBaseID, flip, ref trackID, ref triangles);
@@ -1257,7 +1285,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
                 flip,
                 ref trackID,
                 ref triangles);
-            #endregion
+#endregion
         }
 
         private void TriangulateFan(int lowEdgeID, int highEdgeID, int centerID,
@@ -1602,7 +1630,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
             return innerGridSize + outerEdgesSize + vertexFanCount;
         }
-        #endregion
+#endregion
 
         // Update is called once per frame
         void Update()

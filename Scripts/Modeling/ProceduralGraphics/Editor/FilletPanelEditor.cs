@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿#if UNITY
+using System.Collections;
 using System.Collections.Generic;
+
 using UnityEngine;
 using UnityEditor;
 
@@ -8,7 +10,18 @@ namespace Instrumental.Modeling.ProceduralGraphics
     [CustomEditor(typeof(FilletPanel))]
     public class FilletPanelEditor : Editor
     {
-        #region Properties
+		#region Properties
+
+		// schema properties
+		SerializedProperty testSchemaProperty;
+		//SerializedProperty testSchemaDimensions;
+		//SerializedProperty testSchemaDepth;
+		//SerializedProperty testSchemaRadius;
+		//SerializedProperty testSchemaRadiusSegments;
+		//SerializedProperty testSchemaBorderThickness;
+
+
+		// old properties
         SerializedProperty panelDimensionsProperty;
         SerializedProperty panelDepthProperty;
         SerializedProperty radiusProperty;
@@ -55,6 +68,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
         void GetProperties()
         {
+			testSchemaProperty = targetObject.FindProperty("testSchema");
             panelDimensionsProperty = targetObject.FindProperty("panelDimensions");
             panelDepthProperty = targetObject.FindProperty("depth");
             radiusProperty = targetObject.FindProperty("radius");
@@ -87,6 +101,37 @@ namespace Instrumental.Modeling.ProceduralGraphics
             //base.OnInspectorGUI();
 
             targetObject.Update();
+
+			if(!Application.isPlaying)
+			{
+				EditorGUILayout.PropertyField(testSchemaProperty, true);
+
+				/*if(testSchemaProperty.objectReferenceValue != null)
+				{
+					// get our new properties if needed
+					//if(schemaPropertyWasNull && schemaPropertyIsValid)
+					//{
+                        testSchemaProperty.serializedObject.Update();
+						testSchemaDimensions = testSchemaProperty.FindPropertyRelative("PanelDimensions");
+						testSchemaDepth = testSchemaProperty.FindPropertyRelative("Depth");
+						testSchemaRadius = testSchemaProperty.FindPropertyRelative("Radius");
+						testSchemaRadiusSegments = testSchemaProperty.FindPropertyRelative("RadiusSegments");
+						testSchemaBorderThickness = testSchemaProperty.FindPropertyRelative("BorderThickness");
+                    //}
+
+                    // do sub property drawing
+
+                    // validate the schema to ensure PanelType is Fillet
+                    // I don't think we support space curving without a Panel object?
+                    // that is correct, although we might not be able to handle that here.
+
+                    //EditorGUILayout.PropertyField(testSchemaDimensions);
+                    //EditorGUILayout.PropertyField(testSchemaDepth);
+                    //EditorGUILayout.PropertyField(testSchemaRadius);
+                    //EditorGUILayout.PropertyField(testSchemaRadiusSegments);
+                    //EditorGUILayout.PropertyField(testSchemaBorderThickness);
+                }*/
+			}
 
             panelDimensionsProperty.vector2Value = EditorGUILayout.Vector2Field("Panel Dimensions", panelDimensionsProperty.vector2Value);
             panelDepthProperty.floatValue = EditorGUILayout.Slider("Depth", panelDepthProperty.floatValue, FilletPanel.MIN_DEPTH, FilletPanel.MAX_DEPTH);
@@ -284,7 +329,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
                     Handles.matrix = transformMatrix;
                     for (int i = 0; i < m_instance.Verts.Length; i++)
                     {
-                        Vector3 vert = m_instance.Verts[i];
+                        Vector3 vert = (Vector3)m_instance.Verts[i];
 
                         //int vertIndx = (i) / width;
                         //int horizIndx = (i) % width;
@@ -357,3 +402,4 @@ namespace Instrumental.Modeling.ProceduralGraphics
         }
     }
 }
+#endif

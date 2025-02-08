@@ -8,6 +8,11 @@ using UnityEngine;
 using StereoKit;
 #endif
 
+using Instrumental.Schema;
+
+
+// todo: look into this for faster casting of structs with identical layout
+// https://www.reddit.com/r/csharp/comments/13y1w9p/how_to_cast_a_struct_to_another_struct_of_the/
 namespace Instrumental.Core.Math
 {
 #if UNITY
@@ -68,6 +73,12 @@ namespace Instrumental.Core.Math
 		public static explicit operator StereoKit.Vec2(Vector2 v2) =>
 			new Vector3(v2.x, v2.y);
 #endif
+
+		public static implicit operator Vect2(sV2 v2)	=>
+			new Vect2(v2.x, v2.y);
+
+		public static implicit operator sV2(Vect2 v2) =>
+			new sV2(v2.x, v2.y);
 
 		public static implicit operator Vect2(Vect3 _v)
 		{

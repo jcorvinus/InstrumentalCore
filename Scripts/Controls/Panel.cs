@@ -1,7 +1,12 @@
 ﻿using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
+
+#if UNITY
 using UnityEngine;
+#elif STEREOKIT
+using StereoKit;
+#endif
 
 using Instrumental.Modeling.ProceduralGraphics;
 using Instrumental.Editing.Tools;
@@ -36,18 +41,18 @@ namespace Instrumental.Controls
             }
         }
 
-        #region PanelHandles
+#region PanelHandles
         PanelHandle[] allHandles;
         PanelHandle upperHandle, lowerHandle, leftHandle, rightHandle,
             upperLeftHandle, lowerLeftHandle, upperRightHandle, lowerRightHandle;
-        #endregion
+#endregion
 
-        #region ColorZones
+#region ColorZones
         [SerializeField]
         ColorZone outlineColorZone;
         UniformColorZone surfaceUniformColorZone;
         GradientColorZone surfaceGradientColorZone;
-        #endregion
+#endregion
 
         Dictionary<string, UIControl> uiControls = new Dictionary<string, UIControl>();
 
@@ -67,7 +72,7 @@ namespace Instrumental.Controls
             surfaceUniformColorZone = panelCollider.GetComponent<UniformColorZone>();
             surfaceGradientColorZone = panelCollider.GetComponent<GradientColorZone>();
 
-            #region Handles
+#region Handles
             allHandles = GetComponentsInChildren<PanelHandle>(true);
             upperHandle = allHandles.First(item => item.Type == PanelHandle.HandleType.UpperRail);
             lowerHandle = allHandles.First(item => item.Type == PanelHandle.HandleType.LowerRail);
@@ -77,14 +82,14 @@ namespace Instrumental.Controls
             lowerLeftHandle = allHandles.First(item => item.Type == PanelHandle.HandleType.LowerLeftCorner);
             upperRightHandle = allHandles.First(item => item.Type == PanelHandle.HandleType.UpperRightCorner);
             lowerRightHandle = allHandles.First(item => item.Type == PanelHandle.HandleType.LowerRightCorner);
-            #endregion
+#endregion
 
-            #region Border Colliders
+#region Border Colliders
             borderUpperCollider = outlineColorZone.transform.GetChild(0).GetComponent<BoxCollider>();
             borderLowerCollider = outlineColorZone.transform.GetChild(1).GetComponent<BoxCollider>();
             borderLeftCollider = outlineColorZone.transform.GetChild(2).GetComponent<BoxCollider>();
             borderRightCollider = outlineColorZone.transform.GetChild(3).GetComponent<BoxCollider>();
-            #endregion
+#endregion
         }
 
         // Use this for initialization
@@ -117,7 +122,9 @@ namespace Instrumental.Controls
                     filletPanel.SetDimensions(panelSchema.PanelDimensions);
                     filletPanel.SetRadius(panelSchema.Radius);
                     filletPanel.SetBorderInsetPercent(panelSchema.BorderThickness);
-                    filletPanel.SetBorderColor(panelSchema.BorderColor);
+                    filletPanel.SetBorderColor(
+						new Color(panelSchema.BorderColor.r, panelSchema.BorderColor.g, panelSchema.BorderColor.b, 
+						panelSchema.BorderColor.a));
 
                     // set surface color zones properly
                     surfaceGradientColorZone.enabled = filletPanel.FaceColorType == Modeling.ColorType.Gradient;
@@ -164,9 +171,9 @@ namespace Instrumental.Controls
             return panelSchema;
         }
 
-        public Vector2 Dimensions { get { return panelSchema.PanelDimensions; } }
+        public Vector2 Dimensions { get { return new Vector2(panelSchema.PanelDimensions.x, panelSchema.PanelDimensions.y); } }
 
-        #region Child Controls Recordkeeping
+#region Child Controls Recordkeeping
         /// <summary>
         /// Because UI controls must have unique names, this method will tell you
         /// if the 
@@ -206,9 +213,9 @@ namespace Instrumental.Controls
         {
             uiControls.Remove(control.Name);
         }
-        #endregion
+#endregion
 
-        #region Panel Handle Methods
+#region Panel Handle Methods
         private void Handle_OnHandleGrasped(PanelHandle handle)
         {
             // disable grasping for all the handles that aren't grasped
@@ -258,7 +265,8 @@ namespace Instrumental.Controls
 
             bool isCorner = HandleIsCorner(handle.Type);
 
-            Vector2 newDimensions = panelSchema.PanelDimensions * 0.5f;
+            Vector2 newDimensions = 
+				Dimensions * 0.5f;
 
             switch (handle.Type)
             {
@@ -286,7 +294,7 @@ namespace Instrumental.Controls
             newDimensions *= 2;
 
             bool didConstrain = ShouldPanelConstrain(newDimensions, out newDimensions);
-            panelSchema.PanelDimensions = newDimensions;
+            panelSchema.PanelDimensions = new Instrumental.Schema.sV2(newDimensions.x, newDimensions.y);
 
             switch (panelSchema.PanelType)
             {
@@ -358,9 +366,9 @@ namespace Instrumental.Controls
                     return transform.position;
             }
         }
-        #endregion
+#endregion
 
-        #region Panel Space Methods
+#region Panel Space Methods
         public void SetSpaceType(Schema.SpaceType spaceType)
         {
             panelSchema.SpaceType = spaceType;
@@ -435,9 +443,9 @@ namespace Instrumental.Controls
             rendererSpaceCollider.size = new Vector3(panelSchema.PanelDimensions.x + (panelSchema.PanelDimensions.x * 0.1f),
                 panelSchema.PanelDimensions.y + (panelSchema.PanelDimensions.y * 0.1f), rendererSpaceCollider.size.z);
         }
-        #endregion
+#endregion
 
-        #region Border Methods
+#region Border Methods
         void SetBorderColor(Color color)
         {
             switch (panelSchema.PanelType)
@@ -502,7 +510,7 @@ namespace Instrumental.Controls
             borderRightCollider.size = new Vector3(radius * borderThickness, panelSchema.PanelDimensions.y,
                 panelSchema.Depth * 2);
         }
-        #endregion
+#endregion
 
     }
 }

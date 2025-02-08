@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 #if UNITY
 using UnityEngine;
@@ -21,6 +22,31 @@ namespace Instrumental.Core
 #elif STEREOKIT
 		private StereoKit.Ray skRay;
 #endif
+
+#if UNITY
+		public static explicit operator RayIC(Ray ray) =>
+			new RayIC((Vect3)ray.origin, (Vect3)ray.direction);
+
+		public static explicit operator Ray(RayIC ray) =>
+			new Ray((Vector3)ray.position, (Vector3)ray.direction);
+#elif STEREOKIT
+		public static explicit operator RayIC(Ray ray) =>
+			new RayIC((Vect3)ray.position, (Vect3)ray.direction);
+#endif
+
+		public RayIC(Vect3 origin, Vect3 direction)
+		{
+#if UNITY
+			Vector3 uOrigin, uDirection;
+			uOrigin = (Vector3)origin;
+			uDirection = (Vector3)direction;
+			uRay = new Ray(uOrigin, uDirection);
+#elif STEREOKIT
+			skRay = new Ray();
+			skRay.position = (Vec3)origin;
+			skRay.direction = (Vec3)direction;
+#endif
+		}
 
 		public Vect3 position
 		{
