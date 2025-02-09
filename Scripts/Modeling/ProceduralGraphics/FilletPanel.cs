@@ -146,6 +146,72 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
         public ColorType FaceColorType { get { return faceColorType; } }
 
+#if UNITY_EDITOR
+		// editor inspector variables
+		public float Depth
+		{
+			get
+			{
+				if (!Application.isPlaying)
+				{
+					return (testSchema) ? testSchema.Depth : depth;
+				}
+				else
+				{
+					return depth;
+				}
+			}
+		}
+
+		public float Radius
+		{
+			get
+			{
+				if (!Application.isPlaying)
+				{
+					return (testSchema) ? testSchema.Radius : radius;
+				}
+				else return radius;
+			}
+		}
+
+		public Vector2 PanelDimensions
+		{
+			get
+			{
+				if (!Application.isPlaying)
+				{
+					return (testSchema) ? (Vector2)((Vect2)testSchema.PanelDimensions) : (Vector2)panelDimensions;
+				}
+				else return (Vector2)panelDimensions;
+			}
+		}
+
+		public int FilletSegments
+		{
+			get
+			{
+				if (!Application.isPlaying)
+				{
+					return (testSchema) ? testSchema.RadiusSegments : filletSegments;
+				}
+				else return filletSegments;
+			}
+		}
+
+		public float BorderInsetPercent
+		{
+			get
+			{
+				if (!Application.isPlaying)
+				{
+					return (testSchema) ? testSchema.BorderThickness : borderInsetPercent;
+				}
+				else return borderInsetPercent;
+			}
+		}
+#endif
+
 		#region Mesh Vars
 		ProcGenMesh mesh;
 
@@ -188,7 +254,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
         {
             base.Awake();
 			mesh = new ProcGenMesh();
-
+			SetDefaultValues();
 		}
 
         // Use this for initialization
@@ -197,8 +263,23 @@ namespace Instrumental.Modeling.ProceduralGraphics
             
         }
 
+		private void SetDefaultValues()
+		{
+			if(testSchema)
+			{
+				panelDimensions = testSchema.PanelDimensions;
+				depth = testSchema.Depth;
+				radius = testSchema.Radius;
+				filletSegments = testSchema.RadiusSegments;
+				borderInsetPercent = testSchema.BorderThickness;
+				//borderColor = testSchema.BorderColor; // schema property
+			}
+		}
+
         public override void OnValidate()
         {
+			if (!Application.isPlaying) SetDefaultValues();
+
             widthSegments = Mathf.Max(0, widthSegments);
             heightSegments = Mathf.Max(0, heightSegments);
 

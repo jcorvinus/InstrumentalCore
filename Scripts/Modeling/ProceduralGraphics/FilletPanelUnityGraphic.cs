@@ -50,7 +50,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
         private void OnValidate()
         {
-            GetComponents();
+            //GetComponents();
         }
 
         // Update is called once per frame

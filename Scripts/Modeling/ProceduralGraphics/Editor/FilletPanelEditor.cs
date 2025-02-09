@@ -199,7 +199,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
         private void DrawCornerSamples(Vector3 v1, Vector3 v2, Vector3 v3, float radius)
         {
-            Vector3[] cornerVerts = new Vector3[filletSegmentsProperty.intValue];
+            Vector3[] cornerVerts = new Vector3[m_instance.FilletSegments];
 
             FilletPanel.CornerInfo cornerInfo = m_instance.GetCorner((Vect3)v1, (Vect3)v2, (Vect3)v3,
                 radius);
@@ -314,8 +314,8 @@ namespace Instrumental.Modeling.ProceduralGraphics
                 return;
             }
 
-            float depth = panelDepthProperty.floatValue;
-            float radius = radiusProperty.floatValue;
+			float depth = m_instance.Depth;
+			float radius = m_instance.Radius;
             Vect3 frontPrimaryV1, frontPrimaryV2, frontPrimaryV3, frontPrimaryV4;
             m_instance.GetCorners(out frontPrimaryV1, out frontPrimaryV2, 
                 out frontPrimaryV3, out frontPrimaryV4, 0);
