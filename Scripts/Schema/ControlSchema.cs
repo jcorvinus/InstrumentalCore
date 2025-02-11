@@ -1,12 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+
+#if UNITY
 using UnityEngine;
+#endif
 
 using Instrumental.Controls;
 
 namespace Instrumental.Schema
 {
-    [System.Serializable]
+	[System.Serializable]
     public struct ControlVariable
     {
         public string Name;
@@ -19,16 +22,22 @@ namespace Instrumental.Schema
     /// we're going to dump all the variables into a single struct and
     /// let the control classes handle loading and saving
     /// </summary>
+#if UNITY
     [CreateAssetMenu(fileName = "ControlSchema", menuName = "Instrumental/ControlSchema")]
-    public class ControlSchema : ScriptableObject
+#endif
+	public class ControlSchema : ScriptableObject
     {
-        [Header("Common Variables")]
-        public ControlType Type;
+#if UNITY
+		[Header("Common Variables")]
+#endif
+		public ControlType Type;
         public string Name;
-        public Vector3 Position;
-        public Quaternion Rotation;
+        public sV3 Position;
+        public sQuat Rotation;
 
-        [Header("Type-Specific Variables")]
-        public List<ControlVariable> ControlVariables;
+#if UNITY
+		[Header("Type-Specific Variables")]
+#endif
+		public List<ControlVariable> ControlVariables;
     }
 }

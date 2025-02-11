@@ -14,6 +14,14 @@ using Instrumental.Schema;
 
 namespace Instrumental.Modeling.ProceduralGraphics
 {
+	/// <summary>
+	/// This class generates a 3d model of a control panel.
+	/// It supports a completely flat panel, outlines, extruded panel,
+	/// extruded panel with a back side, and extruded panel with extruded outlines.
+	/// 
+	/// todo: there is a bug in this class where in some configurations it will generate
+	/// too many triangles, and these have degenerate indices of 0,0,0
+	/// </summary>
     public class FilletPanel : ProcGenModel
     { 
         public enum BorderType
@@ -139,7 +147,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
         [Range(MIN_BORDER_SEGMENTS, MAX_BORDER_SEGMENTS)]
         [SerializeField]
-        int borderSegments = 1; // appears to be unused
+        int borderSegments = 1; // appears to be unused. I think this was how many bevels the border would have
 
         [SerializeField]
         Color borderColor = Color.white; // schema property

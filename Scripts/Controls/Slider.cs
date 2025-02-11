@@ -86,11 +86,15 @@ namespace Instrumental.Controls
 
         public override void SetSchema(ControlSchema controlSchema)
         {
-            // set stuff like our press depth, mesh generation, etc...
-            // based off the data in the schema
-            transform.localPosition = controlSchema.Position;
-            transform.localRotation = controlSchema.Rotation;
-            _name = controlSchema.Name;
+			// set stuff like our press depth, mesh generation, etc...
+			// based off the data in the schema
+#if UNITY
+			transform.localPosition = (Vector3)controlSchema.Position;
+            transform.localRotation = (Quaternion)controlSchema.Rotation;
+#elif STEREOKIT
+			throw new System.NotImplementedException();
+#endif
+			_name = controlSchema.Name;
 
             sliderSchema = SliderSchema.CreateFromControl(controlSchema);
         }
@@ -181,9 +185,13 @@ namespace Instrumental.Controls
             ControlSchema schema = new ControlSchema()
             {
                 Name = _name,
-                Position = transform.localPosition,
-                Rotation = transform.localRotation,
-                Type = GetControlType()
+#if UNITY
+				Position = (sV3)transform.localPosition,
+                Rotation = (sQuat)transform.localRotation,
+#elif STEREOKIT
+				throw new System.NotImplementedException();
+#endif
+				Type = GetControlType()
             };
 
             return schema;
@@ -194,7 +202,7 @@ namespace Instrumental.Controls
             return ControlType.Slider;
         }
 
-		#region Runtime Behavior
+#region Runtime Behavior
 		bool IsInBounds(Vect3 point)
 		{
             Vector3 closestPointOnBounds = runtimeFaceCollider.ClosestPoint((Vector3)point);
@@ -366,7 +374,7 @@ namespace Instrumental.Controls
 		{
             isHovering = false;
 		}
-		#endregion
+#endregion
 
 		void DesigntimeUpdate()
 		{

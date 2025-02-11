@@ -257,10 +257,14 @@ namespace Instrumental.Controls
 
 		public override void SetSchema(ControlSchema controlSchema)
         {
-            // set things based off the schema
-            transform.localPosition = controlSchema.Position;
-            transform.localRotation = controlSchema.Rotation;
-            _name = controlSchema.Name;
+			// set things based off the schema
+#if UNITY
+			transform.localPosition = (Vector3)controlSchema.Position;
+            transform.localRotation = (Quaternion)controlSchema.Rotation;
+#elif STEREOKIT
+			throw new System.NotImplementedException();
+#endif
+			_name = controlSchema.Name;
 
 			buttonSchema = ButtonSchema.CreateFromControl(controlSchema);
         }
@@ -302,9 +306,13 @@ namespace Instrumental.Controls
             ControlSchema schema = new ControlSchema()
             {
                 Name = _name,
-                Position = transform.localPosition,
-                Rotation = transform.localRotation,
-                Type = GetControlType()
+#if UNITY
+				Position = (sV3)transform.localPosition,
+                Rotation = (sQuat)transform.localRotation,
+#elif STEREOKIT
+				throw new System.NotImplementedException();
+#endif
+				Type = GetControlType()
             };
 
 			buttonSchema.SetControlSchema(ref schema);
@@ -312,7 +320,7 @@ namespace Instrumental.Controls
             return schema;
         }
 
-		#region Meshing
+#region Meshing
 		void RebuildMesh()
 		{
 
@@ -322,7 +330,7 @@ namespace Instrumental.Controls
 		{
 			
 		}
-		#endregion
+#endregion
 
 		public override ControlType GetControlType()
         {
