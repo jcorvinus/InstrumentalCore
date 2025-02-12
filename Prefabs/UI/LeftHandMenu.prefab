@@ -242,11 +242,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6671a491d8f7c0c47b0d6eef221ff7b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  testSchema: {fileID: 0}
-  panelDimensions: {x: 0.15, y: 0.145}
-  depth: 0.004
-  radius: 0.03
-  filletSegments: 5
+  testSchema: {fileID: 11400000, guid: 6968796918a985f46bb581c8e769b17b, type: 2}
   widthSegments: 3
   heightSegments: 3
   useVColors: 1

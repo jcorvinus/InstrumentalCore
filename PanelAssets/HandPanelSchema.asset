@@ -16,8 +16,8 @@ MonoBehaviour:
   SpaceType: 0
   SpaceCurveRadius: 0
   PanelDimensions:
-    x: 0
-    y: 0
+    x: 0.15
+    y: 0.145
   Depth: 0.004
   Radius: 0.03
   RadiusSegments: 5
