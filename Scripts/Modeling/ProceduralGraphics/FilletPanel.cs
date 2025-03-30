@@ -106,11 +106,15 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
         Vect2 panelDimensions; // schema property
 
+        // defaults are set here because even though we load whatever's in the
+        // test schema on load if available, OnValidate and I think OnEnable 
+        // run before Awake handles that, and even then, the testSchema may not be available
+        // although we'll want to warn the user in that case.
         float depth = 0.01f; // schema property
 
-        float radius; // schema property
+        float radius = 0.01f; // schema property
 
-        int filletSegments; // schema property
+        int filletSegments = MIN_FILLET_SEGMENTS; // schema property
 
 		// This one isn't a schema property because I believe we were going to do it automatically?
 		// maybe based off of distance, or if we're in a curved space or not
