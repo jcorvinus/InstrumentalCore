@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b9918bfb91d16542bcb39281a9411a6, type: 3}
   m_Name: TestRoundButton
   m_EditorClassIdentifier: 
-  Type: 0
+  Type: 1
   Name: 
   Position:
     x: 0

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b9918bfb91d16542bcb39281a9411a6, type: 3}
   m_Name: PanelEditorWideButton
   m_EditorClassIdentifier: 
-  Type: 0
+  Type: 1
   Name: 
   Position:
     x: 0
@@ -24,15 +24,15 @@ MonoBehaviour:
     z: 0
     w: 0
   ControlVariables: []
-  HasRim: 0
-  CornerVertCount: 0
+  HasRim: 1
+  CornerVertCount: 5
   WidthVertCount: 0
-  BevelSliceCount: 0
-  Depth: 0
-  Radius: 0
-  Width: 0
-  BevelRadius: 0
-  BevelDepth: 0
-  RimWidth: 0
-  RimDepth: 0
+  BevelSliceCount: 3
+  Depth: 0.014
+  Radius: 0.021
+  Width: 0.0764
+  BevelRadius: 0.697
+  BevelDepth: 0.418
+  RimWidth: 0.132
+  RimDepth: 0.382
   ThrowDistance: 0
