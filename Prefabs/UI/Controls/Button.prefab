@@ -139,7 +139,7 @@ MonoBehaviour:
   mode: 0
   orientationPreviewID: 0
   buttonModel: {fileID: 2733170341325265288}
-  buttonSchema: {fileID: 0}
+  buttonSchema: {fileID: 11400000, guid: 5c73999026468294bb03a9007724ff10, type: 2}
   boxCollider: {fileID: 4518254474591825844}
   buttonRuntimeBehavior: {fileID: 731302364273269603}
   hoverHeight: 0.055

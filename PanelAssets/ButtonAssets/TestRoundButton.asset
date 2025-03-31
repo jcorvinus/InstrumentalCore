@@ -24,15 +24,15 @@ MonoBehaviour:
     z: 0
     w: 0
   ControlVariables: []
-  HasRim: 0
-  CornerVertCount: 0
+  HasRim: 1
+  CornerVertCount: 5
   WidthVertCount: 0
-  BevelSliceCount: 0
-  Depth: 0
-  Radius: 0
-  Width: 0
-  BevelRadius: 0
-  BevelDepth: 0
-  RimWidth: 0
-  RimDepth: 0
+  BevelSliceCount: 3
+  Depth: 0.017
+  Radius: 0.015
+  Width: 0.0011
+  BevelRadius: 0.697
+  BevelDepth: 0.246
+  RimWidth: 0.133
+  RimDepth: 0.382
   ThrowDistance: 0
