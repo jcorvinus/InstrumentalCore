@@ -244,6 +244,8 @@ namespace Instrumental.Modeling.ProceduralGraphics
 				if(recalculateNormals) mesh.RecalculateNormals();
 			}
 
+			// uvs and colors used to have 'else' clauses that would clear the
+			// buffers. Not sure why. Need to look into it.
 			if (uvs != null && uvs.Length > 0)
 			{
 				for (int uv = 0; uv < uvs.Length; uv++)
@@ -252,11 +254,6 @@ namespace Instrumental.Modeling.ProceduralGraphics
 				}
 
 				mesh.uv = this.uvs;
-			}
-			else
-			{
-				this.uvs = new Vector2[0];
-				mesh.uv = null;
 			}
 
 			if (colors != null && colors.Length > 0)
@@ -267,11 +264,6 @@ namespace Instrumental.Modeling.ProceduralGraphics
 				}
 
 				mesh.colors = this.colors;
-			}
-			else
-			{
-				this.colors = new Color[0];
-				mesh.colors = null;
 			}
 #elif STEREOKIT
 			for(int v=0; v < verts.Length; v++)
