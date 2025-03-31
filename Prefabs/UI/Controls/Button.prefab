@@ -139,19 +139,7 @@ MonoBehaviour:
   mode: 0
   orientationPreviewID: 0
   buttonModel: {fileID: 2733170341325265288}
-  buttonSchema:
-    HasRim: 1
-    CornerVertCount: 5
-    WidthVertCount: 0
-    BevelSliceCount: 3
-    Depth: 0.017
-    Radius: 0.015
-    Width: 0.0011
-    BevelRadius: 0.697
-    BevelDepth: 0.246
-    RimWidth: 0.133
-    RimDepth: 0.382
-    ThrowDistance: 0
+  buttonSchema: {fileID: 0}
   boxCollider: {fileID: 4518254474591825844}
   buttonRuntimeBehavior: {fileID: 731302364273269603}
   hoverHeight: 0.055

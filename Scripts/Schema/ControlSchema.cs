@@ -25,7 +25,7 @@ namespace Instrumental.Schema
 #if UNITY
     [CreateAssetMenu(fileName = "ControlSchema", menuName = "Instrumental/ControlSchema")]
 #endif
-	public class ControlSchema : ScriptableObject
+	public abstract class ControlSchema : ScriptableObject
     {
 #if UNITY
 		[Header("Common Variables")]

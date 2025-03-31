@@ -174,6 +174,11 @@ namespace Instrumental.Modeling.ProceduralGraphics
                 m_instance.GenerateVertexColors();
             }
 
+            if(GUILayout.Button("Break"))
+            {
+                m_instance.Break();
+            }
+
             targetObject.ApplyModifiedProperties();
         }
 

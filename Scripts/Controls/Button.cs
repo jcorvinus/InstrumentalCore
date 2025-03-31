@@ -19,14 +19,18 @@ namespace Instrumental.Controls
 		public event ButtonEventHandler ButtonHoverEnded;
 
 		[SerializeField] ButtonModel buttonModel;
-		[SerializeField] ButtonSchema buttonSchema = ButtonSchema.GetDefault();
+#if UNITY
+		[SerializeField] ButtonSchema buttonSchema;
+#elif STEREOKIT
+		ButtonSchema buttonSchema = ButtonSchema.GetDefault();
+#endif
 		[SerializeField] BoxCollider boxCollider;
 		[SerializeField] ButtonRuntime buttonRuntimeBehavior;
 
 		[SerializeField] float hoverHeight = 0.03f;
 		[SerializeField] float underFlow = 0.01f;
 
-		#region Schema value accessors (Incomplete)
+#region Schema value accessors (Incomplete)
 		public bool HasRim { get { return buttonSchema.HasRim; }
 			set
 			{
@@ -87,7 +91,7 @@ namespace Instrumental.Controls
 		}
 
 		public float HoverHeight { get { return hoverHeight; } }
-		#endregion
+#endregion
 
 		public ButtonRuntime Runtime { get { return buttonRuntimeBehavior; } }
 
@@ -97,11 +101,13 @@ namespace Instrumental.Controls
 			if (!buttonRuntimeBehavior)
 			{
 				buttonRuntimeBehavior = gameObject.AddComponent<ButtonRuntime>();
-
-				float physDepth = (buttonSchema.Depth + (buttonSchema.Depth * buttonSchema.BevelDepth));
-				buttonRuntimeBehavior.ButtonFaceDistance = physDepth;
-				buttonRuntimeBehavior.ButtonFace = buttonRuntimeBehavior.transform.GetChild(0);
-				buttonRuntimeBehavior.ThrowSource = buttonRuntimeBehavior.transform.GetChild(2).GetComponent<AudioSource>();
+				if (buttonSchema != null)
+				{
+					float physDepth = (buttonSchema.Depth + (buttonSchema.Depth * buttonSchema.BevelDepth));
+					buttonRuntimeBehavior.ButtonFaceDistance = physDepth;
+					buttonRuntimeBehavior.ButtonFace = buttonRuntimeBehavior.transform.GetChild(0);
+					buttonRuntimeBehavior.ThrowSource = buttonRuntimeBehavior.transform.GetChild(2).GetComponent<AudioSource>();
+				}
 			}
 		}
 
@@ -133,23 +139,32 @@ namespace Instrumental.Controls
 
 		private void SetBoxColliderRuntimeValues()
 		{
-			float physDepth = (buttonSchema.Depth + (buttonSchema.Depth * buttonSchema.BevelDepth));
-			float physAndHoverDepth = physDepth + (hoverHeight);
-			float totalDepth = physAndHoverDepth + underFlow;
+			if (buttonSchema != null)
+			{
+				float physDepth = (buttonSchema.Depth + (buttonSchema.Depth * buttonSchema.BevelDepth));
+				float physAndHoverDepth = physDepth + (hoverHeight);
+				float totalDepth = physAndHoverDepth + underFlow;
 
-			boxCollider.center = new Vector3(0, 0, (physAndHoverDepth * 0.5f) - (underFlow * 0.5f));
-			boxCollider.size = new Vector3(buttonSchema.Width + (buttonSchema.Radius * 2), buttonSchema.Radius * 2,
-				totalDepth);
-			boxCollider.isTrigger = true;
+				boxCollider.center = new Vector3(0, 0, (physAndHoverDepth * 0.5f) - (underFlow * 0.5f));
+				boxCollider.size = new Vector3(buttonSchema.Width + (buttonSchema.Radius * 2), buttonSchema.Radius * 2,
+					totalDepth);
+				boxCollider.isTrigger = true;
+			}
 		}
 
 		private void SetGraspableColliderValues()
 		{
-			float physDepth = (buttonSchema.Depth + (buttonSchema.Depth * buttonSchema.BevelDepth));
-			boxCollider.center = new Vector3(0, 0, physDepth * 0.5f);
-			boxCollider.size = new Vector3(buttonSchema.Width + (buttonSchema.Radius * 2),
-				buttonSchema.Radius * 2, physDepth);
+			if (buttonSchema != null)
+			{
+
+				float physDepth = (buttonSchema.Depth + (buttonSchema.Depth * buttonSchema.BevelDepth));
+				boxCollider.center = new Vector3(0, 0, physDepth * 0.5f);
+				boxCollider.size = new Vector3(buttonSchema.Width + (buttonSchema.Radius * 2),
+					buttonSchema.Radius * 2, physDepth);
+			}
+
 			boxCollider.isTrigger = false;
+
 		}
 
 		void SetupRuntimeComponents()
@@ -162,7 +177,10 @@ namespace Instrumental.Controls
 		private void OnValidate()
 		{
 #if UNITY_EDITOR
-			buttonModel.SetNewButtonSchema(buttonSchema);
+			if (buttonSchema != null)
+			{
+				buttonModel.SetNewButtonSchema(buttonSchema);
+			}
 
 			// handle our component differentiation
 			if(!Application.isPlaying) // only change components at edit time.
@@ -303,7 +321,7 @@ namespace Instrumental.Controls
 
         public override ControlSchema GetSchema()
         {
-            ControlSchema schema = new ControlSchema()
+            /*ControlSchema schema = new ControlSchema()
             {
                 Name = _name,
 #if UNITY
@@ -315,9 +333,9 @@ namespace Instrumental.Controls
 				Type = GetControlType()
             };
 
-			buttonSchema.SetControlSchema(ref schema);
+			buttonSchema.SetControlSchema(ref schema);*/
 
-            return schema;
+            return buttonSchema;
         }
 
 #region Meshing

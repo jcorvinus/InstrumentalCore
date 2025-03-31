@@ -521,10 +521,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   testSchema: {fileID: 11400000, guid: e0708095c08fda44ea01b02cee181ae9, type: 2}
-  panelDimensions: {x: 0.4, y: 0.2}
-  depth: 0.0165
-  radius: 0.03
-  filletSegments: 5
   widthSegments: 4
   heightSegments: 2
   useVColors: 1
@@ -570,7 +566,7 @@ MonoBehaviour:
   displayVertIDs: 1
   displaySegmentLines: 0
   displayNormals: 0
-  doBackFace: 1
+  doBackFace: 0
 --- !u!4 &1188684349
 Transform:
   m_ObjectHideFlags: 0

@@ -99,19 +99,7 @@ MonoBehaviour:
   mode: 0
   orientationPreviewID: 0
   sliderModel: {fileID: 8084187676574450380}
-  sliderSchema:
-    Width: 0.107
-    Radius: 0.022
-    ButtonHeight: 0.017
-    FaceBevelSliceCount: 4
-    FaceSliceCount: 11
-    ExtrusionDepth: 0.017
-    BevelExtrusionDepth: 0.4
-    BevelRadius: 0.697
-    RailRadius: 0.00127
-    RailForwardDistance: 0.00044
-    RailRadiusSliceCount: 4
-    RailWidthSliceCount: 6
+  sliderSchema: {fileID: 0}
   runtimeFaceCollider: {fileID: 8084187676066049309}
   hoverHeight: 0.03
   underFlow: 0.025

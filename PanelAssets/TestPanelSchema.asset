@@ -18,7 +18,7 @@ MonoBehaviour:
   PanelDimensions:
     x: 0.4
     y: 0.2
-  Depth: 0.0165
+  Depth: 0.0145
   Radius: 0.03
   RadiusSegments: 5
   BorderThickness: 0.5

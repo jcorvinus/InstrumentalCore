@@ -23,8 +23,12 @@ namespace Instrumental.Controls
         #endregion
 
         [SerializeField] SliderModel sliderModel;
-        [SerializeField] SliderSchema sliderSchema = SliderSchema.GetDefault();
-        GameObject faceObject;
+#if UNITY
+		[SerializeField] SliderSchema sliderSchema;
+#elif STEREOKIT
+		SliderSchema sliderSchema = SliderSchema.GetDefault();
+#endif
+		GameObject faceObject;
 
         [SerializeField] BoxCollider runtimeFaceCollider;
         BoxCollider designTimeFullCollider;
@@ -112,35 +116,41 @@ namespace Instrumental.Controls
 
         private void SetFaceColliderRuntimeValues()
 		{
-            float physDepth = SliderFaceDistance;
-            float physAndHoverDepth = physDepth + (hoverHeight);
-            float totalDepth = physAndHoverDepth + underFlow;
+			if (sliderSchema != null)
+			{
+				float physDepth = SliderFaceDistance;
+				float physAndHoverDepth = physDepth + (hoverHeight);
+				float totalDepth = physAndHoverDepth + underFlow;
 
-            if (runtimeFaceCollider) // currently, some design mode prototypes of buttons don't have this
-            {
-                runtimeFaceCollider.center = new Vector3(0, 0, (physAndHoverDepth * 0.5f) - (underFlow * 0.5f));
-                runtimeFaceCollider.size = new Vector3(sliderSchema.Radius * 2, (sliderSchema.Radius * 2),
-                    totalDepth);
-            }
+				if (runtimeFaceCollider) // currently, some design mode prototypes of buttons don't have this
+				{
+					runtimeFaceCollider.center = new Vector3(0, 0, (physAndHoverDepth * 0.5f) - (underFlow * 0.5f));
+					runtimeFaceCollider.size = new Vector3(sliderSchema.Radius * 2, (sliderSchema.Radius * 2),
+						totalDepth);
+				}
+			}
         }
 
         private void SetDesignColliderValues()
 		{
-            float physDepth = SliderFaceDistance;
-            float physAndHoverDepth = physDepth + (hoverHeight);
+			if (sliderSchema != null)
+			{
+				float physDepth = SliderFaceDistance;
+				float physAndHoverDepth = physDepth + (hoverHeight);
 
-            designTimeFullCollider = GetComponent<BoxCollider>();
-            if (designTimeFullCollider)
-            {
-                designTimeFullCollider.center = new Vector3(0, 0, physDepth * 0.5f);
-                designTimeFullCollider.size = new Vector3(sliderSchema.Width, sliderSchema.Radius * 2, physDepth);
-            }
+				designTimeFullCollider = GetComponent<BoxCollider>();
+				if (designTimeFullCollider)
+				{
+					designTimeFullCollider.center = new Vector3(0, 0, physDepth * 0.5f);
+					designTimeFullCollider.size = new Vector3(sliderSchema.Width, sliderSchema.Radius * 2, physDepth);
+				}
+			}
         }
 
 		private void OnValidate()
 		{
 #if UNITY_EDITOR
-            if(sliderModel) sliderModel.SetNewSliderSchema(sliderSchema);
+            if(sliderModel && sliderSchema != null) sliderModel.SetNewSliderSchema(sliderSchema);
 
 			switch (Mode)
 			{
@@ -182,7 +192,7 @@ namespace Instrumental.Controls
 
         public override ControlSchema GetSchema()
         {
-            ControlSchema schema = new ControlSchema()
+            /*ControlSchema schema = new ControlSchema()
             {
                 Name = _name,
 #if UNITY
@@ -192,9 +202,9 @@ namespace Instrumental.Controls
 				throw new System.NotImplementedException();
 #endif
 				Type = GetControlType()
-            };
+            };*/
 
-            return schema;
+            return sliderSchema;
         }
 
         public override ControlType GetControlType()

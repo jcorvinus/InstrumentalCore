@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b9918bfb91d16542bcb39281a9411a6, type: 3}
+  m_Name: PanelEditorWideButton
+  m_EditorClassIdentifier: 
+  Type: 0
+  Name: 
+  Position:
+    x: 0
+    y: 0
+    z: 0
+  Rotation:
+    x: 0
+    y: 0
+    z: 0
+    w: 0
+  ControlVariables: []
+  HasRim: 0
+  CornerVertCount: 0
+  WidthVertCount: 0
+  BevelSliceCount: 0
+  Depth: 0
+  Radius: 0
+  Width: 0
+  BevelRadius: 0
+  BevelDepth: 0
+  RimWidth: 0
+  RimDepth: 0
+  ThrowDistance: 0

@@ -15,7 +15,7 @@ namespace Instrumental.Schema
 	}
 
 	[System.Serializable]
-	public struct SliderSchema
+	public class SliderSchema : ControlSchema
 	{
 		#region Constraint Defines
 		public const float MIN_WIDTH = 0;

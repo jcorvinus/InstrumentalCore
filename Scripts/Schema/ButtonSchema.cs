@@ -6,8 +6,8 @@ using UnityEngine;
 
 namespace Instrumental.Schema
 {
-	[System.Serializable]
-	public struct ButtonSchema
+	[CreateAssetMenu(fileName = "ButtonSchema", menuName = "Instrumental/ButtonSchema")]
+	public class ButtonSchema : ControlSchema
 	{
 		#region Constraint Defines
 		public const int MIN_CORNER_VERT_COUNT = 2;
@@ -45,21 +45,21 @@ namespace Instrumental.Schema
 
 		// number of radius slices
 		[Range(MIN_CORNER_VERT_COUNT, MAX_CORNER_VERT_COUNT)]
-		public int CornerVertCount;
+		public int CornerVertCount = MIN_CORNER_VERT_COUNT;
 
 		[Range(MIN_WIDTH_VERT_COUNT, MAX_WIDTH_VERT_COUNT)]
-		public int WidthVertCount;
+		public int WidthVertCount = MIN_WIDTH_VERT_COUNT;
 
 		[Range(MIN_BEVEL_SLICE_COUNT, MAX_BEVEL_SLICE_COUNT)]
-		public int BevelSliceCount;
+		public int BevelSliceCount = MIN_BEVEL_SLICE_COUNT;
 
 		// button mesh depth
 		[Range(MIN_EXTRUSION_DEPTH, MAX_EXTRUSION_DEPTH)]
-		public float Depth;
+		public float Depth = MIN_EXTRUSION_DEPTH;
 
 		// button height
 		[Range(MIN_RADIUS, MAX_RADIUS)]
-		public float Radius;
+		public float Radius = MIN_RADIUS;
 
 		// square or round?
 
@@ -68,16 +68,16 @@ namespace Instrumental.Schema
 		public float Width;
 
 		[Range(MIN_BEVEL_RADIUS_PERCENT, MAX_BEVEL_RADIUS_PERCENT)]
-		public float BevelRadius;
+		public float BevelRadius = MIN_BEVEL_RADIUS_PERCENT;
 
 		[Range(MIN_BEVEL_EXTRUSION_PERCENT, MAX_BEVEL_EXTRUSION_PERCENT)]
-		public float BevelDepth;
+		public float BevelDepth = MIN_BEVEL_EXTRUSION_PERCENT;
 
 		[Range(MIN_RIM_WIDTH_PERCENT, MAX_RIM_WIDTH_PERCENT)]
-		public float RimWidth;
+		public float RimWidth = MIN_RIM_WIDTH_PERCENT;
 
 		[Range(MIN_RIM_DEPTH_PERCENT, MAX_RIM_DEPTH_PERCENT)]
-		public float RimDepth;
+		public float RimDepth = MIN_RIM_DEPTH_PERCENT;
 
 		// button throw distance
 		public float ThrowDistance; // throw distance and height are good candidates
