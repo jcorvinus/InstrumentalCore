@@ -616,7 +616,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
             tris = triangles;
 
-			mesh.Create(verts, tris, null, (useVColors) ? uvs : null, vColors);
+			mesh.Create(verts, tris, null, uvs, ((useVColors) ? vColors : null));
 
             this.panelInfo = panelInfo;
         }
@@ -867,7 +867,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
                 backPanelExtrudeVertInfo = new FaceVertexArrayInfo();
             }
 
-            if (DoExtrusion)
+            if (doBackFace)
             {
                 int backSideBaseID = baseID;
                 baseID = GenerateFaceVerts(ref verts, baseID, c1, c2, c3, c4, true,
@@ -1727,6 +1727,13 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
 			mesh.Update(verts, null, null, null, null, true, false);
         }
+
+#if UNITY_EDITOR
+        public void Break()
+        {
+            Debug.Break();
+        }
+#endif
 
         private void DrawGizmoMesh()
         {
