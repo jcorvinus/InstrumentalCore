@@ -21,7 +21,7 @@ namespace Instrumental.Controls
 
         // todo: implement the old box panel here maybe?
         // todo: implement the old box panel outline here?
-        FilletPanel filletPanel;
+        FilletPanelModel filletPanel;
 
         BoxCollider rendererSpaceCollider;
         BoxCollider panelCollider;
@@ -65,7 +65,7 @@ namespace Instrumental.Controls
 
         private void Awake()
         {
-            filletPanel = transform.GetChild(0).GetComponent<FilletPanel>();
+            filletPanel = transform.GetChild(0).GetComponent<FilletPanelModel>();
             panelCollider = transform.GetChild(4).GetComponent<BoxCollider>();
             rendererSpaceCollider = GetComponent<BoxCollider>();
 
@@ -324,11 +324,11 @@ namespace Instrumental.Controls
 
         bool ShouldPanelConstrain(Vector2 newDimensions, out Vector2 clippedDimensions)
         {
-            clippedDimensions = new Vector2(Mathf.Clamp(newDimensions.x, FilletPanel.MIN_DIMENSION_SIZE, FilletPanel.MAX_DIMENSION_WIDTH),
-                Mathf.Clamp(newDimensions.y, FilletPanel.MIN_DIMENSION_SIZE, FilletPanel.MAX_DIMENSION_HEIGHT));
+            clippedDimensions = new Vector2(Mathf.Clamp(newDimensions.x, FilletPanelModel.MIN_DIMENSION_SIZE, FilletPanelModel.MAX_DIMENSION_WIDTH),
+                Mathf.Clamp(newDimensions.y, FilletPanelModel.MIN_DIMENSION_SIZE, FilletPanelModel.MAX_DIMENSION_HEIGHT));
 
-            return (newDimensions.x > FilletPanel.MAX_DIMENSION_WIDTH || newDimensions.y > FilletPanel.MAX_DIMENSION_HEIGHT ||
-                newDimensions.x < FilletPanel.MIN_DIMENSION_SIZE || newDimensions.y < FilletPanel.MIN_DIMENSION_SIZE);
+            return (newDimensions.x > FilletPanelModel.MAX_DIMENSION_WIDTH || newDimensions.y > FilletPanelModel.MAX_DIMENSION_HEIGHT ||
+                newDimensions.x < FilletPanelModel.MIN_DIMENSION_SIZE || newDimensions.y < FilletPanelModel.MIN_DIMENSION_SIZE);
         }
 
         public Vector3 GetPositionForHandle(PanelHandle.HandleType handleType)

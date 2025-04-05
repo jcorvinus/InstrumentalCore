@@ -8,10 +8,10 @@ namespace Instrumental.Modeling.ProceduralGraphics
     /// Unity version of the Fillet Panel Graphhic. Use this if for some reason,
     /// you cannot use Leap's Graphic Renderer.
     /// </summary>
-    [RequireComponent(typeof(FilletPanel))]
+    [RequireComponent(typeof(FilletPanelModel))]
     public class FilletPanelUnityGraphic : MonoBehaviour
     {
-        FilletPanel filletPanel;
+        FilletPanelModel filletPanel;
         MeshFilter meshFilter;
         MeshRenderer meshRenderer;
 
@@ -37,7 +37,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
         void GetComponents()
         {
-            filletPanel = GetComponent<FilletPanel>();
+            filletPanel = GetComponent<FilletPanelModel>();
             meshFilter = GetComponent<MeshFilter>();
             meshRenderer = GetComponent<MeshRenderer>();
 

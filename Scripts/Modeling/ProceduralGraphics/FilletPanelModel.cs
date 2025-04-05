@@ -22,7 +22,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 	/// todo: there is a bug in this class where in some configurations it will generate
 	/// too many triangles, and these have degenerate indices of 0,0,0
 	/// </summary>
-    public class FilletPanel : ProcGenModel
+    public class FilletPanelModel : ProcGenModel
     { 
         public enum BorderType
         {

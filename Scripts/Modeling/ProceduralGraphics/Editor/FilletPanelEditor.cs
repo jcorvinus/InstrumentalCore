@@ -10,7 +10,7 @@ using Instrumental.Core.Math;
 
 namespace Instrumental.Modeling.ProceduralGraphics
 {
-    [CustomEditor(typeof(FilletPanel))]
+    [CustomEditor(typeof(FilletPanelModel))]
     public class FilletPanelEditor : Editor
     {
 		#region Properties
@@ -50,22 +50,22 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
         SerializedObject targetObject;
         GameObject targetGameObject;
-        FilletPanel m_instance;
+        FilletPanelModel m_instance;
 
         // Use this for initialization
         void Start()
         {
             targetObject = new SerializedObject(target);
-            targetGameObject = ((FilletPanel)target).gameObject;
-            m_instance = target as FilletPanel;
+            targetGameObject = ((FilletPanelModel)target).gameObject;
+            m_instance = target as FilletPanelModel;
             GetProperties();
         }
 
         private void OnEnable()
         {
             targetObject = new SerializedObject(target);
-            targetGameObject = ((FilletPanel)target).gameObject;
-            m_instance = target as FilletPanel;
+            targetGameObject = ((FilletPanelModel)target).gameObject;
+            m_instance = target as FilletPanelModel;
             GetProperties();
         }
 
@@ -142,22 +142,22 @@ namespace Instrumental.Modeling.ProceduralGraphics
             }
             else
             {
-                FilletPanel.BorderType borderType = (FilletPanel.BorderType)EditorGUILayout.EnumPopup("Border Type", (FilletPanel.BorderType)borderProperty.enumValueIndex);
+                FilletPanelModel.BorderType borderType = (FilletPanelModel.BorderType)EditorGUILayout.EnumPopup("Border Type", (FilletPanelModel.BorderType)borderProperty.enumValueIndex);
                 borderProperty.enumValueIndex = (int)borderType;
             }
 
-            if ((FilletPanel.BorderType)borderProperty.enumValueIndex == FilletPanel.BorderType.Outline ||
-                (FilletPanel.BorderType)borderProperty.enumValueIndex == FilletPanel.BorderType.OutlineAndExtrude)
+            if ((FilletPanelModel.BorderType)borderProperty.enumValueIndex == FilletPanelModel.BorderType.Outline ||
+                (FilletPanelModel.BorderType)borderProperty.enumValueIndex == FilletPanelModel.BorderType.OutlineAndExtrude)
             {
                 borderInsetProperty.floatValue = EditorGUILayout.Slider("Border Inset Percent", borderInsetProperty.floatValue,
-                    FilletPanel.MIN_INSET_PERCENT, FilletPanel.MAX_INSET_PERCENT);
+                    FilletPanelModel.MIN_INSET_PERCENT, FilletPanelModel.MAX_INSET_PERCENT);
 
                 EditorGUILayout.PropertyField(borderColorProperty);
             }
 
             EditorGUILayout.LabelField("Display Options", EditorStyles.boldLabel);
-            FilletPanel.VisualizationMode visMode = (FilletPanel.VisualizationMode)displayModeProperty.enumValueIndex;
-            visMode = (FilletPanel.VisualizationMode)EditorGUILayout.EnumPopup("Visualization Mode", visMode);
+            FilletPanelModel.VisualizationMode visMode = (FilletPanelModel.VisualizationMode)displayModeProperty.enumValueIndex;
+            visMode = (FilletPanelModel.VisualizationMode)EditorGUILayout.EnumPopup("Visualization Mode", visMode);
             displayModeProperty.enumValueIndex = (int)visMode;
 
             displayVertIDsProperty.boolValue = EditorGUILayout.Toggle("Display Vert IDs", displayVertIDsProperty.boolValue);
@@ -184,7 +184,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
         private void DrawCorner(Vector3 v1, Vector3 v2, Vector3 v3, float radius)
         {
-            FilletPanel.CornerInfo cornerInfo = m_instance.GetCorner((Vect3)v1, (Vect3)v2, (Vect3)v3, radius);
+            FilletPanelModel.CornerInfo cornerInfo = m_instance.GetCorner((Vect3)v1, (Vect3)v2, (Vect3)v3, radius);
             if (cornerInfo.Valid)
             {
                 Handles.color = Color.cyan;
@@ -206,7 +206,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
         {
             Vector3[] cornerVerts = new Vector3[m_instance.FilletSegments];
 
-            FilletPanel.CornerInfo cornerInfo = m_instance.GetCorner((Vect3)v1, (Vect3)v2, (Vect3)v3,
+            FilletPanelModel.CornerInfo cornerInfo = m_instance.GetCorner((Vect3)v1, (Vect3)v2, (Vect3)v3,
                 radius);
 
             float angleIncrement = cornerInfo.Angle / (cornerVerts.Length - 1);
@@ -247,7 +247,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
             }
         }
 
-        private void DrawOutlines(Matrix4x4 transformMatrix, FilletPanel.VisualizationMode visMode,
+        private void DrawOutlines(Matrix4x4 transformMatrix, FilletPanelModel.VisualizationMode visMode,
             Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4,
             float radius, float inset)
         {
@@ -275,14 +275,14 @@ namespace Instrumental.Modeling.ProceduralGraphics
             Handles.DrawLine(lowerLeft, lowerRight);
             Handles.DrawLine(rightUpper, rightLower);
 
-            if (visMode == FilletPanel.VisualizationMode.ActualOutlines)
+            if (visMode == FilletPanelModel.VisualizationMode.ActualOutlines)
             {
                 DrawCornerSamples(v4, v1, v2, radius);
                 DrawCornerSamples(v1, v2, v3, radius);
                 DrawCornerSamples(v2, v3, v4, radius);
                 DrawCornerSamples(v3, v4, v1, radius);
             }
-            else if (visMode == FilletPanel.VisualizationMode.IdealOutlines)
+            else if (visMode == FilletPanelModel.VisualizationMode.IdealOutlines)
             {
                 DrawCorner(v4, v1, v2, radius);
                 DrawCorner(v1, v2, v3, radius);
@@ -293,12 +293,12 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
         private void OnSceneGUI()
         {
-            FilletPanel.VisualizationMode visMode = (FilletPanel.VisualizationMode)displayModeProperty.enumValueIndex;
+            FilletPanelModel.VisualizationMode visMode = (FilletPanelModel.VisualizationMode)displayModeProperty.enumValueIndex;
 
             Matrix4x4 transformMatrix = targetGameObject.transform.localToWorldMatrix;
 
-            if (visMode == FilletPanel.VisualizationMode.None) return;
-            else if (visMode == FilletPanel.VisualizationMode.Mesh)
+            if (visMode == FilletPanelModel.VisualizationMode.None) return;
+            else if (visMode == FilletPanelModel.VisualizationMode.Mesh)
             {
                 if (displayVertIDsProperty.boolValue)
                 {
@@ -330,8 +330,8 @@ namespace Instrumental.Modeling.ProceduralGraphics
                 (Vector3)frontPrimaryV1, (Vector3)frontPrimaryV2, (Vector3)frontPrimaryV3, (Vector3)frontPrimaryV4, 
                 radius, 0);
 
-            FilletPanel.BorderType border = (FilletPanel.BorderType)borderProperty.enumValueIndex;
-            if(border == FilletPanel.BorderType.Outline)
+            FilletPanelModel.BorderType border = (FilletPanelModel.BorderType)borderProperty.enumValueIndex;
+            if(border == FilletPanelModel.BorderType.Outline)
             {
                 float inset = radius * borderInsetProperty.floatValue;
                 Vect3 frontInsetV1, frontInsetV2, frontInsetV3, frontInsetV4;
@@ -357,7 +357,7 @@ namespace Instrumental.Modeling.ProceduralGraphics
             }
 
             Vect3[] verts;
-            FilletPanel.PanelInfo panelInfo;
+            FilletPanelModel.PanelInfo panelInfo;
 
             m_instance.GenerateVerts(out verts, out panelInfo);
             int width = widthSegmentsProperty.intValue + 2;

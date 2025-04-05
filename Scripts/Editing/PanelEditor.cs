@@ -209,11 +209,11 @@ namespace Instrumental.Editing
                         uiSchema.Panel.PanelDimensions.y, uiSchema.Panel.Depth));
 
                     Gizmos.color = Color.cyan;
-                    Gizmos.DrawWireCube(Vector3.zero, new Vector3(FilletPanel.MIN_DIMENSION_SIZE, FilletPanel.MIN_DIMENSION_SIZE,
+                    Gizmos.DrawWireCube(Vector3.zero, new Vector3(FilletPanelModel.MIN_DIMENSION_SIZE, FilletPanelModel.MIN_DIMENSION_SIZE,
                         uiSchema.Panel.Depth));
 
                     Gizmos.color = Color.magenta;
-                    Gizmos.DrawWireCube(Vector3.zero, new Vector3(FilletPanel.MAX_DIMENSION_WIDTH, FilletPanel.MAX_DIMENSION_HEIGHT,
+                    Gizmos.DrawWireCube(Vector3.zero, new Vector3(FilletPanelModel.MAX_DIMENSION_WIDTH, FilletPanelModel.MAX_DIMENSION_HEIGHT,
                         uiSchema.Panel.Depth));
                 }
                 Gizmos.matrix = Matrix4x4.identity;
