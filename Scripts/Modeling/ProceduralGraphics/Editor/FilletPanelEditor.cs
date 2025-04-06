@@ -105,11 +105,6 @@ namespace Instrumental.Modeling.ProceduralGraphics
 
             targetObject.Update();
 
-			if(!Application.isPlaying)
-			{
-				EditorGUILayout.PropertyField(testSchemaProperty, true);
-			}
-
             if(EditorApplication.isPlaying)
             {
                 EditorGUILayout.HelpBox("Cannot modify segment values at runtime.", MessageType.Info);
