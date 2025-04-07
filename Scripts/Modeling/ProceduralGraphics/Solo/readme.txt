@@ -1,0 +1,3 @@
+This folder contains 'solo' objects. The idea is that, for the handful of times you need to use a 'Model' class without any owning UISchema or full Panel, you can use these. They are just enough of a skeleton to take a schema and load it into a Model class, or to poke at the model class for debugging or other standalone usage.
+
+The intent is to get rid of these later on, as everything should eventually migrate to the full UI framework.

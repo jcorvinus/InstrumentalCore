@@ -484,6 +484,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1188684349}
+  - component: {fileID: 1188684352}
   - component: {fileID: 1188684348}
   - component: {fileID: 1188684347}
   - component: {fileID: 1188684351}
@@ -520,7 +521,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6671a491d8f7c0c47b0d6eef221ff7b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  testSchema: {fileID: 11400000, guid: e0708095c08fda44ea01b02cee181ae9, type: 2}
   widthSegments: 4
   heightSegments: 2
   useVColors: 1
@@ -632,3 +632,16 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1188684346}
   m_Mesh: {fileID: 961004206}
+--- !u!114 &1188684352
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1188684346}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 368ff9e10c1decb45b783c65816a0448, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  panelSchema: {fileID: 11400000, guid: e0708095c08fda44ea01b02cee181ae9, type: 2}

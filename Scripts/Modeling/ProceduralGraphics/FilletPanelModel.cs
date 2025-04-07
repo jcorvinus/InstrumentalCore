@@ -270,6 +270,16 @@ namespace Instrumental.Modeling.ProceduralGraphics
             SetPropertiesChanged();
         }
 
+        /// <summary>
+        /// This sets the number of fillet segments.
+        /// Note that this will need to set the mesh to dirty to be regenerated
+        /// </summary>
+        /// <param name="filletSegments"></param>
+        public void SetFilletSegments(int filletSegments)
+        {
+            this.filletSegments = filletSegments;
+        }
+
         public void SetBorderColor(Color color)
         {
             borderColor = color;
