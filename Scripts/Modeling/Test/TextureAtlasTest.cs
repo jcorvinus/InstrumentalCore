@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿
+#if UNITY
+using UnityEngine;
 using System.Collections;
 
-namespace Lucidigital.Modeling
+namespace Instrumental.Modeling
 {
     [RequireComponent(typeof(TextureAtlas))]
     public class TextureAtlasTest : MonoBehaviour
@@ -81,3 +83,4 @@ namespace Lucidigital.Modeling
         }
     }
 }
+#endif

@@ -1,15 +1,17 @@
 ﻿/*-----------------------------------------------------------
- * Lucidigital Texture Atlas
+ * Instrumental Texture Atlas
  * By JCorvinus
- * Currently unlicenced for any use.
+ * MIT licensed as part of the repository this thing is in.
  * ----------------------------------------------------------*/
+#if UNITY
 using UnityEngine;
+#endif
 using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Lucidigital.Modeling
+namespace Instrumental.Modeling
 {
     /// <summary>
     /// This texture atlas lets you bake multiple textures
@@ -18,6 +20,7 @@ namespace Lucidigital.Modeling
     /// </summary>
     public class TextureAtlas : MonoBehaviour
     {
+#if UNITY
         public delegate void AtlasChangedHandler(TextureAtlas sender);
         public event AtlasChangedHandler AtlasChanged;
 
@@ -265,5 +268,6 @@ namespace Lucidigital.Modeling
         {
             RepackTextures();
         }
+#endif
     }
 }
